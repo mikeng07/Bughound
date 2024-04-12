@@ -26,7 +26,7 @@ CREATE TABLE reports (
     report_id           INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
 
     program_name        VARCHAR(255) NOT NULL,
-    release_id          INT NOT NULL,
+    release_name        VARCHAR(255) NOT NULL,
     version_id          INT NOT NULL,
 
     report_type         VARCHAR(255) NOT NULL,
@@ -45,7 +45,8 @@ CREATE TABLE reports (
 CREATE TABLE programs (
     program_id          INT NOT NULL,                               -- TODO: hash program_name, release_id, and version_id together
     program_name        VARCHAR(255) NOT NULL,                      -- connected to reports:program_name
-    release_id          INT NOT NULL,                               -- connected to reports:release_id
+    release_id          INT NOT NULL,                               
+    release_name        VARCHAR(255) NOT NULL,                      -- connected to reports:release_name
     version_id          INT NOT NULL,                               -- connected to reports:version_id
 );
 
@@ -73,40 +74,3 @@ CREATE TABLE resolutions (
 
 
 
--- insert sql functions/procedures here (TODO: rewrite to make more modular and more function-like)
-
--- insert a new bug report
--- INSERT INTO bugs (title, description, reported_by, severity) VALUES ('Bug Title', 'Bug Description', 1, 'High');
--- CREATE FUNCTION createBugReport (@title VARCHAR(255), @description VARCHAR(255), @reported_by INT, @severity VARCHAR(255))
--- RETURNS INT AS 
--- begin 
---     INSERT INTO bugs (@title, @description, @reported_by, @severity) VALUES ('Bug Title', 'Bug Description', 1, 'High'); 
---     IF EXISTS(SELECT 1 FROM bugs WHERE bug_title=@title AND bug_description=@description AND reporter_id=@reported_by AND bug_severity=@severity) RETURN 1;
---     RETURN 0;
--- end
-
--- fetch all bugs (TODO: a select for specific entries)
--- SELECT * FROM bugs;
--- CREATE FUNCTION getBugReports()
--- RETURNS TABLE AS
--- RETURN(select * from bugs);
-
--- update a bug report
--- UPDATE bugs SET status = 'Resolved' WHERE bug_id = 1;
-
--- delete a bug report
--- DELETE FROM bugs WHERE bug_id = 1;
--- CREATE FUNCTION deleteBugReport (@bug_id INT)
--- BEGIN
---     IF EXISTS(SELECT 1 FROM bugs WHERE bug_id = @bug_id)
---     BEGIN
---         DELETE FROM bugs WHERE bug_id = @bug_id;
---         RETURN 1;
---     END
---     ELSE
---     BEGIN
---         RETURN 0;
---     END
--- END
-
--- insert sql procedures (which use the functions; MAYBE to use in PHP-land?)

@@ -8,7 +8,9 @@
 </head>
 <body>
     <h2>New Bug Report Page</h2>
-    <label for="program">Program</label>
+
+    <label for="program">Program:</label>
+    <!-- TODO: will need to be filled out with pre-requiste sql info -->
     <select id="program">
         <option >COBOL Coder V1</option>
         <option >COBOL Coder V2</option>
@@ -16,7 +18,7 @@
         <option >COBOL Coder V4</option>
     </select>
     
-    <label for="reportType">Report Type</label>
+    <label for="reportType">Report Type:</label>
     <select id="reportType">
         <option >Coding Error</option>
         <option >Design Issue</option>
@@ -26,54 +28,52 @@
         <option >Query</option>
         
     </select>
-
-    <label for="severity">Severity</label>
+    <br>
+    <label for="severity">Severity:</label>
     <select id="severity">
         <option >Mild</option>
         <option >Infectious</option>
         <option >Serious</option>
-        <option >Fatal</option>
-    
-        
+        <option >Fatal</option>    
     </select>
+
+    <label for="reproducible">Reproducible?</label>
+    <input type="checkbox" name="reproducible" id="repro">
+    
+    <br><br>
+    <label for="problem">Problem</label>
+    <textarea type="text" id="problem" name="problem" class="problem" rows="1"></textarea>
+    
     <br>
     <label for="problemSummary">Problem Summary</label>
     <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="2"></textarea>
 
-
-    <label for="reproducible">Reproducible?</label>
-    <input type="checkbox" name="reproducible" id="repro">
     <br>
-
-    <label for="problem">Problem</label>
-    <textarea type="text" id="problem" name="problem" class="problem" rows="2"></textarea>
-
-    <br>
-    <label for="suggestedFix">Suggested Fix</label>
+    <label for="suggestedFix">Suggested Fix (optional)</label>
     <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="2"></textarea>
-    <br>
-
+    
+    <br><br>
     <label for="reportedBy">Reported By</label>
+
+    <!-- TODO: will need to be filled out with users with prerequisite access -->
     <select id="reportedBy">
         <option >Mike</option>
         <option >Austin</option>
-        <option >Seungjunjeon</option>
-        
+        <option >Seungjun</option>
     </select>
-    <label for="date">Date</label>
+
+    <label for="date">on</label>
     <input type="date" id ="dateInput" name ="dateInput">
-    <br>
-    <br>
-
     
-
-
+    <br><br>
     <button id ="submitButton"> Submit</button>
     <button id ="submitButton"> Reset</button>
     <button id ="submitButton"> Cancel</button>
 
+    <br><br>
     <script src="script.js"></script>
-    
+    <button id="backButton" href="mainPage.html">Back to Home</button>
+    <br><br>
 
 </body>
 </html>
