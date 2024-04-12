@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>New Bug Report Page</h2>
+    <label for="program">Program</label>
+    <select id="program">
+        <option >COBOL Coder V1</option>
+        <option >COBOL Coder V2</option>
+        <option >COBOL Coder V3</option>
+        <option >COBOL Coder V4</option>
+    </select>
+    
+    <label for="reportType">Report Type</label>
+    <select id="reportType">
+        <option >Coding Error</option>
+        <option >Design Issue</option>
+        <option >Suggestion</option>
+        <option >Documentation</option>
+        <option >Hardware</option>
+        <option >Query</option>
+        
+    </select>
+
+    <label for="severity">Severity</label>
+    <select id="severity">
+        <option >Mild</option>
+        <option >Infectious</option>
+        <option >Serious</option>
+        <option >Fatal</option>
+    
+        
+    </select>
+    <br>
+    <label for="problemSummary">Problem Summary</label>
+    <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="2"></textarea>
+
+
+    <label for="reproducible">Reproducible?</label>
+    <input type="checkbox" name="reproducible" id="repro">
+    <br>
+
+    <label for="problem">Problem</label>
+    <textarea type="text" id="problem" name="problem" class="problem" rows="2"></textarea>
+
+    <br>
+    <label for="suggestedFix">Suggested Fix</label>
+    <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="2"></textarea>
+    <br>
+
+    <label for="reportedBy">Reported By</label>
+    <select id="reportedBy">
+        <option >Mike</option>
+        <option >Austin</option>
+        <option >Seungjunjeon</option>
+        
+    </select>
+    <label for="date">Date</label>
+    <input type="date" id ="dateInput" name ="dateInput">
+    <br>
+    <br>
+
+    
+
+
+    <button id ="submitButton"> Submit</button>
+    <button id ="submitButton"> Reset</button>
+    <button id ="submitButton"> Cancel</button>
+
+    <script src="script.js"></script>
+    
+
+</body>
+</html>
