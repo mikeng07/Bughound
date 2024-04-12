@@ -5,6 +5,7 @@ required) web-based bug recording and tracking
 software product
 
 • Key Features:
+
 – Using web browser, create, edit and update “bug” reports
 on multiple products
 
