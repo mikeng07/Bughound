@@ -28,3 +28,11 @@
     margin-right: 10px; /* Adjust margin as needed */
     margin-left: 5px;
 }
+
+h1 {
+	font-size: 200%; /* Consistent Font Sizing between Headers */
+
+}
+h2 {
+	font-size: 200%; /* Consistent Font Sizing between Headers */
+}
