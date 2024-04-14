@@ -1,20 +1,30 @@
 .problemSummary{
 
-    width: calc(100%-20px)
-    margin-right 20px;
-    display: inline-block;
-    vertical-align: top;
-    
-    problemSummary{
-        display: block;
-        margin-bottom: 5px;
-    }
-}
-
-.problem{
     width: 100%;
 }
+
+
 
 .suggestedFix{
     width: 100%;
+}
+
+
+.long-line {
+    border: none; /* Remove default border */
+    height: 3px; /* Set the height of the line */
+    background-color: black; /* Line color */
+    margin: 0; /* Remove default margin */
+}
+
+
+.input-container {
+    display: flex;
+    flex-direction: row-reverse; /* Reverse the order of flex items */
+}
+
+.input-container textarea {
+    flex: 1; /* Take up remaining space */
+    margin-right: 10px; /* Adjust margin as needed */
+    margin-left: 5px;
 }

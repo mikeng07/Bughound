@@ -8,78 +8,175 @@
 </head>
 <body>
     <h2>New Bug Report Page</h2>
+    <!--All the required Attributes here-->
+    <label for="program">Program:</label>
+    <!-- TODO: will need to be filled out with pre-requiste sql info -->
+    <select id="program">
+        <option >COBOL Coder V1</option>
+        <option >COBOL Coder V2</option>
+        <option >COBOL Coder V3</option>
+        <option >COBOL Coder V4</option>
+    </select>
+    
+    <label for="reportType">Report Type:</label>
+    <select id="reportType">
+        <option >Coding Error</option>
+        <option >Design Issue</option>
+        <option >Suggestion</option>
+        <option >Documentation</option>
+        <option >Hardware</option>
+        <option >Query</option>
+        
+    </select>
+    <label for="severity">Severity</label>
+    <select id="severity">
+        <option >Mild</option>
+        <option >Infectious</option>
+        <option >Serious</option>
+        <option >Fatal</option>    
+    </select>
 
+    <label for="reproducible">Reproducible?</label>
+    <input type="checkbox" name="reproducible" id="reproducible">
     
-    <form action="/" method="post" name="upload">
-        <label for="program">Program:</label>
-        <!-- TODO: will need to be filled out with pre-requiste sql info -->
-        <select id="program">
-            <option >COBOL Coder V1</option>
-            <option >COBOL Coder V2</option>
-            <option >COBOL Coder V3</option>
-            <option >COBOL Coder V4</option>
-        </select>
-        
-        <label for="reportType">Report Type:</label>
-        <select id="reportType">
-            <option >Coding Error</option>
-            <option >Design Issue</option>
-            <option >Suggestion</option>
-            <option >Documentation</option>
-            <option >Hardware</option>
-            <option >Query</option>
-            
-        </select>
-        <br>
-        <label for="severity">Severity:</label>
-        <select id="severity">
-            <option >Mild</option>
-            <option >Infectious</option>
-            <option >Serious</option>
-            <option >Fatal</option>    
-        </select>
-    
-        <label for="reproducible">Reproducible?</label>
-        <input type="checkbox" name="reproducible" id="repro">
-        
-        <br><br>
-        <label for="problem">Problem</label>
-        <textarea type="text" id="problem" name="problem" class="problem" rows="1"></textarea>
-        
-        <br>
+    <br> <br>
+    <div class="input-container">
+        <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="3"></textarea>
         <label for="problemSummary">Problem Summary</label>
-        <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="2"></textarea>
+    </div>
+    <br>
+    <div class="input-container">
+        <textarea type="text" id="problem" name="problem" class="problem" rows="3"></textarea>
+        <label for="problem">Problem</label>
+    </div>
     
-        <br>
-        <label for="suggestedFix">Suggested Fix (optional)</label>
-        <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="2"></textarea>
-        
-        <br><br>
-        <label for="reportedBy">Reported By</label>
+    <br>
     
-        <!-- TODO: will need to be filled out with users with prerequisite access -->
-        <select id="reportedBy">
-            <option >Mike</option>
-            <option >Austin</option>
-            <option >Seungjun</option>
-        </select>
+    <div class="input-container">
+        <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="3"></textarea>
+        <label for="suggestedFix">Suggested Fix</label>
+    </div>
     
-        <label for="date">on</label>
-        <input type="date" id ="dateInput" name ="dateInput">
+    <br>
     
-        <br><br> <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
-        <label for="attachments">Supplementary attachements (optional)</label><br>
-        <input type="file" name="attachments" multiple/>
-        
-        <br><br>
-        <input type="submit" value="Submit Report"/>
-        <button id="reset">Reset Report</button>
-        <button id="backButton" href="mainPage.html">Cancel</button>
-    </form>
+
+    <label for="reportedBy">Reported By</label>
+
+    <!-- TODO: will need to be filled out with users with prerequisite access -->
+    <select id="reportedBy">
+        <option >Mike</option>
+        <option >Austin</option>
+        <option >Seungjun</option>
+    </select>
+
+    <label for="date">Date</label>
+    <input type="date" id ="dateInput" name ="dateInput">
+    <br><br> <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
+    <label for="attachments">Supplementary attachements (optional)</label><br>
+    <input type="file" name="attachments" multiple/>
+    
+    <br><br>
+    <hr class="long-line">
+    <br>
+   
+    
+
+
+    <!--All the optional Attribute here-->
+
+    <label for="funtionalArea">Funtional Area</label>      
+    <select id="funtionalArea">
+        <option >Networking</option>
+        <option >Software</option>
+    </select>
+
+
+    <label for="assignTo">Assigned To</label>      
+    <select id="assignTo">
+        <option >Austin</option>
+        <option >Seungjun</option>
+        <option >Mike</option>
+    </select>
+
+    <br><br>
+    <div class="input-container">
+        <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
+        <label for="comments">Comments</label>
+    </div>
 
     <br>
+    <label for="status">Status</label>      
+    <select id="status">
+        <option >Open</option>
+        <option >Closed</option>
+        <option >Resolved</option>
+    </select>
+
+    <label for="priority">Priority</label>      
+    <select id="priority">
+        <option >1</option>
+        <option >2</option>
+        <option >3</option>
+        <option >4</option>
+        <option >5</option>
+        <option >6</option>
+    </select>
+
+    <label for="resolution">Resolution</label>      
+    <select id="resolution">
+        <option >pending</option>
+        <option >fixed</option>
+        <option >can not be reproduced</option>
+        <option >deffered</option>
+        <option >as designed</option>
+        <option >withdrawn by reporter</option>
+        <option >need more info</option>
+        <option >disagree with suggestion</option>
+        <option >duplicate</option>
+        
+    </select>
+
+    <label for="resolutionVersion">Resolution Version</label>      
+    <select id="resolutionVersion">
+        <option >V1</option>
+        <option >V2</option>
+        <option >V3</option>
+    </select>
+    <br><br>
+
+    <label for="resolveBy">Resolved By</label>
+    <select id="resolvedBy">
+        <option >Seungjun</option>
+        <option >Austin</option>
+        <option >Mike</option>
+    </select>
+
+    <label for="date">Date</label>
+    <input type="date" id ="dateResolved" name ="dateResolved">
+
+    <label for="testedBy">Tested By</label>
+    <select id="testedBy">
+        <option >Austin</option>
+        <option >Seungjun</option>
+        <option >Mike</option>
+    </select>
+
+    <label for="date">Date</label>
+    <input type="date" id ="dateTested" name ="dateTested">
+
+    <label for="treatAsDeffered">Treat as deffered?</label>
+    <input type="checkbox" name="treatAsDeffered" id="treatAsDeffered">
+        
+    <br><br>
+    <button id ="submitButton"> Submit</button>
+    <button id ="resetButton"> Reset</button>
+    <button id="backButton">Cancel</button>
+    <br><br>
+
+
     <script src="script.js"></script>
-    <br>
 
+    
+    
 </body>
 </html>
