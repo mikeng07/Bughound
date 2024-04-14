@@ -1,6 +1,8 @@
 CREATE DATABASE bughound_db;
 USE bughound_db;
 
+DECLARE @debug AS INT = 1; -- TODO: CHANGE THIS TO 0 LATER
+
 -- insert database entities here
 -- TODO: check if this is right
 -- TODO: change varchar lengths based on what the variable is
@@ -26,8 +28,8 @@ CREATE TABLE reports (
     report_id           INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
 
     program_name        VARCHAR(255) NOT NULL,
-    release_name        VARCHAR(255) NOT NULL,
-    version_id          INT NOT NULL,
+    -- release_name        VARCHAR(255) NOT NULL,
+    -- version_id          INT NOT NULL,
 
     report_type         VARCHAR(255) NOT NULL,
     report_reproducible BOOLEAN NOT NULL DEFAULT FALSE,
@@ -43,11 +45,11 @@ CREATE TABLE reports (
 );
 
 CREATE TABLE programs (
-    program_id          INT NOT NULL,                               -- TODO: hash program_name, release_id, and version_id together
-    program_name        VARCHAR(255) NOT NULL,                      -- connected to reports:program_name
-    release_id          INT NOT NULL,                               
-    release_name        VARCHAR(255) NOT NULL,                      -- connected to reports:release_name
-    version_id          INT NOT NULL,                               -- connected to reports:version_id
+    program_id          INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+    program_name        VARCHAR(255) NOT NULL,                       -- connected to reports:program_name                      
+    -- release_name        VARCHAR(255) NOT NULL PRIMARY KEY,          -- connected to reports:release_name
+    -- version_id          INT NOT NULL PRIMARY KEY,                   -- connected to reports:version_id
+    -- program_id          HASH,                                       -- TODO: hash program_name, release_id, and version_id together
 );
 
 CREATE TABLE areas (
@@ -73,4 +75,27 @@ CREATE TABLE resolutions (
 
 
 
+IF @debug = 1
+BEGIN
+    -- 'users' table
+    INSERT INTO users (user_name, user_pass, user_access) VALUES ("user_Seungjun", "Seungjun_pass", 1);
+    INSERT INTO users (user_name, user_pass, user_access) VALUES ("user_Austin", "Austin_pass", 2);
+    INSERT INTO users (user_name, user_pass, user_access) VALUES ("user_Mike", "Mike_pass", 3);
+    -- 'programs' table
+    INSERT INTO programs (program_name) VALUES ("COBOL Coder v1");
+    INSERT INTO programs (program_name) VALUES ("COBOL Coder v2");
+    INSERT INTO programs (program_name) VALUES ("COBOL Coder v3");
+    INSERT INTO programs (program_name) VALUES ("COBOL Coder v4");
+    INSERT INTO programs (program_name) VALUES ("Python 3 v3.8");
+    INSERT INTO programs (program_name) VALUES ("Python 3 v3.9");
+    INSERT INTO programs (program_name) VALUES ("Python 3 v3.10");
+    INSERT INTO programs (program_name) VALUES ("Python 3 v3.11");
+    INSERT INTO programs (program_name) VALUES ("Python 3 v3.12");
+    -- 'areas' table
+    INSERT INTO areas (area_title) VALUES ("Back-end");
+    INSERT INTO areas (area_title) VALUES ("Front-end");
+    INSERT INTO areas (area_title) VALUES ("Hardware");
+    INSERT INTO areas (area_title) VALUES ("Networking");
+    INSERT INTO areas (area_title) VALUES ("Software");
+END;
 
