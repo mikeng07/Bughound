@@ -29,5 +29,16 @@ var searchButton = document.getElementById("searchButton");
 if (searchButton) {
     searchButton.addEventListener("click", function() {
         // Your search button functionality here
+
+        $('#searchResults').html("No results found");
+    });
+}
+
+var submitButton = document.getElementById("submitButton");
+if (submitButton) {
+    submitButton.addEventListener("click", function() {
+        // Your search button functionality here
+
+        $('#spinning').toggle();
     });
 }
