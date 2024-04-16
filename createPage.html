@@ -29,6 +29,7 @@
         <option >Query</option>
         
     </select>
+    <br>
     <label for="severity">Severity</label>
     <select id="severity">
         <option >Mild</option>
@@ -70,7 +71,7 @@
         <option >Seungjun</option>
     </select>
 
-    <label for="date">Date</label>
+    <label for="date">on</label>
     <input type="date" id ="dateInput" name ="dateInput">
     <br><br> <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
     <label for="attachments">Supplementary attachements (optional)</label><br>
@@ -120,16 +121,17 @@
         <option >5</option>
         <option >6</option>
     </select>
+    <br>
 
     <label for="resolution">Resolution</label>      
     <select id="resolution">
         <option >pending</option>
         <option >fixed</option>
-        <option >can not be reproduced</option>
+        <option >cannot be reproduced</option>
         <option >deferred</option>
         <option >as designed</option>
         <option >withdrawn by reporter</option>
-        <option >need more info</option>
+        <option >requires more info</option>
         <option >disagree with suggestion</option>
         <option >duplicate</option>
         
@@ -141,8 +143,8 @@
         <option >V2</option>
         <option >V3</option>
     </select>
-    <br><br>
 
+    <br><br>
     <label for="resolvedBy">Resolved By</label>
     <select id="resolvedBy">
         <option >Seungjun</option>
@@ -150,9 +152,10 @@
         <option >Mike</option>
     </select>
 
-    <label for="date">Date</label>
+    <label for="date">on</label>
     <input type="date" id ="dateResolved" name ="dateResolved">
 
+    <br>
     <label for="testedBy">Tested By</label>
     <select id="testedBy">
         <option >Austin</option>
@@ -160,7 +163,7 @@
         <option >Mike</option>
     </select>
 
-    <label for="date">Date</label>
+    <label for="date">on</label>
     <input type="date" id ="dateTested" name ="dateTested">
 
     <label for="treatAsDeferred">Treat as deferred?</label>
