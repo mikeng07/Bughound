@@ -13,6 +13,7 @@
     <label for="program">Program:</label>
     <!-- TODO: will need to be filled out with pre-requiste sql info -->
     <select id="program">
+        <option value="default">select program</option>
         <option >COBOL Coder V1</option>
         <option >COBOL Coder V2</option>
         <option >COBOL Coder V3</option>
@@ -21,6 +22,7 @@
     
     <label for="reportType">Report Type:</label>
     <select id="reportType">
+        <option value="default">select report type</option>
         <option >Coding Error</option>
         <option >Design Issue</option>
         <option >Suggestion</option>
@@ -32,6 +34,7 @@
     <br>
     <label for="severity">Severity</label>
     <select id="severity">
+        <option value="default">select severity</option>
         <option >Mild</option>
         <option >Infectious</option>
         <option >Serious</option>
@@ -66,16 +69,17 @@
 
     <!-- TODO: will need to be filled out with users with prerequisite access -->
     <select id="reportedBy">
+        <option value="default">select user</option>
         <option >Mike</option>
         <option >Austin</option>
         <option >Seungjun</option>
     </select>
 
-    <label for="date">on</label>
+    <label for="dateInput">on</label>
     <input type="date" id ="dateInput" name ="dateInput">
     <br><br> <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
-    <label for="attachments">Supplementary attachements (optional)</label><br>
-    <input type="file" name="attachments" multiple/>
+    <label for="attachments">Supplementary attachments (optional)</label><br>
+    <input type="file" id="attachments" name="attachments" multiple/>
     
     <br><br>
     <hr class="long-line">
@@ -86,6 +90,7 @@
 
     <label for="functionalArea">Functional Area</label>      
     <select id="functionalArea">
+        <option value="default">select functional area</option>
         <option >Networking</option>
         <option >Software</option>
     </select>
@@ -93,6 +98,7 @@
 
     <label for="assignTo">Assigned To</label>      
     <select id="assignTo">
+        <option value="default">select user</option>
         <option >Austin</option>
         <option >Seungjun</option>
         <option >Mike</option>
@@ -107,6 +113,7 @@
     <br>
     <label for="status">Status</label>      
     <select id="status">
+        <option value="default">select status</option>
         <option >Open</option>
         <option >Closed</option>
         <option >Resolved</option>
@@ -114,6 +121,7 @@
 
     <label for="priority">Priority</label>      
     <select id="priority">
+        <option value="default">0</option>
         <option >1</option>
         <option >2</option>
         <option >3</option>
@@ -125,6 +133,7 @@
 
     <label for="resolution">Resolution</label>      
     <select id="resolution">
+        <option value="default">select resolution type</option>
         <option >pending</option>
         <option >fixed</option>
         <option >cannot be reproduced</option>
@@ -139,6 +148,7 @@
 
     <label for="resolutionVersion">Resolution Version</label>      
     <select id="resolutionVersion">
+        <option value="default">V0m</option>
         <option >V1</option>
         <option >V2</option>
         <option >V3</option>
@@ -147,23 +157,25 @@
     <br><br>
     <label for="resolvedBy">Resolved By</label>
     <select id="resolvedBy">
+        <option value="default">select user</option>
         <option >Seungjun</option>
         <option >Austin</option>
         <option >Mike</option>
     </select>
 
-    <label for="date">on</label>
+    <label for="dateResolved">on</label>
     <input type="date" id ="dateResolved" name ="dateResolved">
 
     <br>
     <label for="testedBy">Tested By</label>
     <select id="testedBy">
+        <option value="default">select user</option>
         <option >Austin</option>
         <option >Seungjun</option>
         <option >Mike</option>
     </select>
 
-    <label for="date">on</label>
+    <label for="dateTested">on</label>
     <input type="date" id ="dateTested" name ="dateTested">
 
     <label for="treatAsDeferred">Treat as deferred?</label>
