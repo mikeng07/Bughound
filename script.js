@@ -20,7 +20,7 @@ if (editButton) {
 // Add event listener to the backButton
 if (backButton) {
     backButton.addEventListener("click", function() {
-        window.location.href = "mainPage.html";
+        window.location.href = "index.html";
     });
 }
 
