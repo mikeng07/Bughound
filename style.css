@@ -3,12 +3,9 @@
     width: 100%;
 }
 
-
-
 .suggestedFix{
     width: 100%;
 }
-
 
 .long-line {
     border: none; /* Remove default border */
@@ -17,16 +14,23 @@
     margin: 0; /* Remove default margin */
 }
 
-
 .input-container {
     display: flex;
-    flex-direction: row-reverse; /* Reverse the order of flex items */
+    /* flex-direction: row-reverse; Reverse the order of flex items */
 }
 
 .input-container textarea {
     flex: 1; /* Take up remaining space */
     margin-right: 10px; /* Adjust margin as needed */
-    margin-left: 5px;
+    margin-left: 15px;
+}
+
+/* margins are different b/t summary, problem, and suggestedFix */
+.input-container .problem {
+    margin-left: 81px;
+}
+.input-container .suggestedFix {
+  margin-left: 44px;
 }
 
 h1 {
@@ -64,6 +68,7 @@ input[type=date]{
 	
 }
 
+/* submission spinner (createPage) */
 .spinner {
     animation: rotate 2s linear infinite;
     z-index: 2;

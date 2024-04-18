@@ -1,30 +1,55 @@
-// Get the button elements by ID
+// GENERAL
 var createButton = document.getElementById("createButton");
 var editButton = document.getElementById("editButton");
 var backButton = document.getElementById("backButton");
 
-// Check if createButton exists before adding event listener
 if (createButton) {
     createButton.addEventListener("click", function() {
         window.location.href = "createPage.html";
     });
 }
 
-// Check if editButton exists before adding event listener
 if (editButton) {
     editButton.addEventListener("click", function() {
         window.location.href = "editPage.html";
     });
 }
 
-// Add event listener to the backButton
 if (backButton) {
     backButton.addEventListener("click", function() {
         window.location.href = "index.html";
     });
 }
 
-// reset all values in createPage.html
+var backButtonM = document.getElementById("backButtonM");
+if (backButtonM) {
+    backButtonM.addEventListener("click", function() {
+        window.location.href = "maintenancePage.html";
+    });
+}
+
+// INDEX (ACCESS LEVEL 3)
+
+var maintenanceButton = document.getElementById("maintenanceButton");
+var deepLookupButton = document.getElementById("deepLookupButton");
+
+if (maintenanceButton) {
+    maintenanceButton.addEventListener("click", function() {
+        window.location.href = "maintenancePage.html";
+    });
+}
+
+if (deepLookupButton) {
+    deepLookupButton.addEventListener("click", function() {
+        window.location.href = "maintenanceLookup.html";
+    });
+}
+
+var maint_backButton = document.getElementById("")
+
+
+// CREATE_PAGE
+
 var resetButton = document.getElementById("resetButton");
 if (resetButton) {
     resetButton.addEventListener("click", function() {
@@ -55,19 +80,6 @@ if (resetButton) {
     });
 }
 
-// Add event listener to the searchButton (if needed)
-var searchButton = document.getElementById("searchButton");
-if (searchButton) {
-    searchButton.addEventListener("click", function() {
-        // Your search button functionality here
-
-        // post and await reply
-
-        // default / if reply turns up with nothing
-        $('#searchResults').html("No results found");
-    });
-}
-
 var submitButton = document.getElementById("submitButton");
 if (submitButton) {
     submitButton.addEventListener("click", function() {
@@ -81,5 +93,18 @@ if (submitButton) {
         // $('#spinning').toggle();
 
         // insert reply results
+    });
+}
+
+// EDIT_PAGE
+var searchButton = document.getElementById("searchButton");
+if (searchButton) {
+    searchButton.addEventListener("click", function() {
+        // Your search button functionality here
+
+        // post and await reply
+
+        // default / if reply turns up with nothing
+        $('#searchResults').html("No results found");
     });
 }

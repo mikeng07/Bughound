@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Document</title>
+    <title>BugHound Home</title>
 </head>
 <body>
     <h1>Welcome to BugHound</h1>
+    <hr class="long-line">
+
+    <br>
     <button id ="createButton"> Add a Bug</button>
     <button id ="editButton"> Bug Lookup/Edit</button>
-    
+
+    <!--    TODO: Make available ONLY IF access level is high enough 
+            PS add hidden="true" when done
+    -->
+    <br><br>
+    <button id ="maintenanceButton">DB Maintenance</button>
+    <br><br>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="script.js"></script>

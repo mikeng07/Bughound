@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Bug Lookup/Edit</title>
+    <title>Maintenance Lookup</title>
 </head>
 <body>
-    <h2>Bug Lookup/Edit</h2>
+    <h2>Maintenance Lookup</h2>
 
-    <button id="backButton" >Back to Home</button>
+    <button id="backButtonM">Back</button>
 
     <br><br>
 
-    <input type="search" id="searchInput" placeholder="Enter Bug ID">
-    <button id="searchButton">Search</button>
+    <label for"lookupType">Looking for:</label>
+    <select id="lookupType">
+        <option>User</option>
+        <option>Program</option>
+        <option>Area</option>
+    </select>
+    <button id="lookupButton">Search</button>
 
     <br><br>
     <hr class="long-line">
@@ -22,12 +27,13 @@
 
     <div id="searchResults"></div>
     <!-- 
-        TODO: make results have hrefs that allow users to make edits (bugs, resolutions, etc) 
+        TODO: make views based on selection
     -->
     
     <br>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="script.js"></script>
+    <script src="script_maint.js"></script>
 </body>
 </html>

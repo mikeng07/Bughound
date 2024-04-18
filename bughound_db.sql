@@ -5,10 +5,11 @@
 create procedure createTables()
 BEGIN
     CREATE TABLE users (
-        user_id     INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        user_name   VARCHAR(255) NOT NULL,
-        user_pass   VARCHAR(255) NOT NULL,
-        user_access INT NOT NULL DEFAULT 1     -- note: access_lvl (1:emp, 2:manager, 3:admin)
+        user_id         INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_name       VARCHAR(255) NOT NULL,
+        user_pass       VARCHAR(255) NOT NULL,
+        user_realname   VARCHAR(255) NOT NULL,
+        user_access     INT NOT NULL DEFAULT 1   -- note: access_lvl (1:emp, 2:manager, 3:admin)
     );
     CREATE TABLE bugs (
         bug_id              INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -24,9 +25,27 @@ BEGIN
         program_id          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         program_name        VARCHAR(255) NOT NULL
     );
+    CREATE TABLE program_releases (
+        release_id          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        release_name        VARCHAR(255) NOT NULL,
+
+        program_id          INT NOT NULL,
+        FOREIGN KEY (program_id) REFERENCES programs(program_id)
+        
+    );
+    CREATE TABLE release_versions (
+        version_id          INT NOT NULL PRIMARY KEY,
+        version_name        VARCHAR(255) NOT NULL,
+
+        release_id          INT NOT NULL,
+        FOREIGN KEY (release_id) REFERENCES program_releases (release_id)
+
+        
+    );
+
     CREATE TABLE areas (
         area_id             INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        area_title          VARCHAR(255)
+        area_title          VARCHAR(255) NOT NULL
     );
     CREATE TABLE reports (
         report_id           INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

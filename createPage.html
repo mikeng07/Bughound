@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>New Bug Report Page</title>
     <link rel="stylesheet" href="style.css">
     
 </head>
@@ -11,15 +11,22 @@
     <h2>New Bug Report Page</h2>
     <!--All the required Attributes here-->
     <label for="program">Program:</label>
+
     <!-- TODO: will need to be filled out with pre-requiste sql info -->
     <select id="program">
-        <option value="default">select program</option>
-        <option >COBOL Coder V1</option>
-        <option >COBOL Coder V2</option>
-        <option >COBOL Coder V3</option>
-        <option >COBOL Coder V4</option>
+        <option value="default">program</option>
+
     </select>
-    
+    <select id="release">
+        <option value="default">release</option>
+
+    </select>
+    <select id="version">
+        <option value="default">version</option>
+        
+    </select>
+
+    <br>
     <label for="reportType">Report Type:</label>
     <select id="reportType">
         <option value="default">select report type</option>
@@ -46,20 +53,20 @@
     
     <br> <br>
     <div class="input-container">
+        <label for="problemSummary">Problem Summary</label><br>
         <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="3"></textarea>
-        <label for="problemSummary">Problem Summary</label>
     </div>
     <br>
     <div class="input-container">
+        <label for="problem">Problem</label><br>
         <textarea type="text" id="problem" name="problem" class="problem" rows="3"></textarea>
-        <label for="problem">Problem</label>
     </div>
     
     <br>
     
     <div class="input-container">
+        <label for="suggestedFix">Suggested Fix</label><br>
         <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="3"></textarea>
-        <label for="suggestedFix">Suggested Fix</label>
     </div>
     
     <br>
@@ -70,15 +77,15 @@
     <!-- TODO: will need to be filled out with users with prerequisite access -->
     <select id="reportedBy">
         <option value="default">select user</option>
-        <option >Mike</option>
-        <option >Austin</option>
-        <option >Seungjun</option>
+
     </select>
 
     <label for="dateInput">on</label>
     <input type="date" id ="dateInput" name ="dateInput">
-    <br><br> <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
-    <label for="attachments">Supplementary attachments (optional)</label><br>
+    <br>
+     <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
+    <hr>
+    <label for="attachments">Supplementary attachments (optional)</label><br><br>
     <input type="file" id="attachments" name="attachments" multiple/>
     
     <br><br>
@@ -88,26 +95,24 @@
 
     <!--All the optional Attribute here-->
 
+    <!-- TODO: fill out with pre-requiste info -->
     <label for="functionalArea">Functional Area</label>      
     <select id="functionalArea">
         <option value="default">select functional area</option>
-        <option >Networking</option>
-        <option >Software</option>
+
     </select>
 
 
     <label for="assignTo">Assigned To</label>      
     <select id="assignTo">
         <option value="default">select user</option>
-        <option >Austin</option>
-        <option >Seungjun</option>
-        <option >Mike</option>
+
     </select>
 
     <br><br>
     <div class="input-container">
+        <label for="comments">Comments</label><br>
         <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
-        <label for="comments">Comments</label>
     </div>
 
     <br>
@@ -146,21 +151,14 @@
         
     </select>
 
-    <label for="resolutionVersion">Resolution Version</label>      
-    <select id="resolutionVersion">
-        <option value="default">V0m</option>
-        <option >V1</option>
-        <option >V2</option>
-        <option >V3</option>
-    </select>
+    <label for="resolutionVersion">Version</label>      
+    <input id="resolutionVersion" size="7" placeholder="version num">
 
     <br><br>
     <label for="resolvedBy">Resolved By</label>
     <select id="resolvedBy">
         <option value="default">select user</option>
-        <option >Seungjun</option>
-        <option >Austin</option>
-        <option >Mike</option>
+
     </select>
 
     <label for="dateResolved">on</label>
@@ -170,9 +168,7 @@
     <label for="testedBy">Tested By</label>
     <select id="testedBy">
         <option value="default">select user</option>
-        <option >Austin</option>
-        <option >Seungjun</option>
-        <option >Mike</option>
+
     </select>
 
     <label for="dateTested">on</label>
