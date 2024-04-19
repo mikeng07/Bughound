@@ -110,12 +110,15 @@ if (searchButton) {
 }
 
 
-//make an array to keep all user name and password in one variable
-// Define userList with valid usernames and passwords
+//USER_LOGIN & LOGOUT
+/*
+make an array to keep all user name and password in one variable
+Define userList with valid usernames and passwords*/
 var userList = [
     { username: "admin", password: "admin" },
     { username: "user", password: "user" },
   ];
+
   
   // Function to validate username and password
   function validateCredentials(username, password) {
@@ -158,6 +161,6 @@ var userList = [
   // Function to log out user
 function logout() {
     localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
-    window.location.href = "login.html"; // Redirect to login page
+    window.location.href = "Login.html"; // Redirect to login page
   }
   
