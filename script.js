@@ -115,8 +115,8 @@ if (searchButton) {
 make an array to keep all user name and password in one variable
 Define userList with valid usernames and passwords*/
 var userList = [
-    { username: "admin", password: "admin" },
-    { username: "user", password: "user" },
+    { username: "admin", password: "admin", accessLevel: 3 },
+    { username: "user", password: "user", accessLevel: 1},
   ];
 
   
@@ -138,7 +138,8 @@ var userList = [
     var password = document.getElementById("password").value;
     
     if (validateCredentials(username, password)) {
-        localStorage.setItem("isLoggedIn", false); // Set isLoggedIn flag in local storage
+        localStorage.setItem("isLoggedIn", true); // Set isLoggedIn flag in local storage
+        localStorage.setItem("accessLevel", userList.find(x => x.username === username).accessLevel); // Set accessLevel in local storage   
       window.location.href = "index.html"; // Redirect to index.html if credentials are valid
     } else {
       alert("Invalid username or password. Please try again."); // Show error message if credentials are invalid
@@ -164,3 +165,10 @@ function logout() {
     window.location.href = "Login.html"; // Redirect to login page
   }
   
+
+  //CHECK ACCESS LEVEL
+  var accessLevel = localStorage.getItem("accessLevel");
+
+  if(accessLevel ==1){
+    document.getElementById("maintenanceButton").style.display = "none";
+  }
