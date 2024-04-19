@@ -1,0 +1,38 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Maintenance (E)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Edit database</h1>
+
+    <hr class="long-line">
+    <br>
+    <button id="backButton">Return to maintenance menu</button>
+    <hr>
+
+    <h3>Add Employees</h3>
+    
+    <div id="employee_list_values">
+        <div id="employee_entity_main">
+            <input id="employee_name" name="employee_name" size="10" placeholder="username">
+            <input id="login_id" name="login_id" size="7" placeholder="Login ID">
+            <input id="employee_level" name="employee_level" size="3" placeholder="level">
+            <button id="newEmployeeButton">+</button> 
+            <button id="removeEmployeeButton" hidden=true>-</button>
+            <br><br>
+        </div>
+    </div>
+
+    <button id="clearEmployeeButton">Clear</button>
+    <button id="submitEmployeeButton">Add new employees</button>
+    <br>
+    <hr>    
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="script_employee.js"></script>
+</body>
+</html>

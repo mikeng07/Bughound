@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Maintenance (A)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Edit database</h1>
+
+    <hr class="long-line">
+    <br>
+    <button id="backButton">Return to maintenance menu</button>
+    <hr>
+
+    <h3>Add Areas</h3>
+    
+    <label for="area">Add to program:</label>      
+    <select id="program_list">
+        <option id="default" value="default">select program</option>
+
+    </select>
+    <button id="program_list_refresh">refresh</button>
+
+    <br><br>    
+    <div id="area_list_values">
+        <div id="area_entity_main">
+            <input id="area_title" name="area_title" size="30" placeholder="functional area">
+            <button id="newAreaButton">+</button>
+            <button id="removeAreaButton" hidden=true>-</button>
+            <br><br>
+        </div>
+    </div>
+    
+    <button id="clearAreaButton">Clear</button>
+    <button id="submitAreaButton">Add new Areas</button>
+    <br>
+    <hr>    
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="script_area.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB Maintenance (P)</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Edit database</h1>
+
+    <hr class="long-line">
+    <br>
+    <button id="backButton">Return to maintenance menu</button>
+    <hr>
+
+    <h3>Add Programs</h3>
+    
+    <div id="program_list_values">
+        <div id="program_entity_main">
+            <input id="program_name" name="program_name" size="10" placeholder="program name">
+            <input id="program_release" name="program_release" size="6" placeholder="release">
+            <input id="release_version" name="release_version" size="3" placeholder="version">
+            <button id="newProgramButton">+</button> 
+            <button id="removeProgramButton" hidden=true>-</button>
+            <br><br>
+        </div>
+    </div>
+    
+    <button id="clearProgramButton">Clear</button>
+    <button id="submitProgramButton">Add new programs</button>
+    <br>
+    <hr>      
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="script_program.js"></script>
+</body>
+</html>
