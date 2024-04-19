@@ -13,9 +13,68 @@
     <button id ="deepLookupButton">DB Lookup</button>
     <hr>
     
+<<<<<<< HEAD
     <button id="toEmployees">edit Employees</button><br><br>
     <button id="toPrograms">edit Programs</button><br><br>
     <button id="toAreas">edit Areas</button>
+=======
+    <div id="employee_list_values">
+        <div id="employee_entity_main">
+            <input id="employee_user" name="employee_user" size="10" placeholder="user name">
+            <input id="login_id" name="login_id" size="7" placeholder="Login ID">
+            <input id="employee_level" name="employee_level" size="4" placeholder="level">
+            <button id="newEmployeeButton">+</button> 
+            <button id="removeEmployeeButton" hidden=true>-</button>
+            <br><br>
+        </div>
+    </div>
+    
+    
+    
+    <button id="clearEmployeeButton">Clear</button>
+    <button id="addEmployeeButton">Add new employees</button>
+    <br><br>
+    <hr>    
+
+    <h3>Add Programs</h3>
+    
+    <div id="program_list_values">
+        <div id="program_entity_main">
+            <input id="program_name" name="program_name" size="12" placeholder="program name">
+            <input id="program_version" name="program_version" size="7" placeholder="version">
+            <input id="program_release" name="program_release" size="6" placeholder="release">
+            <button id="newProgramButton">+</button> 
+            <button id="removeProgramButton" hidden=true>-</button>
+            <br><br>
+        </div>
+    </div>
+    
+    
+    
+    <button id="clearProgramButton">Clear</button>
+    <button id="addProgramButton">Add new programs</button>
+    <br><br>
+    <hr>    
+
+
+    
+
+    <h3>Add Areas</h3>
+    
+    <label for="area">Areas</label>      
+    <select id="area">
+        <option value="area"></option>
+    </select>
+
+    <br><br>
+    <textarea type="area" id="areaSummary" name="areaSummary" class="areaSummary" rows="2" "></textarea>
+    <br><br>
+    
+    
+    <button id="clearAreaButton">Clear</button>
+    <button id="addAreaButton">Add new Areas</button>
+    <br><br>
+>>>>>>> 9a66434 (validate employee/program/area)
 
     <hr>
     <button id="backButton">Exit Maintenance</button>
