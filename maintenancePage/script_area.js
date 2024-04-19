@@ -134,6 +134,7 @@ if (clearAreaChangeButton) {
     clearAreaChangeButton.addEventListener("click", function() {
         $('#area_entity_before #area_title').val("");
         $('#area_entity_after #area_title').val("");
+        $('#area_change_res').html("");
     });
 }
 

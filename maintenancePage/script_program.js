@@ -85,6 +85,7 @@ if (clearProgramChangeButton) {
         $('#program_entity_after #program_name').val("");
         $('#program_entity_after #program_release').val("");
         $('#program_entity_after #release_version').val("");
+        $('#program_change_res').html("");
     });
 }
 

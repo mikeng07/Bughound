@@ -80,6 +80,7 @@ if (clearAccessChangeButton) {
     clearAccessChangeButton.addEventListener("click", function() {
         $('#employee_realname').val("");
         $('#level_change').val("");
+        $('#employee_change_res').html("");
     });
 }
 
