@@ -55,19 +55,77 @@ if (clearProgramButton) {
 }
 
 if (submitProgramButton) {
-    // submitProgramButton.addEventListener("click", function(e) {
-    //     e.preventDefault();
-    //     $.ajax({
-    //         type: "POST",
-    //         url:  "db_connect.php",
-    //         data: {
-    //             f: "add_programs",
-    //             q: "",
-    //         },
-    //         success: function(obj) {
-    //             console.log(obj);
-    //         },
-    //         dataType: "json",
-    //     });
-    // });
+    submitProgramButton.addEventListener("click", function(e) {
+        // e.preventDefault();
+        // $.ajax({
+        //     type: "POST",
+        //     url:  "db_connect.php",
+        //     data: {
+        //         f: "add_programs",
+        //         q: "",
+        //     },
+        //     success: function(obj) {
+        //         console.log(obj);
+        //     },
+        //     dataType: "json",
+        // });
+    });
+}
+
+// EDIT PROGRAM INFO
+
+var clearProgramChangeButton = document.getElementById("clearProgramChangeButton");
+var submitProgramChangeButton = document.getElementById("submitProgramChangeButton");
+
+if (clearProgramChangeButton) {
+    clearProgramChangeButton.addEventListener("click", function() {
+        $('#program_entity_before #program_name').val("");
+        $('#program_entity_before #program_release').val("");
+        $('#program_entity_before #release_version').val("");
+        $('#program_entity_after #program_name').val("");
+        $('#program_entity_after #program_release').val("");
+        $('#program_entity_after #release_version').val("");
+    });
+}
+
+if (submitProgramChangeButton) {
+    submitProgramChangeButton.addEventListener("click", function() {
+
+        let name_before    = $('#program_entity_before #program_name').val();
+        let release_before = $('#program_entity_before #program_release').val();
+        let version_before = $('#program_entity_before #release_version').val();
+        let name_after     = $('#program_entity_after #program_name').val();
+        let release_after  = $('#program_entity_after #program_release').val();
+        let version_after  = $('#program_entity_after #release_version').val();
+        
+
+        var res = "";
+        let incompleteFlag = false;
+
+        if (name_before === '' && release_before === "" && version_before === "") {
+            res = res + "<span>warning -- no program specified. what are you changing from?<span><br>";
+            incompleteFlag = true;
+        }
+        if (name_after === '' && release_after === "" && version_after === "") {
+            res = res + "<span>warning -- no program specified. what are you changing to?<span><br>";
+            incompleteFlag = true;
+        }
+        console.log(res);
+        $('#program_change_res').html(res);
+        
+        if (incompleteFlag) {
+            console.log("not completely filled out."); 
+            return;
+
+        } else {
+    
+            // POST new change
+
+            // put out the results, regardless of success or failure
+
+            // result = "<span>"+ "" +"</span>";    // place results here
+            // $('#program_change_res').append(result);
+
+        }
+    });
 }

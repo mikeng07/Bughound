@@ -28,9 +28,38 @@
     
     <button id="clearProgramButton">Clear</button>
     <button id="submitProgramButton">Add new programs</button>
+    <div id="new_program_res">
+        <!-- <span>successful</span> -->
+    </div>
     <br>
     <hr>      
 
+    <h3>Edit Programs</h3>
+
+    
+    <label for="program_entity_before">Program before change:</label>
+    <div id="program_entity_before">
+        <input id="program_name" name="program_name" size="10" placeholder="program name">
+        <input id="program_release" name="program_release" size="6" placeholder="release">
+        <input id="release_version" name="release_version" size="3" placeholder="version">
+        <br><br>
+    </div>
+    
+    <label for="program_entity_after">Program after change (leave blank for no change):</label>
+    <div id="program_entity_after">
+        <input id="program_name" name="program_name" size="10" placeholder="program name">
+        <input id="program_release" name="program_release" size="6" placeholder="release">
+        <input id="release_version" name="release_version" size="3" placeholder="version">
+        <br><br>
+    </div>
+    
+    <button id="clearProgramChangeButton">Clear</button>
+    <button id="submitProgramChangeButton">Make program edit</button>
+    <div id="program_change_res">
+        <!-- <span>successful</span> -->
+    </div>
+    <br>
+    <hr>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="script_program.js"></script>

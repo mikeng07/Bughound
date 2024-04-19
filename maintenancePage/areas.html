@@ -15,12 +15,14 @@
 
     <h3>Add Areas</h3>
     
-    <label for="area">Add to program:</label>      
+    <label for="program_list">Add to program:</label>      
     <select id="program_list">
         <option id="default" value="default">select program</option>
-
+        <option id="program_entity">COBOL coder</option>
+        <option id="program_entity">Python idle</option>
+        <option id="program_entity">Java devkit</option>
     </select>
-    <button id="program_list_refresh">refresh</button>
+    <button id="program_list_refresh">↻</button>
 
     <br><br>    
     <div id="area_list_values">
@@ -34,8 +36,42 @@
     
     <button id="clearAreaButton">Clear</button>
     <button id="submitAreaButton">Add new Areas</button>
+    <div id="new_area_res">
+        <!-- <span>successful</span> -->
+    </div>
     <br>
-    <hr>    
+    <hr>
+    
+    <h3>Edit Areas</h3>
+
+    <label for="program_list_c">Referenced program:</label>      
+    <select id="program_list_c">
+        <option id="default" value="default">select program</option>
+        <option id="program_entity">COBOL coder</option>
+        <option id="program_entity">Python idle</option>
+        <option id="program_entity">Java devkit</option>
+
+    </select>
+    <button id="program_list_refresh_c">↻</button>
+    
+    <br>
+    <div id="area_entity_before">
+        <label for="area_title" style="margin-right: 5px;">Area before change: </label>
+        <input id="area_title" name="area_title" size="15" placeholder="functional area">
+    </div>
+    <div id="area_entity_after">
+        <label for="area_title" style="margin-right: 17px;">Area after change: </label>
+        <input id="area_title" name="area_title" size="15" placeholder="functional area">
+        <br><br>
+    </div>
+    
+    <button id="clearAreaChangeButton">Clear</button>
+    <button id="submitAreaChangeButton">Make area edit</button>
+    <div id="area_change_res">
+        <!-- <span>successful</span> -->
+    </div>
+    <br>
+    <hr>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

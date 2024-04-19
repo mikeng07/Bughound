@@ -70,3 +70,56 @@ if (submitEmployeeButton) {
     //     });
     // });
 }
+
+// EDIT EMPLOYEE INFO (ACCESS LEVEL ONLY)
+
+var clearAccessChangeButton = document.getElementById("clearAccessChangeButton");
+var submitAccessChangeButton = document.getElementById("submitAccessChangeButton");
+
+if (clearAccessChangeButton) {
+    clearAccessChangeButton.addEventListener("click", function() {
+        $('#employee_realname').val("");
+        $('#level_change').val("");
+    });
+}
+
+if (submitAccessChangeButton) {
+    submitAccessChangeButton.addEventListener("click", function() {
+        let employee_name = $('#employee_realname').val();
+        let new_access_level = $('#level_change').val();
+
+        var res = "";
+        let incompleteFlag = false;
+
+        if (employee_name === '') {
+            res = res + "<span>warning -- no employee specified. whose access level are you changing?<span><br>";
+            incompleteFlag = true;
+        }
+        if (new_access_level === '') {
+            res = res + "<span>warning -- no access level specified. what are you changing this to?<span><br>";
+            incompleteFlag = true;
+        }
+        // TODO: match this to that user's accessLevel
+        // if (new_access_level === access_level_of_the_user) {
+        //     res = res + "<span>warning -- the user has this access level currently<span><br>";
+        //     incompleteFlag = true;
+        // }
+        console.log(res);
+        $('#employee_change_res').html(res);
+        
+        if (incompleteFlag) {
+            console.log("not completely filled out."); 
+            return;
+
+        } else {
+    
+            // POST new change
+
+            // put out the results, regardless of success or failure
+
+            // result = "<span>"+ "" +"</span>";    // place results here
+            // $('#employee_change_res').append(result);
+
+        }
+    });
+}
