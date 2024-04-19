@@ -102,23 +102,38 @@ if (submitProgramButton) {
         //     dataType: "json",
         // });
 
-        // Select all program entities
-        var programEntities = document.querySelectorAll(".program_entity");
+       // Select all program entities
+       var programEntities = document.querySelectorAll(".program_entity");
 
-        // Iterate over each program entity
-        programEntities.forEach(function(entity) {
-            // Retrieve data for each program
-            var programName = entity.querySelector("input[name='program_name']").value;
-            var programRelease = entity.querySelector("input[name='program_release']").value;
-            var releaseVersion = entity.querySelector("input[name='release_version']").value;
+       // Flag to track if any program is submitted without a name
+       var hasEmptyName = false;
 
-            // Create an object for the program and add it to the programList array
-            addProgramToList({ program_name: programName, program_release: programRelease, release_version: releaseVersion });
-            localStorage.setItem('programList', JSON.stringify(programList));
-        });
+       // Iterate over each program entity
+       programEntities.forEach(function(entity) {
+           // Retrieve data for each program
+           var programName = entity.querySelector("input[name='program_name']").value;
+           var programRelease = entity.querySelector("input[name='program_release']").value;
+           var releaseVersion = entity.querySelector("input[name='release_version']").value;
 
-        // Display the updated programList (optional)
-        console.log(programList);
+           // Check if program name is empty
+           if (programName.trim() === "") {
+               hasEmptyName = true;
+               return; // Exit the loop early
+           }
+
+           // Add the program to the list
+           addProgramToList({ program_name: programName, program_release: programRelease, release_version: releaseVersion });
+           localStorage.setItem('programList', JSON.stringify(programList));
+       });
+
+       // Check if any program was submitted without a name
+       if (hasEmptyName) {
+           alert("Please provide a program name for all programs.");
+           return; // Exit the function early
+       }
+
+       // Display the updated programList (optional)
+       console.log(programList);
     });
 }
 

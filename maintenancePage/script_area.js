@@ -124,15 +124,17 @@ if (submitAreaButton) {
     // });
     submitAreaButton.addEventListener("click", function(){
         if (isProgramListEmpty()){
-          alert("Please add a program first");
-        }
-        else{
-
+            alert("Please add a program first");
+        } else {
             var programDropdown = document.getElementById("program_list");
-
-            // Retrieve the selected program name
-
             var selectedProgram = programDropdown.value;
+    
+            // Check if a program is selected
+            if (selectedProgram.trim() === "") {
+                alert("Please select a program.");
+                return; // Exit the function early
+            }
+    
             // Select all area entities
             var areaEntities = document.querySelectorAll("#area_list_values .area_entity");
     
@@ -149,16 +151,19 @@ if (submitAreaButton) {
             });
             
             // Combine the selected program with the functional areas
-        var areaEntry = {
-            program: selectedProgram,
-            functionalAreas: functionalAreas
-        };
-
-        // Add the combined entry to the areaList array
-        areaList.push(areaEntry);
-
-        // Log the updated areaList array (optional)
-        console.log("Updated areaList:", areaList); 
+            var areaEntry = {
+                program: selectedProgram,
+                functionalAreas: functionalAreas
+            };
+    
+            // Add the combined entry to the areaList array
+            areaList.push(areaEntry);
+    
+            // Log the updated areaList array (optional)
+            console.log("Updated areaList:", areaList);
+    
+            // Show alert to notify the user
+            alert("Areas added successfully.");
         }
       });
 }

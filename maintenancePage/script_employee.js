@@ -125,33 +125,53 @@ if (clearEmployeeButton) {
     //     });
     // });
 
-// Event listener for submitting employees
-if (submitEmployeeButton) {
-    submitEmployeeButton.addEventListener("click", function() {
-        // Select all employee entities
-        var employeeEntities = document.querySelectorAll(".employee_entity");
-
-        // Iterate over each employee entity
-        employeeEntities.forEach(function(entity) {
-            // Retrieve data for each employee
-            var employeeName = entity.querySelector("input[name='employee_name']").value;
-            var loginId = entity.querySelector("input[name='login_id']").value;
-            var employeeLevel = parseInt(entity.querySelector("input[name='employee_level']").value);
-
-            // Create an object for the employee and add it to the employeeList array
-            addEmployeeToList({ user: employeeName, login_id: loginId, level: employeeLevel });
+    if (submitEmployeeButton) {
+        submitEmployeeButton.addEventListener("click", function() {
+            // Select all employee entities
+            var employeeEntities = document.querySelectorAll(".employee_entity");
+    
+            // Flag to check if at least one employee has a name
+            var atLeastOneWithName = false;
+    
+            // Iterate over each employee entity
+            employeeEntities.forEach(function(entity) {
+                // Retrieve data for each employee
+                var employeeName = entity.querySelector("input[name='employee_name']").value;
+                var loginId = entity.querySelector("input[name='login_id']").value;
+                var employeeLevel = parseInt(entity.querySelector("input[name='employee_level']").value);
+    
+                // Check if the employee has provided a name
+                if (employeeName.trim() === "") {
+                    // Display alert to notify the user
+                    alert("Please provide a name for all employees.");
+                    return; // Exit the function early
+                }
+    
+                // Set flag to true if at least one employee has a name
+                atLeastOneWithName = true;
+    
+                // Create an object for the employee and add it to the employeeList array
+                addEmployeeToList({ user: employeeName, login_id: loginId, level: employeeLevel });
+            });
+    
+            // If no employee has provided a name, show alert
+            if (!atLeastOneWithName) {
+                alert("Please provide a name for at least one employee.");
+                return; // Exit the function early
+            }
+    
+            // Display the updated employeeList (optional)
+            console.log(employeeList);
+            console.log(userList);
+            alert("Employees added successfully.");
+    
+            localStorage.setItem('userList', JSON.stringify(userList));
+    
+            // Reset the form or perform any other necessary action
+            // form.reset();
         });
-
-        // Display the updated employeeList (optional)
-        console.log(employeeList);
-        console.log(userList);
-
-        localStorage.setItem('userList', JSON.stringify(userList));
-
-        // Reset the form or perform any other necessary action
-        // form.reset();
-    });
-}
+    }
+    
 
 // EDIT EMPLOYEE INFO (ACCESS LEVEL ONLY)
 
