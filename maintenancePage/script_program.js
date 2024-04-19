@@ -1,3 +1,22 @@
+
+var programList = [];
+
+// Function to add an employee to the employeeList array
+function addProgramToList(program) {
+    programList.push(program);
+}
+
+
+
+//function to validate area
+function isProgramListEmpty(){
+    if(programList.length == 0){
+      return true;
+    }
+    return false;
+  }
+  
+  
 var backButton = document.getElementById("backButton");
 if (backButton) {
     backButton.addEventListener("click", function() {
@@ -13,49 +32,62 @@ var submitProgramButton = document.getElementById("submitProgramButton");
 
 var programEntityCount = 0;
 
+// Event listener for adding a new program
+var newProgramButton = document.getElementById("newProgramButton");
 if (newProgramButton) {
     newProgramButton.addEventListener("click", function() {
-        temp =  '<div id="program_entity">'+
-                    '<input id="program_name" name="program_name" size="10" placeholder="program name"> '+
-                    '<input id="program_release" name="program_release" size="6" placeholder="release"> '+
-                    '<input id="release_version" name="release_version" size="3" placeholder="version">'+
-                    '<br><br>'+
-                '</div>';
-        $("div#program_list_values").append(temp);
+        // Generate unique IDs for the new program entity
+        var entityId = "program_entity_" + programEntityCount;
+        var nameId = "program_name_" + programEntityCount;
+        var releaseId = "program_release_" + programEntityCount;
+        var versionId = "release_version_" + programEntityCount;
 
-        programEntityCount += 1;
-        // console.log('program entity count:', programEntityCount);
+        // Construct the HTML for the new program entity
+        var temp =  '<div id="' + entityId + '" class="program_entity">'+
+                        '<input id="' + nameId + '" name="program_name" size="12" placeholder="program name"> '+
+                        '<input id="' + releaseId + '" name="program_release" size="6" placeholder="release"> '+
+                        '<input id="' + versionId + '" name="release_version" size="6" placeholder="version">'+
+                        '<br><br>'+
+                    '</div>';
 
-        if (programEntityCount > 0) {
-            removeProgramButton.hidden = false;
-        }
+        // Append the new program entity to the container
+        document.getElementById("program_list_values").insertAdjacentHTML('beforeend', temp);
+
+        // Increment the counter
+        programEntityCount++;
+
+        // Show the remove program button
+        removeProgramButton.hidden = false;
     });
 }
+
 
 if (removeProgramButton) {
     removeProgramButton.addEventListener("click", function() {
-        $("div#program_list_values").children('div[id=program_entity]:last').remove();
+        // Remove the last program entity
+        var programEntities = document.querySelectorAll(".program_entity");
+        if (programEntities.length > 0) {
+            programEntities[programEntities.length - 1].remove();
+            programEntityCount--;
 
-        programEntityCount -= 1;
-        // console.log('program entity count:', programEntityCount);
-
-        if (programEntityCount == 0) removeProgramButton.hidden = true;
+            // Hide the removeProgramButton if there are no more program entities
+            if (programEntityCount === 0) {
+                removeProgramButton.hidden = true;
+            }
+        }
     });
 }
-
 if (clearProgramButton) {
     clearProgramButton.addEventListener("click", function() {
-
-        $('div[id=program_entity]').remove();
-        $('#program_name').val("");
-        $('#program_release').val("");
-        $('#release_version').val("");
-        removeProgramButton.hidden = true;
+        // Remove all program entities
+        var programListValues = document.getElementById("program_list_values");
+        programListValues.innerHTML = ""; // Remove all HTML inside the container
+        programEntityCount = 0;
+        removeProgramButton.hidden = true; // Hide the removeProgramButton
     });
 }
-
 if (submitProgramButton) {
-    submitProgramButton.addEventListener("click", function(e) {
+    submitProgramButton.addEventListener("click", function() {
         // e.preventDefault();
         // $.ajax({
         //     type: "POST",
@@ -69,6 +101,24 @@ if (submitProgramButton) {
         //     },
         //     dataType: "json",
         // });
+
+        // Select all program entities
+        var programEntities = document.querySelectorAll(".program_entity");
+
+        // Iterate over each program entity
+        programEntities.forEach(function(entity) {
+            // Retrieve data for each program
+            var programName = entity.querySelector("input[name='program_name']").value;
+            var programRelease = entity.querySelector("input[name='program_release']").value;
+            var releaseVersion = entity.querySelector("input[name='release_version']").value;
+
+            // Create an object for the program and add it to the programList array
+            addProgramToList({ program_name: programName, program_release: programRelease, release_version: releaseVersion });
+            localStorage.setItem('programList', JSON.stringify(programList));
+        });
+
+        // Display the updated programList (optional)
+        console.log(programList);
     });
 }
 

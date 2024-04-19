@@ -163,130 +163,150 @@ if(accessLevel ==1){
   document.getElementById("maintenanceButton").style.display = "none";
 }
 
+
+// Function to parse userList from local storage
+function parseUserList() {
+  // Retrieve the userList from local storage
+  var storedUserList = localStorage.getItem('userList');
+  
+  // Parse the stored userList string into a JavaScript object
+  var userList = JSON.parse(storedUserList);
+
+  // Return the parsed userList
+  return userList;
+}
+
+// Other common script functions...
+
+// Call the parseUserList function when needed in your login page
+var userList = parseUserList();
+console.log(userList); // Check if the userList is correctly parsed
+
+
 //LOCAL STORAGE FOR PROGRAM/AREA/EMPLOYEE
 
-var areaList = [
-  { program: "", area: "" },
+// var areaList = [
+//   { program: "", area: "" },
   
-];
+// ];
 
-var programList = [
-  {program_name: "", program_version: "", program_release: ""},
+// var programList = [
+//   {program_name: "", program_version: "", program_release: ""},
 
-];
+// ];
 
-var employeeList = [
-  {user: "", login_id: "", level: ""},
+// var employeeList = [
+//   {user: "", login_id: "", level: ""},
 
 
-];
+// ];
 
 //function to validate area
-function isProgramListEmpty(){
-  if(programList.length == 1){
-    return true;
-  }
-  return false;
-}
+// function isProgramListEmpty(){
+//   if(programList.length == 1){
+//     return true;
+//   }
+//   return false;
+// }
 
 //add Area
-var addAreaButton = document.getElementById("addAreaButton");
-if (addAreaButton){
-  addAreaButton.addEventListener("click", function(){
-    if (isProgramListEmpty()){
-      alert("Please add a program first");
-    }
-    else{
-      var program = document.getElementById("program_name").value;
-      var area = document.getElementById("areaSummary").value;
-      areaList.push({program: program, area: area});
-      alert("Area added successfully");
-    }
-  });
-}
+// var addAreaButton = document.getElementById("addAreaButton");
+// if (addAreaButton){
+//   addAreaButton.addEventListener("click", function(){
+//     if (isProgramListEmpty()){
+//       alert("Please add a program first");
+//     }
+//     else{
+//       var program = document.getElementById("program_name").value;
+//       var area = document.getElementById("areaSummary").value;
+//       areaList.push({program: program, area: area});
+//       alert("Area added successfully");
+//     }
+//   });
+// }
 
   //add Program
-  var addProgramButton = document.getElementById("addProgramButton");
+  // var addProgramButton = document.getElementById("addProgramButton");
 
-  if(addProgramButton){
-    addProgramButton.addEventListener("click", function(){
-      var program_name = document.getElementById("program_name").value;
-      var program_version = document.getElementById("program_version").value;
-      var program_release = document.getElementById("program_release").value;
-      programList.push({program_name: program_name, program_version: program_version, program_release: program_release});
-      updateAreaDropdown();
-      alert("Program added successfully");
-    });
-  }
+  // if(addProgramButton){
+  //   addProgramButton.addEventListener("click", function(){
+  //     var program_name = document.getElementById("program_name").value;
+  //     var program_version = document.getElementById("program_version").value;
+  //     var program_release = document.getElementById("program_release").value;
+  //     programList.push({program_name: program_name, program_version: program_version, program_release: program_release});
+  //     updateAreaDropdown();
+  //     alert("Program added successfully");
+  //   });
+  // }
 
   //add Employee
-  var addEmployeeButton = document.getElementById("addEmployeeButton");
-  if(addEmployeeButton){
-    addEmployeeButton.addEventListener("click", function(){
-      var user = document.getElementById("employee_user").value;
-      var login_id = document.getElementById("login_id").value;
-      var level = document.getElementById("employee_level").value;
-      employeeList.push({user: user, login_id: login_id, level: level});
-      alert("Employee added successfully");
-    });
-  }
+  // var addEmployeeButton = document.getElementById("addEmployeeButton");
+  // if(addEmployeeButton){
+  //   addEmployeeButton.addEventListener("click", function(){
+  //     var user = document.getElementById("employee_user").value;
+  //     var login_id = document.getElementById("login_id").value;
+  //     var level = document.getElementById("employee_level").value;
+  //     employeeList.push({user: user, login_id: login_id, level: level});
+  //     alert("Employee added successfully");
+  //   });
+  // }
 
   //clear Button function 
-  var clearEmployeeButton = document.getElementById("clearEmployeeButton");
-  if(clearEmployeeButton){
-    clearEmployeeButton.addEventListener("click", function(){
-      document.getElementById("employee_user").value = "";
-      document.getElementById("login_id").value = "";
-      document.getElementById("employee_level").value = "";
-    });
-  }
+  // var clearEmployeeButton = document.getElementById("clearEmployeeButton");
+  // if(clearEmployeeButton){
+  //   clearEmployeeButton.addEventListener("click", function(){
+  //     document.getElementById("employee_user").value = "";
+  //     document.getElementById("login_id").value = "";
+  //     document.getElementById("employee_level").value = "";
+  //   });
+  // }
 
-  var clearProgramButton = document.getElementById("clearProgramButton");
-  if(clearProgramButton){
-    clearProgramButton.addEventListener("click", function(){
-      document.getElementById("program_name").value = "";
-      document.getElementById("program_version").value = "";
-      document.getElementById("program_release").value = "";
-    });
-  }
+  // var clearProgramButton = document.getElementById("clearProgramButton");
+  // if(clearProgramButton){
+  //   clearProgramButton.addEventListener("click", function(){
+  //     document.getElementById("program_name").value = "";
+  //     document.getElementById("program_version").value = "";
+  //     document.getElementById("program_release").value = "";
+  //   });
+  // }
 
-  var clearAreaButton = document.getElementById("clearAreaButton");
-  if(clearAreaButton){
-    clearAreaButton.addEventListener("click", function(){
-      document.getElementById("area").value = "";
-      document.getElementById("areaSummary").value = "";
-    });
-  }
+  // var clearAreaButton = document.getElementById("clearAreaButton");
+  // if(clearAreaButton){
+  //   clearAreaButton.addEventListener("click", function(){
+  //     document.getElementById("area").value = "";
+  //     document.getElementById("areaSummary").value = "";
+  //   });
+  // }
 
 
 //update area dropdown
-function updateAreaDropdown(){
-  var areaSelect = document.getElementById("area");
+// function updateAreaDropdown(){
+//   var areaSelect = document.getElementById("area");
 
-  areaSelect.innerHTML = "";
+//   areaSelect.innerHTML = "";
 
-  var defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.text = "Select Area";
-  areaSelect.appendChild(defaultOption);
-  if(areaSelect){
-    for (var i = 1; i < programList.length; i++){
-      var option = document.createElement("option");
-      option.value = programList[i].program_name; 
-      option.text = programList[i].program_name;
-      areaSelect.appendChild(option);
-    }
-  }
-}
+//   var defaultOption = document.createElement("option");
+//   defaultOption.value = "";
+//   defaultOption.text = "Select Area";
+//   areaSelect.appendChild(defaultOption);
+//   if(areaSelect){
+//     for (var i = 1; i < programList.length; i++){
+//       var option = document.createElement("option");
+//       option.value = programList[i].program_name; 
+//       option.text = programList[i].program_name;
+//       areaSelect.appendChild(option);
+//     }
+//   }
+// }
 
 
-var areaSelect = document.getElementById("area");
-if(areaSelect){
-  for (var i = 1; i < programList.length; i++){
-    var option = document.createElement("option");
-    option.value = programList[i].program_name; 
-    option.text = programList[i].program_name;
-    areaSelect.appendChild(option);
-  }
-}
+// var areaSelect = document.getElementById("area");
+// if(areaSelect){
+//   for (var i = 1; i < programList.length; i++){
+//     var option = document.createElement("option");
+//     option.value = programList[i].program_name; 
+//     option.text = programList[i].program_name;
+//     areaSelect.appendChild(option);
+//   }
+// }
   

@@ -1,3 +1,15 @@
+
+var areaList = [
+    { },
+    
+  ];
+
+  var programList = JSON.parse(localStorage.getItem('programList')) || [];
+
+  updateAreaDropdown()
+
+
+
 var backButton = document.getElementById("backButton");
 if (backButton) {
     backButton.addEventListener("click", function() {
@@ -20,7 +32,7 @@ if (programRefreshButton) {
         // $.ajax({
         //     type: "GET",
         //     url:  "../db_connect.php",
-        //     data: {
+        //     data: { 
         //         f: "get_programs",
         //         q: "",
         //     },
@@ -44,41 +56,56 @@ var areaEntityCount = 0;
 
 if (newAreaButton) {
     newAreaButton.addEventListener("click", function() {
-        temp =  '<div id="area_entity">'+
-                    '<input id="area_title" name="area_title" size="30" placeholder="functional area">'+
-                    '<br><br>'+
-                '</div>';
-        $("div#area_list_values").append(temp);
+        // Generate unique IDs for the new area entity
+        var entityId = "area_entity_" + areaEntityCount;
+        var inputId = "area_title_" + areaEntityCount;
 
-        areaEntityCount += 1;
-        // console.log('program entity count:', areaEntityCount);
+        // Construct the HTML for the new area entity
+        var temp =  '<div id="' + entityId + '" class="area_entity">'+
+                        '<input id="' + inputId + '" name="area_title" size="30" placeholder="functional area">'+
+                        '<br><br>'+
+                    '</div>';
 
-        if (areaEntityCount > 0) {
-            removeAreaButton.hidden = false;
+        // Append the new area entity to the container
+        document.getElementById("area_list_values").insertAdjacentHTML('beforeend', temp);
+
+        // Increment the counter
+        areaEntityCount++;
+
+        // Show the remove area button
+        removeAreaButton.hidden = false;
+    });
+}
+
+
+// Remove button
+if (removeAreaButton) {
+    removeAreaButton.addEventListener("click", function() {
+        // Remove the last area entity
+        var areaEntities = document.querySelectorAll("#area_list_values .area_entity");
+        if (areaEntities.length > 0) {
+            areaEntities[areaEntities.length - 1].remove();
+            areaEntityCount -= 1;
+            // Hide the remove button if there are no more area entities
+            if (areaEntityCount === 0) {
+                removeAreaButton.hidden = true;
+            }
         }
     });
 }
-
-if (removeAreaButton) {
-    removeAreaButton.addEventListener("click", function() {
-        $("div#area_list_values").children('div[id=area_entity]:last').remove();
-
-        areaEntityCount -= 1;
-        // console.log('program entity count:', areaEntityCount);
-
-        if (areaEntityCount == 0) removeAreaButton.hidden = true;
-    });
-}
-
+// Clear button
 if (clearAreaButton) {
     clearAreaButton.addEventListener("click", function() {
-
-        $('div[id=area_entity]').remove();
-        $('#area_title').val("");
+        // Remove all area entities
+        document.querySelectorAll("#area_list_values .area_entity").forEach(function(entity) {
+            entity.remove();
+        });
+        // Clear the area title input
+        document.getElementById("area_title").value = "";
+        // Hide the remove button
         removeAreaButton.hidden = true;
     });
 }
-
 if (submitAreaButton) {
     // submitAreaButton.addEventListener("click", function(e) {
     //     e.preventDefault();
@@ -95,6 +122,45 @@ if (submitAreaButton) {
     //         dataType: "json",
     //     });
     // });
+    submitAreaButton.addEventListener("click", function(){
+        if (isProgramListEmpty()){
+          alert("Please add a program first");
+        }
+        else{
+
+            var programDropdown = document.getElementById("program_list");
+
+            // Retrieve the selected program name
+
+            var selectedProgram = programDropdown.value;
+            // Select all area entities
+            var areaEntities = document.querySelectorAll("#area_list_values .area_entity");
+    
+            // Initialize an array to store the area titles
+            var functionalAreas = [];
+    
+            // Iterate over each area entity
+            areaEntities.forEach(function(entity) {
+                // Retrieve the area title for each entity
+                var areaTitle = entity.querySelector("input[name='area_title']").value;
+    
+                // Add the area title to the functionalAreas array
+                functionalAreas.push(areaTitle);
+            });
+            
+            // Combine the selected program with the functional areas
+        var areaEntry = {
+            program: selectedProgram,
+            functionalAreas: functionalAreas
+        };
+
+        // Add the combined entry to the areaList array
+        areaList.push(areaEntry);
+
+        // Log the updated areaList array (optional)
+        console.log("Updated areaList:", areaList); 
+        }
+      });
 }
 
 // EDIT AREAS
@@ -180,3 +246,31 @@ if (submitAreaChangeButton) {
 
     });
 }
+
+//update area dropdown
+function updateAreaDropdown() {
+    var programSelect = document.getElementById("program_list");
+  
+    // Clear existing options
+    programSelect.innerHTML = "";
+  
+    // Create a default option
+    var defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.text = "Select Program";
+    programSelect.appendChild(defaultOption);
+  
+    // Check if programList is available and not empty
+    if (programList && programList.length > 0) {
+      // Iterate through programList and add options to the dropdown
+      for (var i = 0; i < programList.length; i++) {
+        var option = document.createElement("option");
+        option.value = programList[i].program_name;
+        option.text = programList[i].program_name;
+        programSelect.appendChild(option);
+      }
+    }
+  }
+  
+
+console.log(programList)
