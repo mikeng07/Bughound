@@ -13,6 +13,7 @@
     <br>
     <button id ="createButton"> Add a Bug</button>
     <button id ="editButton"> Bug Lookup/Edit</button>
+    <button id="logoutButton" type="button">Logout</button>
 
     <!--    TODO: Make available ONLY IF access level is high enough 
             PS add hidden="true" when done
@@ -23,6 +24,16 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="script.js"></script>
-
+    
+    <script>
+        // Check if user is logged in
+        var isLoggedIn = localStorage.getItem("isLoggedIn");
+    
+        // If user is not logged in, redirect to login page
+        if (!isLoggedIn) {
+            alert("You are not logged in. Redirecting to login page...");
+          window.location.href = "login.html";
+        }
+      </script>
 </body>
 </html>

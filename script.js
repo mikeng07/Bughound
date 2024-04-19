@@ -128,19 +128,36 @@ var userList = [
   }
   
   // Event listener for login button
-  document.getElementById("loginButton").addEventListener("click", function() {
+  var loginButton = document.getElementById("loginButton")
+  if(loginButton)
+  {loginButton.addEventListener("click", function() {
     var username = document.getElementById("username").value;
     var password = document.getElementById("password").value;
     
     if (validateCredentials(username, password)) {
+        localStorage.setItem("isLoggedIn", false); // Set isLoggedIn flag in local storage
       window.location.href = "index.html"; // Redirect to index.html if credentials are valid
     } else {
       alert("Invalid username or password. Please try again."); // Show error message if credentials are invalid
     }
-  });
+  })};
   
   // Event listener for forgot password button (placeholder)
-  document.getElementById("forgotPasswordButton").addEventListener("click", function() {
+  var forgotPasswordButton = document.getElementById("forgotPasswordButton")
+  if(forgotPasswordButton){
+    forgotPasswordButton.addEventListener("click", function() {
     alert("Forgot Password functionality is not implemented yet."); // Placeholder for forgot password functionality
-  });
+  })};
+  
+  //Add event listener to logout button
+  var logoutButton =  document.getElementById("logoutButton")
+  if(logoutButton){
+    logoutButton.addEventListener("click", function() {
+    logout(); // Call logout function when logout button is clicked
+  })};
+  // Function to log out user
+function logout() {
+    localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
+    window.location.href = "login.html"; // Redirect to login page
+  }
   
