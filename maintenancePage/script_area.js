@@ -1,8 +1,5 @@
 
-var areaList = [
-    { },
-    
-  ];
+var areaList = [];
 
   var programList = JSON.parse(localStorage.getItem('programList')) || [];
 

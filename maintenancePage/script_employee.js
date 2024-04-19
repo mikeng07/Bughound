@@ -188,7 +188,7 @@ if (clearAccessChangeButton) {
 
 if (submitAccessChangeButton) {
     submitAccessChangeButton.addEventListener("click", function() {
-        let employee_name = $('#employee_realname').val();
+        /*let employee_name = $('#employee_realname').val();
         let new_access_level = $('#level_change').val();
 
         var res = "";
@@ -223,6 +223,51 @@ if (submitAccessChangeButton) {
             // result = "<span>"+ "" +"</span>";    // place results here
             // $('#employee_change_res').append(result);
 
+        }*/
+
+        // Get input values
+        var realName = document.getElementById("employee_realname").value;
+        var newLevel = parseInt(document.getElementById("level_change").value);
+        var userid = "";
+        // Loop through employeeList to find the employee with the matching realName
+        for (var i = 0; i < employeeList.length; i++) {
+            if (employeeList[i].user === realName) {
+                // Update the level of the employee
+                userid = employeeList[i].login_id;
+                employeeList[i].level = newLevel;
+                
+                // Optionally, you can break the loop if you only want to update the level of the first matching employee
+                // break;
+            }
         }
+        for (var i = 0; i < userList.length; i++) {
+            if (userList[i].username === userid) {
+                userList[i].accessLevel = newLevel;
+            }
+        }
+
+        // Log the updated employeeList
+        console.log("Updated employeeList:", employeeList);
+        console.log("Updated userList:", userList);
     });
 }
+
+// Save updated employeeList and userList to localStorage
+// localStorage.setItem('employeeList', JSON.stringify(employeeList));
+// localStorage.setItem('userList', JSON.stringify(userList));
+
+// function parseEmployeeList() {
+//     // Retrieve the userList from local storage
+//     var storedEmployeeList = localStorage.getItem('employeeList');
+    
+//     // Parse the stored userList string into a JavaScript object
+//     var employeeList = JSON.parse(storedEmployeeList);
+  
+//     // Return the parsed userList
+//     return employeeList;
+//   }
+  
+//   // // Other common script functions...
+  
+//   // // Call the parseUserList function when needed in your login page
+//   var employeeList = parseEmployeeList();

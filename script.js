@@ -1,3 +1,5 @@
+
+
 // GENERAL
 var createButton = document.getElementById("createButton");
 var editButton = document.getElementById("editButton");
@@ -143,7 +145,7 @@ if(forgotPasswordButton) {
 var logoutButton =  document.getElementById("logoutButton")
 if(logoutButton) {
   logoutButton.addEventListener("click", function() {
-
+    //localStorage.clear();
     logout(); // Call logout function when logout button is clicked
   });
 }
@@ -164,7 +166,7 @@ if(accessLevel ==1){
 }
 
 
-// Function to parse userList from local storage
+//Function to parse userList from local storage
 function parseUserList() {
   // Retrieve the userList from local storage
   var storedUserList = localStorage.getItem('userList');
@@ -176,11 +178,12 @@ function parseUserList() {
   return userList;
 }
 
-// Other common script functions...
+// // Other common script functions...
 
-// Call the parseUserList function when needed in your login page
+// // Call the parseUserList function when needed in your login page
 var userList = parseUserList();
-console.log(userList); // Check if the userList is correctly parsed
+ console.log(userList); // Check if the userList is correctly parsed
+ console.log(employeeList)
 
 
 //LOCAL STORAGE FOR PROGRAM/AREA/EMPLOYEE
