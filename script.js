@@ -93,6 +93,7 @@ var userList = [
   { username: "admin", password: "admin", accessLevel: 3 },
   { username: "user", password: "user", accessLevel: 1},
 ];
+localStorage.setItem("userList", userList);
 
   
 // Function to validate username and password
@@ -181,9 +182,9 @@ function parseUserList() {
 // // Other common script functions...
 
 // // Call the parseUserList function when needed in your login page
-var userList = parseUserList();
- console.log(userList); // Check if the userList is correctly parsed
- console.log(employeeList)
+var userList = parseUserList(); 
+console.log(userList); // Check if the userList is correctly parsed
+// console.log(employeeList)
 
 
 //LOCAL STORAGE FOR PROGRAM/AREA/EMPLOYEE
