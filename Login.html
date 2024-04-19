@@ -1,31 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Bughound - Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bughound Login</title>
 </head>
+<body>
   <h2>Bughound Login</h2>
   <br>
   <div class="container">
     <label for="username"><b>Username</b></label>
-    <input type="text" placeholder="Enter Username" name="username" required>
+    <input type="text" id="username" placeholder="Enter Username" name="username" required>
   </div>
   <br>
   <div class="container">
     <label for="password"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="password" required>
+    <input type="password" id="password" placeholder="Enter Password" name="password" required>
   </div>
   
   <br>
   <div class="container" style="background-color:#f1f1f1">
-    <button type="submit">Login</button>
-    <button type="forgotpassword">Forgot Password?</button>  
+    <button id="loginButton" type="button">Login</button>
+    <button id="forgotPasswordButton" type="button">Forgot Password?</button>  
   </div>
-  
 
-  <br>
-
-
+  <script src="script.js"></script>
+</body>
 </html>

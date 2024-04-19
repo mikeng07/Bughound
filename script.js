@@ -108,3 +108,39 @@ if (searchButton) {
         $('#searchResults').html("No results found");
     });
 }
+
+
+//make an array to keep all user name and password in one variable
+// Define userList with valid usernames and passwords
+var userList = [
+    { username: "admin", password: "admin" },
+    { username: "user", password: "user" },
+  ];
+  
+  // Function to validate username and password
+  function validateCredentials(username, password) {
+    for (var i = 0; i < userList.length; i++) {
+      if (userList[i].username === username && userList[i].password === password) {
+        return true; // Valid credentials
+      }
+    }
+    return false; // Invalid credentials
+  }
+  
+  // Event listener for login button
+  document.getElementById("loginButton").addEventListener("click", function() {
+    var username = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
+    
+    if (validateCredentials(username, password)) {
+      window.location.href = "index.html"; // Redirect to index.html if credentials are valid
+    } else {
+      alert("Invalid username or password. Please try again."); // Show error message if credentials are invalid
+    }
+  });
+  
+  // Event listener for forgot password button (placeholder)
+  document.getElementById("forgotPasswordButton").addEventListener("click", function() {
+    alert("Forgot Password functionality is not implemented yet."); // Placeholder for forgot password functionality
+  });
+  
