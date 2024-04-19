@@ -150,149 +150,143 @@ if(logoutButton) {
 
 // Function to log out user
 function logout() {
-    localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
-    window.location.href = "Login.html"; // Redirect to login page
-  }
+  localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
+  localStorage.removeItem("accessLevel");
+  window.location.href = "Login.html"; // Redirect to login page
+}
   
 
-  //CHECK ACCESS LEVEL
-  var accessLevel = localStorage.getItem("accessLevel");
+//CHECK ACCESS LEVEL
+var accessLevel = localStorage.getItem("accessLevel");
 
-  if(accessLevel ==1){
-    document.getElementById("maintenanceButton").style.display = "none";
-  }
+if(accessLevel ==1){
+  document.getElementById("maintenanceButton").style.display = "none";
+}
 
-  //LOCAL STORAGE FOR PROGRAM/AREA/EMPLOYEE
+//LOCAL STORAGE FOR PROGRAM/AREA/EMPLOYEE
+
+var areaList = [
+  { program: "", area: "" },
   
-  var areaList = [
-    { program: "", area: "" },
-    
-  ];
+];
 
-  var programList = [
-    {program_name: "", program_version: "", program_release: ""},
+var programList = [
+  {program_name: "", program_version: "", program_release: ""},
 
-  ];
+];
 
-  var employeeList = [
-    {user: "", login_id: "", level: ""},
+var employeeList = [
+  {user: "", login_id: "", level: ""},
 
 
-  ];
+];
 
-  //function to validate area
-  function isProgramListEmpty(){
-    if(programList.length == 1){
-      return true;
+//function to validate area
+function isProgramListEmpty(){
+  if(programList.length == 1){
+    return true;
+  }
+  return false;
+}
+
+//add Area
+var addAreaButton = document.getElementById("addAreaButton");
+if (addAreaButton){
+  addAreaButton.addEventListener("click", function(){
+    if (isProgramListEmpty()){
+      alert("Please add a program first");
     }
-    return false;
-  }
+    else{
+      var program = document.getElementById("program_name").value;
+      var area = document.getElementById("areaSummary").value;
+      areaList.push({program: program, area: area});
+      alert("Area added successfully");
+    }
+  });
+}
 
-  //add Area
-  var addAreaButton = document.getElementById("addAreaButton");
-  if (addAreaButton){
-    addAreaButton.addEventListener("click", function(){
-      if (isProgramListEmpty()){
-        alert("Please add a program first");
-      }
-      else{
-        var program = document.getElementById("program_name").value;
-        var area = document.getElementById("areaSummary").value;
-        areaList.push({program: program, area: area});
-        alert("Area added successfully");
-      }
+  //add Program
+  var addProgramButton = document.getElementById("addProgramButton");
+
+  if(addProgramButton){
+    addProgramButton.addEventListener("click", function(){
+      var program_name = document.getElementById("program_name").value;
+      var program_version = document.getElementById("program_version").value;
+      var program_release = document.getElementById("program_release").value;
+      programList.push({program_name: program_name, program_version: program_version, program_release: program_release});
+      updateAreaDropdown();
+      alert("Program added successfully");
     });
   }
 
-   //add Program
-    var addProgramButton = document.getElementById("addProgramButton");
+  //add Employee
+  var addEmployeeButton = document.getElementById("addEmployeeButton");
+  if(addEmployeeButton){
+    addEmployeeButton.addEventListener("click", function(){
+      var user = document.getElementById("employee_user").value;
+      var login_id = document.getElementById("login_id").value;
+      var level = document.getElementById("employee_level").value;
+      employeeList.push({user: user, login_id: login_id, level: level});
+      alert("Employee added successfully");
+    });
+  }
 
-    if(addProgramButton){
-        addProgramButton.addEventListener("click", function(){
-            var program_name = document.getElementById("program_name").value;
-            var program_version = document.getElementById("program_version").value;
-            var program_release = document.getElementById("program_release").value;
-            programList.push({program_name: program_name, program_version: program_version, program_release: program_release});
-            updateAreaDropdown();
-            alert("Program added successfully");
-        });
-    }
+  //clear Button function 
+  var clearEmployeeButton = document.getElementById("clearEmployeeButton");
+  if(clearEmployeeButton){
+    clearEmployeeButton.addEventListener("click", function(){
+      document.getElementById("employee_user").value = "";
+      document.getElementById("login_id").value = "";
+      document.getElementById("employee_level").value = "";
+    });
+  }
 
-    //add Employee
-    var addEmployeeButton = document.getElementById("addEmployeeButton");
-    if(addEmployeeButton){
-        addEmployeeButton.addEventListener("click", function(){
-            var user = document.getElementById("employee_user").value;
-            var login_id = document.getElementById("login_id").value;
-            var level = document.getElementById("employee_level").value;
-            employeeList.push({user: user, login_id: login_id, level: level});
-            alert("Employee added successfully");
-        });
-    }
+  var clearProgramButton = document.getElementById("clearProgramButton");
+  if(clearProgramButton){
+    clearProgramButton.addEventListener("click", function(){
+      document.getElementById("program_name").value = "";
+      document.getElementById("program_version").value = "";
+      document.getElementById("program_release").value = "";
+    });
+  }
 
-    //clear Button function 
-    var clearEmployeeButton = document.getElementById("clearEmployeeButton");
-    if(clearEmployeeButton){
-        clearEmployeeButton.addEventListener("click", function(){
-            document.getElementById("employee_user").value = "";
-            document.getElementById("login_id").value = "";
-            document.getElementById("employee_level").value = "";
-        });
-    }
-
-    var clearProgramButton = document.getElementById("clearProgramButton");
-    if(clearProgramButton){
-        clearProgramButton.addEventListener("click", function(){
-            document.getElementById("program_name").value = "";
-            document.getElementById("program_version").value = "";
-            document.getElementById("program_release").value = "";
-        });
-    }
-
-    var clearAreaButton = document.getElementById("clearAreaButton");
-    if(clearAreaButton){
-        clearAreaButton.addEventListener("click", function(){
-            document.getElementById("area").value = "";
-            document.getElementById("areaSummary").value = "";
-        });
-    }
+  var clearAreaButton = document.getElementById("clearAreaButton");
+  if(clearAreaButton){
+    clearAreaButton.addEventListener("click", function(){
+      document.getElementById("area").value = "";
+      document.getElementById("areaSummary").value = "";
+    });
+  }
 
 
 //update area dropdown
 function updateAreaDropdown(){
-    var areaSelect = document.getElementById("area");
+  var areaSelect = document.getElementById("area");
 
-    areaSelect.innerHTML = "";
+  areaSelect.innerHTML = "";
 
-    var defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.text = "Select Area";
-    areaSelect.appendChild(defaultOption);
-    if(areaSelect){
-        for (var i = 1; i < programList.length; i++){
-            var option = document.createElement("option");
-            option.value = programList[i].program_name; 
-            option.text = programList[i].program_name;
-            areaSelect.appendChild(option);
-        }
+  var defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.text = "Select Area";
+  areaSelect.appendChild(defaultOption);
+  if(areaSelect){
+    for (var i = 1; i < programList.length; i++){
+      var option = document.createElement("option");
+      option.value = programList[i].program_name; 
+      option.text = programList[i].program_name;
+      areaSelect.appendChild(option);
     }
+  }
 }
 
 
 var areaSelect = document.getElementById("area");
 if(areaSelect){
-    for (var i = 1; i < programList.length; i++){
-        var option = document.createElement("option");
-        option.value = programList[i].program_name; 
-        option.text = programList[i].program_name;
-        areaSelect.appendChild(option);
-    }
+  for (var i = 1; i < programList.length; i++){
+    var option = document.createElement("option");
+    option.value = programList[i].program_name; 
+    option.text = programList[i].program_name;
+    areaSelect.appendChild(option);
+  }
 }
-
-
-//   // Remove flags from local storage
-//   localStorage.removeItem("isLoggedIn"); 
-//   localStorage.removeItem("accessLevel");
-
-//   window.location.href = "Login.html"; // Redirect to login page
   
