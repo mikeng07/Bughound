@@ -16,22 +16,13 @@
     <h3>Add Areas</h3>
     
     <label for="program_list">Add to program:</label>      
-    <select id="program_list">
-        <!-- <option id="default" value="default">select program</option>
-        <option id="program_entity">COBOL coder</option>
-        <option id="program_entity">Python idle</option>
-        <option id="program_entity">Java devkit</option> -->
-    </select>
-    <!-- <button id="program_list_refresh">↻</button> -->
+    <select id="program_list"></select>
+    <button id="program_list_refresh">↻</button>
+    <button id="newAreaButton">+</button>
+    <button id="removeAreaButton" hidden=true>-</button>
 
-    <br><br>    
+    <br><br>
     <div id="area_list_values">
-        <div id="area_entity_main">
-            <!-- <input id="area_title" name="area_title" size="30" placeholder="functional area"> -->
-            <button id="newAreaButton">+</button>
-            <button id="removeAreaButton" hidden=true>-</button>
-            <br><br>
-        </div>
     </div>
     
     <button id="clearAreaButton">Clear</button>
@@ -75,9 +66,7 @@
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script_program.js"></script>
     <script src="script_area.js"></script>
-    <script src="script_employee.js"></script>
    
 </body>
 </html>
