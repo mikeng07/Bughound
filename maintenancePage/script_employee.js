@@ -24,17 +24,11 @@ if (backButton1) {
 var logoutButton1 =  document.getElementById("logoutButton1")
 if(logoutButton1) {
   logoutButton1.addEventListener("click", function() {
-
+    localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
+    localStorage.removeItem("accessLevel");
     window.location.href = "../login.html"; // Redirect to login page
   });
 }
-
-// Function to log out user
-// function logout() {
-//   localStorage.removeItem("isLoggedIn"); // Remove isLoggedIn flag from local storage
-//   localStorage.removeItem("accessLevel");
-//   window.location.href = "Login.html"; // Redirect to login page
-// }
 
 // ADD EMPLOYEES
 var newEmployeeButton = document.getElementById("newEmployeeButton");
@@ -56,7 +50,7 @@ if (newEmployeeButton) {
         // Construct the HTML for the new employee entity
         var temp =  '<div id="' + entityId + '" class="employee_entity">'+
                         '<input id="' + nameId + '" name="employee_name" size="10" placeholder="username"> '+
-                        '<input id="' + loginId + '" name="login_id" size="7" placeholder="Login ID"> '+
+                        '<input id="' + loginId + '" name="login_id" size="15" placeholder="Login ID"> '+
                         '<input id="' + levelId + '" name="employee_level" size="4" placeholder="level">'+
                         '<br><br>'+
                     '</div>';

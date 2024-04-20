@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Bug Report Page</title>
+    <title class="title">New Bug Report Page</title>
     <link rel="stylesheet" href="style.css">
     
 </head>
 <body>
-    <h2>New Bug Report Page</h2>
+    <h2 class="title">New Bug Report Page</h2>
     <!--All the required Attributes here-->
     <label for="program">Program:</label>
 
@@ -85,99 +85,103 @@
     <br>
      <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
     <hr>
-    <label for="attachments">Supplementary attachments (optional)</label><br><br>
-    <input type="file" id="attachments" name="attachments" multiple/>
+    <div id="attachment_inputs">
+        <label for="attachments">Supplementary attachments (optional)</label><br><br>
+        <input type="file" id="attachments" name="attachments" multiple/>
+    </div>
     
-    <br><br>
+    <br>
     <hr class="long-line">
     <br>
    
 
-    <!--All the optional Attribute here-->
+    <!--All the resolution form info here -->
+    <div id="resolutionForm">
 
-    <!-- TODO: fill out with pre-requiste info -->
-    <label for="functionalArea">Functional Area</label>      
-    <select id="functionalArea">
-        <option value="default">select functional area</option>
-
-    </select>
-
-
-    <label for="assignTo">Assigned To</label>      
-    <select id="assignTo">
-        <option value="default">select user</option>
-
-    </select>
-
-    <br><br>
-    <div class="input-container">
-        <label for="comments">Comments</label><br>
-        <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
+        <!-- TODO: fill out with pre-requiste info -->
+        <label for="functionalArea">Functional Area</label>      
+        <select id="functionalArea">
+            <option value="default">select functional area</option>
+    
+        </select>
+    
+    
+        <label for="assignTo">Assigned To</label>      
+        <select id="assignTo">
+            <option value="default">select user</option>
+    
+        </select>
+    
+        <br><br>
+        <div class="input-container">
+            <label for="comments">Comments</label><br>
+            <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
+        </div>
+    
+        <br>
+        <label for="status">Status</label>      
+        <select id="status">
+            <option value="default">select status</option>
+            <option >Open</option>
+            <option >Closed</option>
+            <option >Resolved</option>
+        </select>
+    
+        <label for="priority">Priority</label>      
+        <select id="priority">
+            <option value="default">0</option>
+            <option >1</option>
+            <option >2</option>
+            <option >3</option>
+            <option >4</option>
+            <option >5</option>
+            <option >6</option>
+        </select>
+        <br>
+    
+        <label for="resolution">Resolution</label>      
+        <select id="resolution">
+            <option value="default">select resolution type</option>
+            <option >pending</option>
+            <option >fixed</option>
+            <option >cannot be reproduced</option>
+            <option >deferred</option>
+            <option >as designed</option>
+            <option >withdrawn by reporter</option>
+            <option >requires more info</option>
+            <option >disagree with suggestion</option>
+            <option >duplicate</option>
+            
+        </select>
+    
+        <label for="resolutionVersion">Version</label>      
+        <input id="resolutionVersion" size="7" placeholder="version num">
+    
+        <br><br>
+        <label for="resolvedBy">Resolved By</label>
+        <select id="resolvedBy">
+            <option value="default">select user</option>
+    
+        </select>
+    
+        <label for="dateResolved">on</label>
+        <input type="date" id ="dateResolved" name ="dateResolved">
+    
+        <br>
+        <label for="testedBy">Tested By</label>
+        <select id="testedBy">
+            <option value="default">select user</option>
+    
+        </select>
+    
+        <label for="dateTested">on</label>
+        <input type="date" id ="dateTested" name ="dateTested">
+    
+        <label for="treatAsDeferred">Treat as deferred?</label>
+        <input type="checkbox" name="treatAsDeferred" id="treatAsDeferred">
+        <hr>
     </div>
-
-    <br>
-    <label for="status">Status</label>      
-    <select id="status">
-        <option value="default">select status</option>
-        <option >Open</option>
-        <option >Closed</option>
-        <option >Resolved</option>
-    </select>
-
-    <label for="priority">Priority</label>      
-    <select id="priority">
-        <option value="default">0</option>
-        <option >1</option>
-        <option >2</option>
-        <option >3</option>
-        <option >4</option>
-        <option >5</option>
-        <option >6</option>
-    </select>
-    <br>
-
-    <label for="resolution">Resolution</label>      
-    <select id="resolution">
-        <option value="default">select resolution type</option>
-        <option >pending</option>
-        <option >fixed</option>
-        <option >cannot be reproduced</option>
-        <option >deferred</option>
-        <option >as designed</option>
-        <option >withdrawn by reporter</option>
-        <option >requires more info</option>
-        <option >disagree with suggestion</option>
-        <option >duplicate</option>
         
-    </select>
-
-    <label for="resolutionVersion">Version</label>      
-    <input id="resolutionVersion" size="7" placeholder="version num">
-
-    <br><br>
-    <label for="resolvedBy">Resolved By</label>
-    <select id="resolvedBy">
-        <option value="default">select user</option>
-
-    </select>
-
-    <label for="dateResolved">on</label>
-    <input type="date" id ="dateResolved" name ="dateResolved">
-
-    <br>
-    <label for="testedBy">Tested By</label>
-    <select id="testedBy">
-        <option value="default">select user</option>
-
-    </select>
-
-    <label for="dateTested">on</label>
-    <input type="date" id ="dateTested" name ="dateTested">
-
-    <label for="treatAsDeferred">Treat as deferred?</label>
-    <input type="checkbox" name="treatAsDeferred" id="treatAsDeferred">
-        
-    <br><br>
     <button id ="submitButton"> Submit</button>
     <button id ="resetButton"> Reset</button>
     <button id="backButton">Cancel</button>

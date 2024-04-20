@@ -13,26 +13,10 @@
     <button id="backButton">Return to maintenance menu</button>
     <hr>
 
-    <!-- <h3>Add Programs</h3>
-    
-    <div id="program_list_values">
-        <div id="program_entity_main">
-            <input id="program_name" name="program_name" size="10" placeholder="program name">
-            <input id="program_release" name="program_release" size="6" placeholder="release">
-            <input id="release_version" name="release_version" size="3" placeholder="version">
-            <button id="newProgramButton">+</button> 
-            <button id="removeProgramButton" hidden=true>-</button>
-            <br><br>
-        </div>
-    </div> -->
-
     <h3 style="display: inline-block;">Add Programs</h3>
-    <button id="newProgramButton" style="vertical-align: middle; margin-left: 10px;">+</button>
-    <button id="removeProgramButton" hidden="true" style="vertical-align: middle;">-</button>
-    <div id="program_list_values">
-        <div id="program_entity_main">
-        </div>
-    </div>
+    <button id="newProgramButton" class="quantityButton plus">+</button>
+    <button id="removeProgramButton" hidden="true" class="quantityButton">-</button>
+    <div id="program_list_values"></div>
     
     <button id="clearProgramButton">Clear</button>
     <button id="submitProgramButton">Add new programs</button>
@@ -44,10 +28,9 @@
 
     <h3>Edit Programs</h3>
 
-    
     <label for="program_entity_before">Program before change:</label>
     <div id="program_entity_before">
-        <input id="program_name" name="program_name" size="10" placeholder="program name">
+        <input id="program_name" name="program_name" size="15" placeholder="program name">
         <input id="program_release" name="program_release" size="6" placeholder="release">
         <input id="release_version" name="release_version" size="3" placeholder="version">
         <br><br>
@@ -55,7 +38,7 @@
     
     <label for="program_entity_after">Program after change (leave blank for no change):</label>
     <div id="program_entity_after">
-        <input id="program_name" name="program_name" size="10" placeholder="program name">
+        <input id="program_name" name="program_name" size="15" placeholder="program name">
         <input id="program_release" name="program_release" size="6" placeholder="release">
         <input id="release_version" name="release_version" size="3" placeholder="version">
         <br><br>

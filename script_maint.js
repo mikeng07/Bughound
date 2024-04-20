@@ -167,5 +167,11 @@ if (lookupButton) {
         // query and post results
         $('#searchResults').html("No results found");
     });
+
+    document.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            lookupButton.click();
+        }
+    });
 }
 

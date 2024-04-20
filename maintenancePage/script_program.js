@@ -44,7 +44,7 @@ if (newProgramButton) {
 
         // Construct the HTML for the new program entity
         var temp =  '<div id="' + entityId + '" class="program_entity">'+
-                        '<input id="' + nameId + '" name="program_name" size="12" placeholder="program name"> '+
+                        '<input id="' + nameId + '" name="program_name" size="15" placeholder="program name"> '+
                         '<input id="' + releaseId + '" name="program_release" size="6" placeholder="release"> '+
                         '<input id="' + versionId + '" name="release_version" size="6" placeholder="version">'+
                         '<br><br>'+
