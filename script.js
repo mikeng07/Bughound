@@ -105,7 +105,7 @@ localStorage.setItem("userList", userList);
 // Function to validate username and password
 function validateCredentials(username, password) {
 
-  console.log('validating...');
+  console.log('Validating...');
 
   $.ajax({
     type: "POST",
@@ -119,6 +119,8 @@ function validateCredentials(username, password) {
         console.error('An error occurred: ' + response['error']);
         return false; // Invalid credentials
       }
+
+      console.log("validation successful!");
       
       // Set accessLevel in local storage   
       localStorage.setItem("accessLevel", response["result"]["accessLevel"]); 
@@ -126,9 +128,12 @@ function validateCredentials(username, password) {
       // TODO: are there others? pwd hash?
 
       return true; // valid credentials
+    },
+    error: function(response) {
+      console.error("something else happened: " + response);
+      return false;
     }
   });
-
 }
 
 // Event listener for login button
