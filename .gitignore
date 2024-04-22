@@ -1,0 +1,7 @@
+# IGNORE THE FOLLOWING
+
+# env file
+.env
+
+# venv folder (flask)
+.venv
