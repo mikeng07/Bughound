@@ -112,6 +112,9 @@ function validateCredentials(username, password) {
     url: 'login.php',
     crossDomain: true,
     dataType: "json",
+    headers: {
+      'Access-Control-Allow-Methods': "POST, GET, OPTIONS, HEAD"
+    },
     data: {usr: username, pwd: password},
     success: function(response) {
 
@@ -129,8 +132,8 @@ function validateCredentials(username, password) {
 
       return true; // valid credentials
     },
-    error: function(response) {
-      console.error("something else happened: " + response);
+    error: function(xhr) {
+      console.error("error -- allowed responses: " + xhr.getResponseHeader('allow'));
       return false;
     }
   });
