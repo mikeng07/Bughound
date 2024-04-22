@@ -78,15 +78,14 @@ CREATE TABLE Attachments (
     FOREIGN KEY (report_id) REFERENCES Reports(report_id)
 );
 
-
-DROP TABLE Attachments;
-DROP TABLE Resolutions;
-DROP TABLE Reports;
-DROP TABLE program_areas;
-DROP TABLE Programs;
-DROP TABLE Bugs;
-DROP TABLE Areas, Users;
-
+-- REMOVING TABLES ---------------------------------------------------
+-- DROP TABLE Attachments;
+-- DROP TABLE Resolutions;
+-- DROP TABLE Reports;
+-- DROP TABLE program_areas;
+-- DROP TABLE Programs;
+-- DROP TABLE Bugs;
+-- DROP TABLE Areas, Users;
 
 -- TEST POPULATION OF TABLES -----------------------------------------
 
@@ -94,39 +93,13 @@ DROP TABLE Areas, Users;
 -- TODO: procedure to connect reports of 1 bug to another bug (correlation)
 -- TODO: procedure to add to / remove from 'Users', 'Areas'
 
-create procedure populateTables()
-BEGIN
-    -- 'Users' table
-    INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("admin", UNHEX(SHA2("admin", 256)), "ADMIN", 3);
-    INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("user", UNHEX(SHA2("user", 256)), "USER", 1);
+-- 'Users' table
+INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("admin", UNHEX(SHA2("admin", 256)), "ADMIN", 3);
+INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("user", UNHEX(SHA2("user", 256)), "USER", 1);
 
-    -- 'Areas' table
-    INSERT INTO Areas (area_title) VALUES ("Back-end");
-    INSERT INTO Areas (area_title) VALUES ("Front-end");
-    INSERT INTO Areas (area_title) VALUES ("Hardware");
-    INSERT INTO Areas (area_title) VALUES ("Networking");
-    INSERT INTO Areas (area_title) VALUES ("Software");
-END
-------------------------------------------------------------------------
-
--- procedure calls      (call <procedure-name>)
--- deleting procedures  (drop procedure <procedure-name>)
-drop procedure dropTables;
-drop procedure populateTables;
-
--- create procedure submitNewReport (IN program_name, report_type, report_severity, report_reproducible, report_summary, report_problem, report_suggested_fix, reporter_name, report_date, report_attachments)
-
--- create procedure submitNewResolution(IN functional_area, assignment_name, resolution_comments, resolution_status, resolution_priority, resolution_state, resolution_version, resolver_name, resolver_date, tester_name, tester_date, resolution_deferred)
-
-create procedure searchForBugs(IN input_bug_id INT)
-BEGIN
-    select * from reports where bug_id = input_bug_id;
-END
--- call searchForBugs(<some bug_id>)
-
-create procedure getUserAssignment(IN assigned_name VARCHAR(255))
-BEGIN
-    SELECT @user_id := user_id from users where user_name = assigned_name;
-    select * from resolutions where assigned_id = @user_id;
-END
--- call getUserAssignment(<some user name>);
+-- 'Areas' table
+INSERT INTO Areas (area_title) VALUES ("Back-end");
+INSERT INTO Areas (area_title) VALUES ("Front-end");
+INSERT INTO Areas (area_title) VALUES ("Hardware");
+INSERT INTO Areas (area_title) VALUES ("Networking");
+INSERT INTO Areas (area_title) VALUES ("Software");
