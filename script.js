@@ -110,7 +110,7 @@ function validateCredentials(username, password) {
   $.ajax({
     type: "POST",
     url: 'login.php',
-    crossdDomain: true,
+    crossDomain: true,
     dataType: "json",
     data: {usr: username, pwd: password},
     success: function(response) {
