@@ -104,11 +104,25 @@ localStorage.setItem("userList", userList);
   
 // Function to validate username and password
 function validateCredentials(username, password) {
-  for (var i = 0; i < userList.length; i++) {
-    if (userList[i].username === username && userList[i].password === password) {
-      return true; // Valid credentials
+
+  console.log('validating...');
+
+  $.ajax({
+    type: "POST",
+    url: 'login.php',
+    dataType: "json",
+    data: {usr: username, pwd: password},
+    success: function(user) {
+    
+      // Set accessLevel in local storage   
+      localStorage.setItem("accessLevel", user["accessLevel"]); 
+
+      // TODO: are there others? pwd hash?
+
+      return true; // valid credentials
     }
-  }
+  });
+
   return false; // Invalid credentials
 }
 
@@ -124,10 +138,7 @@ if(loginButton) {
     if (validateCredentials(username, password)) {
       // Set isLoggedIn flag in local storage
       localStorage.setItem("isLoggedIn", true); 
-      
-      // Set accessLevel in local storage   
-      localStorage.setItem("accessLevel", userList.find(x => x.username === username).accessLevel); 
-      
+            
       // Redirect to index.html if credentials are valid
       window.location.href = "index.html"; 
 
@@ -140,7 +151,7 @@ if(loginButton) {
   // tied to the document
   document.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
-      console.log('enter key being pressed')
+      // console.log('enter key being pressed')
       loginButton.click();
     }
   });
