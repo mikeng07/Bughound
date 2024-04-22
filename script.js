@@ -110,12 +110,18 @@ function validateCredentials(username, password) {
   $.ajax({
     type: "POST",
     url: 'login.php',
+    crossdDomain: true,
     dataType: "json",
     data: {usr: username, pwd: password},
-    success: function(user) {
-    
+    success: function(response) {
+
+      if (response["error"]) {
+        console.error('An error occurred: ' + response['error']);
+        return false; // Invalid credentials
+      }
+      
       // Set accessLevel in local storage   
-      localStorage.setItem("accessLevel", user["accessLevel"]); 
+      localStorage.setItem("accessLevel", response["result"]["accessLevel"]); 
 
       // TODO: are there others? pwd hash?
 
@@ -123,7 +129,6 @@ function validateCredentials(username, password) {
     }
   });
 
-  return false; // Invalid credentials
 }
 
 // Event listener for login button

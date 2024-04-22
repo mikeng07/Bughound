@@ -1,4 +1,6 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
 
 // create result array
 $interactRes = array();
@@ -29,7 +31,7 @@ if (!isset($_POST['error'])) {
     
     if (mysqli_connect_errno()) {
         die("Connection failed: " . mysqli_connect_error());
-        
+
     } else {
 
         echo "connected successfully";
