@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+    <title>BugHound Home</title>
+</head>
+<body>
+    <h1>Welcome to BugHound, {{username}}</h1>
+    <hr class="long-line">
+
+    <br><b>Main Menu</b>
+    <ul id="buttonMenu">
+        <li><a href="{{url_for('add_bug')}}">Add a Bug</a></li>
+        <li><a href="{{url_for('update_bug')}}">Edit a Bug</a></li>
+        <li><a href="{{url_for('search_bug')}}">Lookup a Bug</a></li>
+    
+        {% if access == '3' %}
+        <br><li><a href="{{url_for('maintain_database')}}">DB Maintenance</a></li>
+        {% endif %}
+    </ul>
+    
+    <hr>
+    <a href="{{url_for('logout')}}">Logout</a>
+</body>
+</html> 

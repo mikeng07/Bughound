@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+  <title>Bughound Login</title>
+</head>
+<body>
+  <h2>Bughound Login</h2>
+  <hr class="long-line">
+  
+  <form id="loginForm" action="/" method="POST">
+    <br>
+    <div class="container">
+      <label for="username"><b>Username</b></label>
+      <input type="text" id="username" placeholder="Enter Username" name="username" required>
+    </div>
+    <br>
+    <div class="container">
+      <label for="password" style="margin-right: 3px;"><b>Password</b></label>
+      <input type="password" id="password" placeholder="Enter Password" name="password" required>
+    </div>
+    
+    <br>
+    <div class="container" style="background-color:#f1f1f1">
+      <button id="loginButton" type="submit">Login</button>
+      <button id="forgotPasswordButton" type="button">Forgot Password?</button>  
+    </div>
+  </form>
+
+</body>
+</html>

@@ -1,7 +1,9 @@
 # IGNORE THE FOLLOWING
 
-# env file
+# env files
 .env
+.flaskenv
 
 # venv folder (flask)
 .venv
+__pycache__
