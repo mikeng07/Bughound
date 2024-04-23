@@ -23,23 +23,38 @@ db_config = {
 
 # helper functions
 def verify_login():
-    if "loggedin" not in session:
+    if "loggedin" not in session or 'loggedIn' in session is False:
          print('not logged in')
          message = f"You need to Login first"
          flash(message=message)
          return render_template('Login.html')
 
 def verify_access():
-    if session['user_level'] != '3':
+    if session['user_level'] != 3:
         print('not high enough')
         flash(message=f"Access restricted, returning to dashboard")
         return render_template('index.html', access=session['user_level'], username=session['username'])
+
+def get_all_MySQL_results(sql_list: str | list[str]):
+    connection = pymysql.connect(**db_config)
+
+    # result pile
+    data = []
+
+    with connection.cursor() as cursor:
+
+        for sql in sql_list:
+            cursor.execute(sql)
+            data.append(cursor.fetchall())
+            connection.commit()
+
+    return data
 
 
 # initial landing
 @app.route("/")
 def index():
-    print("login screen")
+    print("back to the start of everything")
 
     if 'username' in session and 'loggedIn' in session is True:
         print("welcome back")
@@ -65,13 +80,14 @@ def login_auth():
         # print(employee)
         # print(encoded_password)
 
-        if employee and employee['user_pass'] == encoded_password: # type: ignore
+        if employee and employee['user_pass'] == encoded_password: # type:ignore
             session['loggedin'] = True
             session['username'] = username
-            session['user_level'] = employee["user_access"]        # type: ignore
+            session['user_level'] = int(employee["user_access"])   # type:ignore
 
             print('login successful')
             return redirect('/homepage')
+        
         else:
             print("incorrect username/password")
             message = f"Incorrect username or password"
@@ -81,8 +97,10 @@ def login_auth():
 # invoke logout
 @app.route('/logout', methods=['POST','GET'])
 def logout():
+    print('making logout request')
+
     if "loggedin" in session:
-        message = f"You are Logged out Succesfully"
+        message = f"You are Logged out Successfully"
         flash(message=message)
         session.clear()
     else:
@@ -94,6 +112,7 @@ def logout():
 # homepage
 @app.route('/homepage', methods=["GET"])
 def homepage():
+    print('homepage')
     print("session:", session.items())
 
     username = session['username']
@@ -109,8 +128,8 @@ def homepage():
 # insert new employee
 @app.route('/insert', methods=['POST']) #type:ignore
 def insert():
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         #flash("Data Inserted Successfully")
@@ -121,7 +140,7 @@ def insert():
         
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO employees (name, username, password, userlevel) VALUES (%s, %s, %s, %s)", (name, username, password, userlevel))
+            cursor.execute("INSERT INTO users (name, username, password, userlevel) VALUES (%s, %s, %s, %s)", (name, username, password, userlevel))
             connection.commit()
             emp_id = cursor.lastrowid
             message = f"Employee {name} was successfully added."
@@ -132,8 +151,8 @@ def insert():
 # update an employee
 @app.route('/edit', methods=['POST','GET']) #type:ignore
 def edit():
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         emp_id = request.form['emp_id']
@@ -144,7 +163,7 @@ def edit():
         
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
-            cursor.execute("UPDATE employees SET name=%s, username=%s, password=%s, userlevel=%s WHERE emp_id=%s", (name, username, password, userlevel, emp_id))
+            cursor.execute("UPDATE users SET name=%s, username=%s, password=%s, userlevel=%s WHERE emp_id=%s", (name, username, password, userlevel, emp_id))
             connection.commit()
             
             message = f"Employee {name} was successfully updated."
@@ -156,15 +175,15 @@ def edit():
 @app.route('/delete/<string:id_data>', methods = ['GET'])
 def delete(id_data):
 
-    verify_login()
     verify_access()
+    verify_login()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM employees WHERE emp_id=%s", (id_data,))
+        cursor.execute("DELETE FROM users WHERE emp_id=%s", (id_data,))
         
         connection.commit()
-        message=f"Employee with id {id_data} was succesfully deleted"
+        message=f"Employee with id {id_data} was successfully deleted"
     
         flash(message=message)
         return redirect(url_for('manage_employee'))
@@ -173,8 +192,8 @@ def delete(id_data):
 @app.route('/add_program', methods=['POST']) #type:ignore
 def add_program():
 
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         program = request.form['program']
@@ -186,7 +205,7 @@ def add_program():
             cursor.execute("INSERT INTO programs (program,program_release,program_version) VALUES (%s, %s, %s)", (program, program_release, program_version))
             connection.commit()
             prog_id = cursor.lastrowid
-            message = f"Program {program} was successfully added."
+            message = f"Program {program}:{prog_id} was successfully added."
         
         flash(message=message)
         return redirect(url_for('manage_program'))
@@ -194,8 +213,8 @@ def add_program():
 # edit a program
 @app.route('/edit_program', methods=['POST','GET']) #type:ignore
 def edit_program():
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         prog_id = request.form['prog_id']
@@ -218,15 +237,15 @@ def edit_program():
 @app.route('/delete_program/<string:id_data>', methods = ['GET'])
 def delete_program(id_data):
 
-    verify_login()
     verify_access()
+    verify_login()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM programs WHERE prog_id=%s", (id_data,))
         
         connection.commit()
-        message=f"Program with id {id_data} was succesfully deleted"
+        message=f"Program with id {id_data} was successfully deleted"
     
         flash(message=message)
         return redirect(url_for('manage_program'))
@@ -235,8 +254,8 @@ def delete_program(id_data):
 @app.route('/add_area', methods=['POST']) #type:ignore
 def add_area():
 
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         print(request.form)
@@ -251,14 +270,10 @@ def add_area():
             print(result['COUNT(*)']) #type:ignore
             connection.commit()
             '''
-
-
             cursor.execute("SELECT prog_id FROM programs where program=%s",(program,))
             prog_id = cursor.fetchone()
             print(prog_id)
             '''
-
-
 
             if result['COUNT(*)'] == 0: #type:ignore
                 message="Cannot add area - programs table is empty."
@@ -277,16 +292,14 @@ def add_area():
 @app.route('/edit_area', methods=['POST','GET']) #type:ignore
 def edit_area():
 
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == "POST":
         prog_id = request.form['prog_id']
         area = request.form['area']
         area_id = request.form['area_id']
-       
-        
-        
+               
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
             cursor.execute("UPDATE areas SET area=%s, prog_id=%s WHERE area_id=%s", (area,prog_id, area_id))
@@ -301,21 +314,21 @@ def edit_area():
 @app.route('/delete_area/<string:id_data>', methods = ['GET'])
 def delete_area(id_data):
 
-    verify_login()
     verify_access()
+    verify_login()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM areas WHERE area_id=%s", (id_data,))
         
         connection.commit()
-        message=f"Area with id {id_data} was succesfully deleted"
+        message=f"Area with id {id_data} was successfully deleted"
     
         flash(message=message)
         return redirect(url_for('manage_area'))
 
 
-# editPage
+# editPage --------------------------------
 @app.route('/update_bug')
 def update_bug():
     username = session['username']
@@ -323,36 +336,14 @@ def update_bug():
 
     verify_login()
     
-    report_types = ['coding error', 'design error', 'hardware error', 'suggestion', 'Documentation', 'Query']
-    severities = ['fatal', 'severe', 'minor']
-    #employees = ['employee1', 'employee2', 'employee3'] # replace with actual employee list
-    #areas = ['area1', 'area2', 'area3'] # replace with actual area list
-    priority=[1,2,3,4,5,6]
-    status=['Open', 'Closed', 'Resolved']
-    resolution=['Pending', 'Fixed', 'Irreproducible', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Need more info', 'Disagree with suggestion', 'Duplicate']
-    resolution_version=[1,2,3,4]
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM bug')
-        data = cursor.fetchall()
-        connection.commit()
+    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
 
+    sql_list = ['SELECT * FROM bugs', 'SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
 
-        cursor.execute('SELECT * FROM programs')
-        programs = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM areas')
-        areas = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM employees')
-        employees = cursor.fetchall()
-        connection.commit()
-
-        print(data)
+    data, programs, areas, employees = get_all_MySQL_results(sql_list)
+    print(data)
     
-    return render_template('update_bug.html',username=username,userlevel=userlevel, bugs=data, programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
+    return render_template('editPage.html',username=username,userlevel=userlevel, bugs=data, programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
 
 # delete a bug
 @app.route('/delete_bug/<string:id_data>', methods = ['GET'])
@@ -365,7 +356,7 @@ def delete_bug(id_data):
         cursor.execute("DELETE FROM bug WHERE bug_id=%s", (id_data,))
         
         connection.commit()
-        message=f"Bug with id {id_data} was succesfully deleted"
+        message=f"Bug with id {id_data} was successfully deleted"
     
         flash(message=message)
         return redirect(url_for('update_bug'))
@@ -437,7 +428,7 @@ def edit_bug():
         return redirect(url_for('update_bug'))
 
 
-# createPage
+# createPage ------------------------------
 @app.route('/add_bug', methods=['GET', 'POST'])
 def add_bug():
     username = session['username']
@@ -490,16 +481,18 @@ def add_bug():
             connection.commit()
 
             
-            print("INSERT INTO bug (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", (program, report_type, severity, 
-                                            problem_summary, reproducible, problem, reported_by, 
-                                            date_reported, functional_area, assigned_to, comments, 
-                                            status, priority, resolution, resolution_version, resolution_by,
-                                            date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'], attachment, file_name)) #type:ignore
-            cursor.execute("INSERT INTO bug (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", (program, report_type, severity, 
-                                            problem_summary, reproducible, problem, reported_by, 
-                                            date_reported, functional_area, assigned_to, comments, 
-                                            status, priority, resolution, resolution_version, resolution_by,
-                                            date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'], attachment, file_name)) #type:ignore
+            print("INSERT INTO bugs (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", 
+                (program, report_type, severity, 
+                 problem_summary, reproducible, problem, reported_by, 
+                 date_reported, functional_area, assigned_to, comments, 
+                 status, priority, resolution, resolution_version, resolution_by,
+                 date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
+            cursor.execute("INSERT INTO bugs (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", 
+                (program, report_type, severity, 
+                 problem_summary, reproducible, problem, reported_by, 
+                 date_reported, functional_area, assigned_to, comments, 
+                 status, priority, resolution, resolution_version, resolution_by,
+                 date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
             connection.commit()
             
             bug_id= cursor.lastrowid
@@ -512,39 +505,22 @@ def add_bug():
         flash(message=message)
         return redirect(url_for('add_bug'))
 
+
+    sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
+    programs, areas, employees = get_all_MySQL_results(sql_list)
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM programs')
-        programs = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM areas')
-        areas = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM employees')
-        employees = cursor.fetchall()
-        connection.commit()
     # if the request method is GET, render the add_bug page with the necessary form data
-    #programs = programs # replace with actual program list
-    report_types = ['coding error', 'design error', 'hardware error', 'suggestion', 'Documentation', 'Query']
-    severities = ['fatal', 'severe', 'minor']
-    #employees = ['employee1', 'employee2', 'employee3'] # replace with actual employee list
-    #areas = ['area1', 'area2', 'area3'] # replace with actual area list
-    priority=[1,2,3,4,5,6]
-    status=['Open', 'Closed', 'Resolved']
-    resolution=['Pending', 'Fixed', 'Irreproducible', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Need more info', 'Disagree with suggestion', 'Duplicate']
-    resolution_version=[1,2,3,4]
+    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
+
     return render_template('add_bug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 
-# maintenancePage
+# maintenancePage -------------------------
 @app.route('/maintain_database')
 def maintain_database():
     
-    verify_login()
     verify_access()
+    verify_login()
     
     print('rendering...')
     return render_template('maintenancePage.html')
@@ -555,16 +531,13 @@ def manage_employee():
     username = session['username']
     userlevel =session['user_level']
     
-    verify_login()
     verify_access()
+    verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM employees')
-        data = cursor.fetchall()
-        connection.commit()
+    sql = 'SELECT * FROM users'
+    data = get_all_MySQL_results(sql)
      
-        return render_template('manage_employee.html', employees=data, username=username, userlevel=userlevel)
+    return render_template('manage_employee.html', employees=data, username=username, userlevel=userlevel)
 
 # manage program page
 @app.route('/manage_program')
@@ -572,16 +545,13 @@ def manage_program():
     username = session['username']
     userlevel =session['user_level']
     
-    verify_login()
     verify_access()
+    verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM programs')
-        data = cursor.fetchall()
-        connection.commit()
+    sql = 'SELECT * FROM programs'
+    data = get_all_MySQL_results(sql)
      
-        return render_template('manage_program.html', program=data, username=username, userlevel=userlevel)
+    return render_template('manage_program.html', program=data, username=username, userlevel=userlevel)
 
 # manage area page
 @app.route('/manage_area')
@@ -589,36 +559,30 @@ def manage_area():
     username = session['username']
     userlevel =session['user_level']
     
-    verify_login()
     verify_access()
+    verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM areas')
-        data = cursor.fetchall()
-        connection.commit()
-        cursor.execute('SELECT * FROM programs')
-        programs = cursor.fetchall()
-        connection.commit()
+    sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs']
+    data, programs = get_all_MySQL_results(sql_list)
+    
     return render_template('manage_area.html', areas=data, programs=programs, username=username, userlevel=userlevel)
 
 @app.route('/update',methods=['POST','GET'])
 def update():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('Login.html')
-
+    verify_access()
+    verify_login()
     return redirect(url_for('manage_employee'))
 
 
-#add Bugs Page
+# createPage ------------------------------
 @app.route('/search_bug', methods=['GET', 'POST'])
 def search_bug():
     username = session['username']
     userlevel =session['user_level']
 
     verify_login()
+
+    sql_list = ['SELECT * FROM programs','SELECT * FROM areas','SELECT * FROM users']
     
     if request.method == 'POST':
         field_values={
@@ -641,12 +605,13 @@ def search_bug():
         'date_resolved': request.form.get('date_resolved'),
         'tested_by': request.form.get('tested_by')
         }
+
         print(field_values)
         if field_values['date_reported']=='':
             field_values['date_reported']=None
 
         # build the SQL query based on user inputs
-        sql = "SELECT * FROM bug"
+        sql = "SELECT * FROM bugs"
         conditions = []
         for field, value in field_values.items():
             if value!=None:
@@ -655,64 +620,22 @@ def search_bug():
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
        
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            print(sql)
-            cursor.execute(sql)
-            search_result=cursor.fetchall()
-            print(search_result)
-            connection.commit()
+        sql_list.append(sql)
+        programs, areas, employees, search_result = get_all_MySQL_results(sql_list)
 
-            cursor.execute('SELECT * FROM programs')
-            programs = cursor.fetchall()
-            connection.commit()
-
-            cursor.execute('SELECT * FROM areas')
-            areas = cursor.fetchall()
-            connection.commit()
-
-            cursor.execute('SELECT * FROM employees')
-            employees = cursor.fetchall()
-            connection.commit()
         # if the request method is GET, render the add_bug page with the necessary form data
-        #programs = programs # replace with actual program list
-        report_types = ['coding error', 'design error', 'hardware error', 'suggestion', 'Documentation', 'Query']
-        severities = ['fatal', 'severe', 'minor']
-        #employees = ['employee1', 'employee2', 'employee3'] # replace with actual employee list
-        #areas = ['area1', 'area2', 'area3'] # replace with actual area list
-        priority=[1,2,3,4,5,6]
-        status=['Open', 'Closed', 'Resolved']
-        resolution=['Pending', 'Fixed', 'Irreproducible', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Need more info', 'Disagree with suggestion', 'Duplicate']
-        resolution_version=[1,2,3,4]
+        report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
        
         # process the form data and store it in the database using PL/SQL
         
         # redirect to a success page
         return render_template('search_bug_result.html', result=search_result, username=username, userlevel=userlevel,programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM programs')
-        programs = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM areas')
-        areas = cursor.fetchall()
-        connection.commit()
-
-        cursor.execute('SELECT * FROM employees')
-        employees = cursor.fetchall()
-        connection.commit()
+    programs, areas, employees = get_all_MySQL_results(sql_list)
+    
     # if the request method is GET, render the add_bug page with the necessary form data
-    #programs = programs # replace with actual program list
-    report_types = ['coding error', 'design error', 'hardware error', 'suggestion', 'Documentation', 'Query']
-    severities = ['fatal', 'severe', 'minor']
-    #employees = ['employee1', 'employee2', 'employee3'] # replace with actual employee list
-    #areas = ['area1', 'area2', 'area3'] # replace with actual area list
-    priority=[1,2,3,4,5,6]
-    status=['Open', 'Closed', 'Resolved']
-    resolution=['Pending', 'Fixed', 'Irreproducible', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Need more info', 'Disagree with suggestion', 'Duplicate']
-    resolution_version=[1,2,3,4]
+    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
+
     return render_template('search_bug_page.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 # view attachments
@@ -721,7 +644,6 @@ def view_attachment(filename):
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
         cursor.execute("SELECT attachment FROM bug WHERE filename = %s", (filename,))
-
         data = cursor.fetchone()
         print(data)
         
@@ -733,8 +655,8 @@ def export_data():
     username = session['username']
     userlevel =session['user_level']
     
-    verify_login()
     verify_access()
+    verify_login()
     
     if request.method == 'POST':
         table_name = request.form['table_name']
@@ -742,7 +664,6 @@ def export_data():
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
             
-
             cursor.execute(f'SELECT * FROM {table_name}')
             rows = cursor.fetchall()
             # create a root element for the XML file

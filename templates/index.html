@@ -16,7 +16,7 @@
         <li><a href="{{url_for('update_bug')}}">Edit a Bug</a></li>
         <li><a href="{{url_for('search_bug')}}">Lookup a Bug</a></li>
     
-        {% if access == '3' %}
+        {% if access == 3 %}
         <br><li><a href="{{url_for('maintain_database')}}">DB Maintenance</a></li>
         {% endif %}
     </ul>
