@@ -21,6 +21,21 @@ db_config = {
     "cursorclass": pymysql.cursors.DictCursor
 }
 
+# helper functions
+def verify_login():
+    if "loggedin" not in session:
+         print('not logged in')
+         message = f"You need to Login first"
+         flash(message=message)
+         return render_template('Login.html')
+
+def verify_access():
+    if session['user_level'] != '3':
+        print('not high enough')
+        flash(message=f"Access restricted, returning to dashboard")
+        return render_template('index.html', access=session['user_level'], username=session['username'])
+
+
 # initial landing
 @app.route("/")
 def index():
@@ -51,7 +66,6 @@ def login_auth():
         # print(encoded_password)
 
         if employee and employee['user_pass'] == encoded_password: # type: ignore
-
             session['loggedin'] = True
             session['username'] = username
             session['user_level'] = employee["user_access"]        # type: ignore
@@ -76,6 +90,7 @@ def logout():
         flash(message=message)
     return redirect('/')
 
+
 # homepage
 @app.route('/homepage', methods=["GET"])
 def homepage():
@@ -85,22 +100,17 @@ def homepage():
     userlevel =session['user_level']
     #print("pp", username,userlevel)
 
-    if "loggedin" in session:
-         return render_template('index.html', username=username, access=session['user_level'])
-    else:
-        message = f"You need to Login first"
-        flash(message=message)
-        return redirect('/')
-    
+    verify_login()
 
-# MAINTENANCE PAGE
+    return render_template('index.html', username=username, access=userlevel)
+
+
+# MAINTENANCE PAGE ---------------------
 # insert new employee
 @app.route('/insert', methods=['POST']) #type:ignore
 def insert():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         #flash("Data Inserted Successfully")
@@ -122,10 +132,8 @@ def insert():
 # update an employee
 @app.route('/edit', methods=['POST','GET']) #type:ignore
 def edit():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         emp_id = request.form['emp_id']
@@ -148,10 +156,8 @@ def edit():
 @app.route('/delete/<string:id_data>', methods = ['GET'])
 def delete(id_data):
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -167,10 +173,8 @@ def delete(id_data):
 @app.route('/add_program', methods=['POST']) #type:ignore
 def add_program():
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         program = request.form['program']
@@ -190,10 +194,8 @@ def add_program():
 # edit a program
 @app.route('/edit_program', methods=['POST','GET']) #type:ignore
 def edit_program():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         prog_id = request.form['prog_id']
@@ -216,10 +218,8 @@ def edit_program():
 @app.route('/delete_program/<string:id_data>', methods = ['GET'])
 def delete_program(id_data):
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -235,10 +235,8 @@ def delete_program(id_data):
 @app.route('/add_area', methods=['POST']) #type:ignore
 def add_area():
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         print(request.form)
@@ -278,10 +276,9 @@ def add_area():
 # edit an area 
 @app.route('/edit_area', methods=['POST','GET']) #type:ignore
 def edit_area():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+
+    verify_login()
+    verify_access()
     
     if request.method == "POST":
         prog_id = request.form['prog_id']
@@ -304,10 +301,8 @@ def edit_area():
 @app.route('/delete_area/<string:id_data>', methods = ['GET'])
 def delete_area(id_data):
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -320,16 +315,13 @@ def delete_area(id_data):
         return redirect(url_for('manage_area'))
 
 
-# Add/Update Bugs page
+# editPage
 @app.route('/update_bug')
 def update_bug():
     username = session['username']
     userlevel =session['user_level']
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
     
     report_types = ['coding error', 'design error', 'hardware error', 'suggestion', 'Documentation', 'Query']
     severities = ['fatal', 'severe', 'minor']
@@ -366,10 +358,7 @@ def update_bug():
 @app.route('/delete_bug/<string:id_data>', methods = ['GET'])
 def delete_bug(id_data):
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -384,10 +373,8 @@ def delete_bug(id_data):
 # edit a bug
 @app.route('/edit_bug', methods=['POST','GET']) #type:ignore
 def edit_bug():
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    
+    verify_login()
     
     if request.method == "POST":
         print(request.form)
@@ -450,15 +437,13 @@ def edit_bug():
         return redirect(url_for('update_bug'))
 
 
-#add Bugs Page
+# createPage
 @app.route('/add_bug', methods=['GET', 'POST'])
 def add_bug():
     username = session['username']
     userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    
+    verify_login()
     
     if request.method == 'POST':
         program = request.form.get('program')
@@ -554,37 +539,24 @@ def add_bug():
     return render_template('add_bug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 
-# Maintain Database page
+# maintenancePage
 @app.route('/maintain_database')
 def maintain_database():
-    username = session['username']
-    userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
     
-
-    if session['user_level'] != 3:
-        condition = False
-        return render_template('dashboard.html', condition = condition, username=username, userlevel=userlevel)
+    verify_login()
+    verify_access()
     
-    return render_template('maintain_database.html', username=username, userlevel=userlevel)
+    print('rendering...')
+    return render_template('maintenancePage.html')
 
 # manage employee page
 @app.route('/manage_employee')
 def manage_employee():
     username = session['username']
     userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
-     
-
-    if session['user_level'] != 3:
-        condition = False
-        return render_template('dashboard.html', condition = condition, username=username, userlevel=userlevel)
+    
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -599,14 +571,9 @@ def manage_employee():
 def manage_program():
     username = session['username']
     userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
     
-    if session['user_level'] != 3:
-        condition = False
-        return render_template('dashboard.html', condition = condition, username=username, userlevel=userlevel)
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -621,14 +588,9 @@ def manage_program():
 def manage_area():
     username = session['username']
     userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
     
-    if session['user_level'] != 3:
-        condition = False
-        return render_template('dashboard.html', condition = condition, username=username, userlevel=userlevel)
+    verify_login()
+    verify_access()
     
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -645,7 +607,7 @@ def update():
     if "loggedin" not in session:
          message = f"You need to Login first"
          flash(message=message)
-         return render_template('login.html')
+         return render_template('Login.html')
 
     return redirect(url_for('manage_employee'))
 
@@ -656,10 +618,7 @@ def search_bug():
     username = session['username']
     userlevel =session['user_level']
 
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
+    verify_login()
     
     if request.method == 'POST':
         field_values={
@@ -693,12 +652,9 @@ def search_bug():
             if value!=None:
                 conditions.append(f"{field} = '{value}'")
             
-
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
        
-
-
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
             print(sql)
@@ -776,14 +732,9 @@ def view_attachment(filename):
 def export_data():
     username = session['username']
     userlevel =session['user_level']
-    if "loggedin" not in session:
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('login.html')
     
-    if session['user_level'] != 3:
-        condition = False
-        return render_template('dashboard.html', condition = condition)
+    verify_login()
+    verify_access()
     
     if request.method == 'POST':
         table_name = request.form['table_name']
