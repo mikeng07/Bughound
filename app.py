@@ -5,8 +5,8 @@ from xml.etree.ElementTree import Element, SubElement, ElementTree
 import pymysql.cursors
 import hashlib
 
-# set: should debug?
-debugVal = True
+# set: should debug? (production)
+debugVal = False
 
 # app configuration
 app = Flask(__name__)
@@ -20,6 +20,7 @@ db_config = {
     "charset": "utf8mb4",
     "cursorclass": pymysql.cursors.DictCursor
 }
+
 
 # helper functions
 def verify_login():
@@ -50,11 +51,25 @@ def get_all_MySQL_results(sql_list: str | list[str]):
 
     return data
 
+def set_static_report_values():
+    report_types = [
+        'coding error', 'design error', 'hardware error', 
+        'suggestion', 'Documentation', 'Query']
 
-# initial landing
+    severities = ['fatal', 'severe', 'minor']
+    priority=[1,2,3,4,5,6]
+    status=['Open', 'Closed', 'Resolved']
+    resolution=['Pending', 'Fixed', 'Irreproducible', 
+                'Deferred', 'As designed','Withdrawn by reporter', 
+                'Need more info', 'Disagree with suggestion', 'Duplicate']
+    resolution_version=[1,2,3,4]
+
+    return report_types, severities, priority, status, resolution, resolution_version
+
+# initial landing (Login)
 @app.route("/")
 def index():
-    print("back to the start of everything")
+    print("initial landing...")
 
     if 'username' in session and 'loggedIn' in session is True:
         print("welcome back")
@@ -66,7 +81,7 @@ def index():
 @app.route("/", methods=['POST', 'GET'])
 def login_auth():
 
-    print("making login request")
+    print("making login request...")
     username = request.form['username']
     password = request.form['password']
 
@@ -97,7 +112,7 @@ def login_auth():
 # invoke logout
 @app.route('/logout', methods=['POST','GET'])
 def logout():
-    print('making logout request')
+    print('making logout request...')
 
     if "loggedin" in session:
         message = f"You are Logged out Successfully"
@@ -109,10 +124,10 @@ def logout():
     return redirect('/')
 
 
-# homepage
+# homepage (index)
 @app.route('/homepage', methods=["GET"])
 def homepage():
-    print('homepage')
+    print('homepage...')
     print("session:", session.items())
 
     username = session['username']
@@ -124,8 +139,76 @@ def homepage():
     return render_template('index.html', username=username, access=userlevel)
 
 
-# MAINTENANCE PAGE ---------------------
-# insert new employee
+# maintenance page (main landing)
+@app.route('/maintain_db')
+def maintain_db():
+    
+    verify_access()
+    verify_login()
+    
+    print('db maintenance...')
+    return render_template('maintenancePage.html')
+
+# manage employee page
+@app.route('/manage_employees')
+def manage_employees():
+    # username = session['username']
+    # userlevel =session['user_level']
+    
+    verify_access()
+    verify_login()
+    
+    return render_template('maintenancePage/employees.html')
+    
+    # sql = 'SELECT * FROM users'
+    # data = get_all_MySQL_results(sql)
+     
+    # return render_template('manage_employee.html', employees=data, username=username, userlevel=userlevel)
+
+# manage program page
+@app.route('/manage_programs')
+def manage_programs():
+    # username = session['username']
+    # userlevel =session['user_level']
+    
+    verify_access()
+    verify_login()
+    
+    return render_template('maintenancePage/programs.html')
+    
+    # sql = 'SELECT * FROM programs'
+    # data = get_all_MySQL_results(sql)
+     
+    # return render_template('manage_program.html', program=data, username=username, userlevel=userlevel)
+
+# manage area page
+@app.route('/manage_areas')
+def manage_areas():
+    # username = session['username']
+    # userlevel =session['user_level']
+    
+    verify_access()
+    verify_login()
+    
+    return render_template('maintenancePage/areas.html')
+    
+    # sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs']
+    # data, programs = get_all_MySQL_results(sql_list)
+    
+    # return render_template('manage_area.html', areas=data, programs=programs, username=username, userlevel=userlevel)
+
+# db lookup page (initial)
+@app.route('/db_lookup')
+def db_lookup():
+    
+    verify_access()
+    verify_login()
+    
+    return render_template("maintenancePage/lookup.html")
+
+
+
+# insert new employee (maintenancePage/employee)
 @app.route('/insert', methods=['POST']) #type:ignore
 def insert():
     verify_access()
@@ -188,7 +271,8 @@ def delete(id_data):
         flash(message=message)
         return redirect(url_for('manage_employee'))
 
-# add a program
+
+# add a program (maintenancePage/program)
 @app.route('/add_program', methods=['POST']) #type:ignore
 def add_program():
 
@@ -250,7 +334,8 @@ def delete_program(id_data):
         flash(message=message)
         return redirect(url_for('manage_program'))
 
-# add an area
+
+# add an area (maintenancePage/area)
 @app.route('/add_area', methods=['POST']) #type:ignore
 def add_area():
 
@@ -328,7 +413,7 @@ def delete_area(id_data):
         return redirect(url_for('manage_area'))
 
 
-# editPage --------------------------------
+# updateBug.html --------------------------------
 @app.route('/update_bug')
 def update_bug():
     username = session['username']
@@ -336,14 +421,14 @@ def update_bug():
 
     verify_login()
     
-    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
-
     sql_list = ['SELECT * FROM bugs', 'SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
 
     data, programs, areas, employees = get_all_MySQL_results(sql_list)
     print(data)
+
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
     
-    return render_template('editPage.html',username=username,userlevel=userlevel, bugs=data, programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
+    return render_template('editBug.html',username=username,userlevel=userlevel, bugs=data, programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
 
 # delete a bug
 @app.route('/delete_bug/<string:id_data>', methods = ['GET'])
@@ -428,7 +513,7 @@ def edit_bug():
         return redirect(url_for('update_bug'))
 
 
-# createPage ------------------------------
+# addBug.html ------------------------------
 @app.route('/add_bug', methods=['GET', 'POST'])
 def add_bug():
     username = session['username']
@@ -510,71 +595,19 @@ def add_bug():
     programs, areas, employees = get_all_MySQL_results(sql_list)
     
     # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
 
-    return render_template('add_bug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
-
-
-# maintenancePage -------------------------
-@app.route('/maintain_database')
-def maintain_database():
-    
-    verify_access()
-    verify_login()
-    
-    print('rendering...')
-    return render_template('maintenancePage.html')
-
-# manage employee page
-@app.route('/manage_employee')
-def manage_employee():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
-    
-    sql = 'SELECT * FROM users'
-    data = get_all_MySQL_results(sql)
-     
-    return render_template('manage_employee.html', employees=data, username=username, userlevel=userlevel)
-
-# manage program page
-@app.route('/manage_program')
-def manage_program():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
-    
-    sql = 'SELECT * FROM programs'
-    data = get_all_MySQL_results(sql)
-     
-    return render_template('manage_program.html', program=data, username=username, userlevel=userlevel)
-
-# manage area page
-@app.route('/manage_area')
-def manage_area():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
-    
-    sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs']
-    data, programs = get_all_MySQL_results(sql_list)
-    
-    return render_template('manage_area.html', areas=data, programs=programs, username=username, userlevel=userlevel)
-
-@app.route('/update',methods=['POST','GET'])
-def update():
-    verify_access()
-    verify_login()
-    return redirect(url_for('manage_employee'))
+    return render_template('addBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 
-# createPage ------------------------------
+# @app.route('/update',methods=['POST','GET'])
+# def update():
+#     verify_access()
+#     verify_login()
+#     return redirect(url_for('manage_employee'))
+
+
+# searchBug ------------------------------
 @app.route('/search_bug', methods=['GET', 'POST'])
 def search_bug():
     username = session['username']
@@ -624,7 +657,7 @@ def search_bug():
         programs, areas, employees, search_result = get_all_MySQL_results(sql_list)
 
         # if the request method is GET, render the add_bug page with the necessary form data
-        report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
+        report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
        
         # process the form data and store it in the database using PL/SQL
         
@@ -634,9 +667,9 @@ def search_bug():
     programs, areas, employees = get_all_MySQL_results(sql_list)
     
     # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = url_for('static', filename='menu.py')
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
 
-    return render_template('search_bug_page.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
+    return render_template('searchBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 # view attachments
 @app.route("/view_attachment/<string:filename>")

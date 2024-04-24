@@ -3,21 +3,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 </head>
 
 <body>
     <h1>Edit database</h1>
     <hr class="long-line">
     <br>
-    <button id ="deepLookupButton">DB Lookup</button>
+    <button onclick="window.location.href='{{ url_for('db_lookup') }}';">DB Lookup</button>
     <hr>
     
-    <button id="toEmployees">edit Employees</button>
+    <button onclick="window.location.href='{{ url_for('manage_employees') }}';">edit Employees</button>
     <span></span>
-    <button id="toPrograms">edit Programs</button>
+    <button onclick="window.location.href='{{ url_for('manage_programs') }}';">edit Programs</button>
     <span></span>
-    <button id="toAreas">edit Areas</button>
+    <button onclick="window.location.href='{{ url_for('manage_areas') }}';">edit Areas</button>
 
     <br><hr>
     <div id="export_employee_list">
@@ -26,7 +26,6 @@
         <select id="file_type_e">
             <option>TXT</option>
             <option>XML</option>
-            <option>JSON</option>
         </select>
     </div>
     <br>
@@ -36,16 +35,11 @@
         <select id="file_type_a">
             <option>TXT</option>
             <option>XML</option>
-            <option>JSON</option>
         </select>
     </div>
 
     <hr>
-    <button id="backButton">Exit Maintenance</button>
+    <button onclick="window.location.href='{{ url_for('homepage') }}';"> Exit Maintenance</button>
     <br><br>
-
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script_maint.js"></script>
 </body>
 </html>

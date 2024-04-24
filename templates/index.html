@@ -10,18 +10,21 @@
     <h1>Welcome to BugHound, {{username}}</h1>
     <hr class="long-line">
 
-    <br><b>Main Menu</b>
-    <ul id="buttonMenu">
-        <li><a href="{{url_for('add_bug')}}">Add a Bug</a></li>
-        <li><a href="{{url_for('update_bug')}}">Edit a Bug</a></li>
-        <li><a href="{{url_for('search_bug')}}">Lookup a Bug</a></li>
-    
-        {% if access == 3 %}
-        <br><li><a href="{{url_for('maintain_database')}}">DB Maintenance</a></li>
-        {% endif %}
-    </ul>
+    <br><b>Bug Menu</b><hr>
+    <button onclick="window.location.href='{{ url_for('add_bug') }}';">Add a Bug</button>
+    <br><br>
+    <button onclick="window.location.href='{{ url_for('update_bug') }}';">Update/Edit a Bug</button>
+    <br><br> 
+    <button onclick="window.location.href='{{ url_for('search_bug') }}';">Search a Bug</button>         
+
+    {% if access == 3 %}
+    <hr>
+    <button onclick="window.location.href='{{ url_for('maintain_db') }}';">DB Maintenance</button>
+    {% endif %}
     
     <hr>
-    <a href="{{url_for('logout')}}">Logout</a>
+    <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
+
+
 </body>
 </html> 

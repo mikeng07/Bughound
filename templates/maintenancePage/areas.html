@@ -3,18 +3,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (A)</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 </head>
 <body>
-    <h1>Edit database</h1>
+    <h1>Edit database - areas</h1>
 
     <hr class="long-line">
     <br>
-    <button id="backButton">Return to maintenance menu</button>
+    <button onclick="window.location.href='{{ url_for('maintain_db') }}';">Return to maintenance menu</button>
     <hr>
 
+
     <h3>Add Areas</h3>
-    
     <label for="program_list">Add to program:</label>      
     <select id="program_list">
         <option id="default" value="default">select program</option>
@@ -22,28 +22,28 @@
         <option id="program_entity">Python idle</option>
         <option id="program_entity">Java devkit</option>
     </select>
-    <button id="program_list_refresh">↻</button>
+    <button type="button" id="program_list_refresh">↻</button>
+
 
     <br><br>    
-    <div id="area_list_values">
+    <form id="newAreaForm" action="" method="POST">
         <div id="area_entity_main">
             <input id="area_title" name="area_title" size="30" placeholder="functional area">
-            <button id="newAreaButton">+</button>
-            <button id="removeAreaButton" hidden=true>-</button>
+            <button type="button" id="newAreaButton">+</button>
+            <button type="button" id="removeAreaButton" hidden=true>-</button>
             <br><br>
         </div>
-    </div>
+    </form>
     
     <button id="clearAreaButton">Clear</button>
-    <button id="submitAreaButton">Add new Areas</button>
+    <button type="submit" form="newAreaForm">Add new Areas</button>
     <div id="new_area_res">
         <!-- <span>successful</span> -->
     </div>
-    <br>
-    <hr>
+    <br><hr>
     
-    <h3>Edit Areas</h3>
 
+    <h3>Edit Areas</h3>
     <label for="program_list_c">Referenced program:</label>      
     <select id="program_list_c">
         <option id="default" value="default">select program</option>
@@ -52,7 +52,7 @@
         <option id="program_entity">Java devkit</option>
 
     </select>
-    <button id="program_list_refresh_c">↻</button>
+    <button type="button" id="program_list_refresh_c">↻</button>
     
     <br>
     <div id="area_entity_before">
@@ -70,11 +70,8 @@
     <div id="area_change_res">
         <!-- <span>successful</span> -->
     </div>
-    <br>
-    <hr>
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script_area.js"></script>
+    <br><hr>
+    <script type="text/javascript" href="{{url_for('static', filename='js/script_area.js')}}"></script>
+    <script type="text/javascript" href="{{url_for('static', filename='js/script.js')}}"></script>
 </body>
 </html>

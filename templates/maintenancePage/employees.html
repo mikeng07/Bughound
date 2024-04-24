@@ -3,56 +3,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (E)</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 </head>
 <body>
-    <h1>Edit database</h1>
+    <h1>Edit database - employees</h1>
 
     <hr class="long-line">
     <br>
-    <button id="backButton">Return to maintenance menu</button>
+    <button onclick="window.location.href='{{ url_for('maintain_db') }}';">Return to maintenance menu</button>
     <hr>
 
+
     <h3>Add Employees</h3>
-    
-    <div id="employee_list_values">
+    <form id="newEmployeeForm" action="" method="POST">
         <div id="employee_entity_main">
             <input id="employee_name" name="employee_name" size="10" placeholder="username">
             <input id="login_id" name="login_id" size="7" placeholder="Login ID">
             <input id="employee_level" name="employee_level" size="3" placeholder="level">
-            <button id="newEmployeeButton">+</button> 
-            <button id="removeEmployeeButton" hidden=true>-</button>
+            <button type="button" id="newEmployeeButton">+</button> 
+            <button type="button" id="removeEmployeeButton" hidden=true>-</button>
             <br><br>
         </div>
-    </div>
+    </form>
 
     <button id="clearEmployeeButton">Clear</button>
-    <button id="submitEmployeeButton">Add new employees</button>
+    <button type="submit" form="newEmployeeForm">Add new employee(s)</button>
     <div id="new_employee_res">
         <!-- <span>successful</span> -->
     </div>
-    <br>
-    <hr>    
+    <br><hr>    
+
 
     <h3>Edit Employee Access Level</h3>
-
-    <label for="employee_name">For:</label>
-    <input id="employee_realname" name="employee_realname" size="20" placeholder="employee name" style="margin-left: 48px"><br>
-
-    <label for="level_change">New Level:</label>
-    <input id="level_change" name="level_change" size="7" placeholder="access level">
-    <br><br>
+    <form id="accessChangeEmployeeForm" action="" method="POST">
+        <label for="employee_name">For:</label>
+        <input id="employee_realname" name="employee_realname" size="20" placeholder="employee name" style="margin-left: 48px"><br>
+    
+        <label for="level_change">New Level:</label>
+        <input id="level_change" name="level_change" size="7" placeholder="access level">
+        <br><br>
+    </form>
 
     <button id="clearAccessChangeButton">Clear</button>
-    <button id="submitAccessChangeButton">Change Access Level</button>
+    <button type="submit" form="accessChangeEmployeeForm">Change Access Level</button>
     <div id="employee_change_res">
         <!-- <span>successful</span> -->
     </div>
-    <br>
-    <hr> 
+    <br><hr>
 
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script_employee.js"></script>
+    <h3>Remove Employee</h3>
+    <form id="removeEmployeeForm" action="" method="POST">
+        <input id="employee_name" name="employee_name" size="10" placeholder="username">
+        <input id="login_id" name="login_id" size="7" placeholder="Login ID">
+    </form>
+
+    <button id="clearRemoveEmployeeButton">Clear</button>
+    <button type="submit" form="removeEmployeeForm">Remove Employee</button>
+    <div id="employee_change_res">
+        <!-- <span>successful</span> -->
+    </div>
+
+    <script type="text/javascript" href="{{url_for('static', filename='js/script_employee.js')}}"></script>
 </body>
 </html>
