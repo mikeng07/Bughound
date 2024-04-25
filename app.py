@@ -32,8 +32,7 @@ def verify_login():
 
 def verify_access():
     if session['user_level'] != 3:
-        print('not high enough')
-        flash(message=f"Access restricted, returning to dashboard")
+        print('access not high enough')
         return render_template('index.html', access=session['user_level'], username=session['username'])
 
 def get_all_MySQL_results(sql_list: str | list[str]):
@@ -53,10 +52,10 @@ def get_all_MySQL_results(sql_list: str | list[str]):
 
 def set_static_report_values():
     report_types = [
-        'coding error', 'design error', 'hardware error', 
-        'suggestion', 'Documentation', 'Query']
+        'Coding Error', 'Design Issue', 'Hardware', 
+        'Suggestion', 'Documentation', 'Query']
 
-    severities = ['fatal', 'severe', 'minor']
+    severities = ['Mild','Infectious','Serious','Fatal']
     priority=[1,2,3,4,5,6]
     status=['Open', 'Closed', 'Resolved']
     resolution=['Pending', 'Fixed', 'Irreproducible', 
@@ -70,10 +69,11 @@ def set_static_report_values():
 @app.route("/")
 def index():
     print("initial landing...")
+    
 
     if 'username' in session and 'loggedIn' in session is True:
         print("welcome back")
-        return redirect("/homepage")
+        return redirect("/index")
 
     return render_template("Login.html")
 
@@ -147,7 +147,7 @@ def maintain_db():
     verify_login()
     
     print('db maintenance...')
-    return render_template('maintenancePage.html')
+    return render_template('maintenancePage.html', access=session['user_level'], username=session['username'])
 
 # manage employee page
 @app.route('/manage_employees')
@@ -205,7 +205,6 @@ def db_lookup():
     verify_login()
     
     return render_template("maintenancePage/lookup.html")
-
 
 
 # insert new employee (maintenancePage/employee)
@@ -525,21 +524,12 @@ def add_bug():
         program = request.form.get('program')
         report_type = request.form.get('report_type')
         severity = request.form.get('severity')
-        problem_summary = request.form.get('problem_summary')
         reproducible = request.form.get('reproducible')
         problem = request.form.get('problem')
+        problem_summary = request.form.get('problem_summary')
+        suggested_fix = request.form.get("suggested_fix")
         reported_by = request.form.get('reported_by')
         date_reported = request.form.get('date_reported')
-        functional_area = request.form.get('functional_area')
-        assigned_to = request.form.get('assigned_to')
-        comments = request.form.get('comments')
-        status = request.form.get('status')
-        priority = request.form.get('priority')
-        resolution = request.form.get('resolution')
-        resolution_version = request.form.get('resolution_version')
-        resolution_by = request.form.get('resolution_by')
-        date_resolved = request.form.get('date_resolved')
-        tested_by = request.form.get('tested_by')
         
         # Get the file attachment from the form
         attachment = request.files["attachment"]
@@ -550,7 +540,6 @@ def add_bug():
         attachment = attachment.read()
         
         
-
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
             
@@ -570,13 +559,13 @@ def add_bug():
                 (program, report_type, severity, 
                  problem_summary, reproducible, problem, reported_by, 
                  date_reported, functional_area, assigned_to, comments, 
-                 status, priority, resolution, resolution_version, resolution_by,
+                 status, priority, resolution, resolution_version, resolved_by,
                  date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
             cursor.execute("INSERT INTO bugs (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", 
                 (program, report_type, severity, 
                  problem_summary, reproducible, problem, reported_by, 
                  date_reported, functional_area, assigned_to, comments, 
-                 status, priority, resolution, resolution_version, resolution_by,
+                 status, priority, resolution, resolution_version, resolved_by,
                  date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
             connection.commit()
             
@@ -593,6 +582,9 @@ def add_bug():
 
     sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
     programs, areas, employees = get_all_MySQL_results(sql_list)
+    print(programs)
+    print(areas)
+    print(employees)
     
     # if the request method is GET, render the add_bug page with the necessary form data
     report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()

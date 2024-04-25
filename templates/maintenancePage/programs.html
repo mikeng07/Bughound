@@ -15,14 +15,14 @@
 
 
     <h3>Add Programs</h3>
-    <form id="newProgramForm">
-        <div id="program_entity_main">
+    <form id="newProgramForm" action="" method="POST">
+        <div id="program_entity" style="margin-bottom: 5px;">
             <input id="program_name" name="program_name" size="10" placeholder="program name">
             <input id="program_release" name="program_release" size="6" placeholder="release">
             <input id="release_version" name="release_version" size="3" placeholder="version">
             <button type="button" id="newProgramButton">+</button> 
             <button type="button" id="removeProgramButton" hidden=true>-</button>
-            <br><br>
+            
         </div>
     </form>
     
@@ -31,17 +31,15 @@
     <div id="new_program_res">
         <!-- <span>successful</span> -->
     </div>
-    <br><hr>      
-
+    <hr>      
 
     <h3>Edit Programs</h3>
     <form id="editProgramForm" action="" method="POST">
         <label for="program_entity_before">Program before change:</label>
-        <div id="program_entity_before">
+        <div id="program_entity_before" style="margin-bottom: 10px;">
             <input id="program_name" name="program_name" size="10" placeholder="program name">
             <input id="program_release" name="program_release" size="6" placeholder="release">
             <input id="release_version" name="release_version" size="3" placeholder="version">
-            <br><br>
         </div>
         
         <label for="program_entity_after">Program after change (leave blank for no change):</label>
@@ -54,10 +52,9 @@
     
     <button id="clearProgramChangeButton">Clear</button>
     <button type="submit" form="editProgramForm">Make program edit</button>
-    <div id="program_change_res">
+    <div id="change_program_res">
         <!-- <span>successful</span> -->
-    </div>
-    <br><hr>
+    </div><hr>
 
     <h3>Remove Program</h3>
     <form id="removeProgramForm" action="" method="POST">
@@ -68,10 +65,66 @@
 
     <button id="clearRemoveProgramButton">Clear</button>
     <button type="submit" form="removeProgramForm">Remove program</button>
-    <div id="employee_change_res">
+    <div id="remove_program_res">
         <!-- <span>successful</span> -->
     </div>
 
-    <script type="text/javascript" href="{{url_for('static', filename='js/script_program.js')}}"></script>
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        function move(endpoint) {
+            window.location.href = endpoint;
+        }
+
+        // newProgramForm
+        $('#newProgramButton').on("click", () => {
+            
+            let temp = '<div id="program_entity" style="margin-bottom: 5px;">'+
+                '<input id="program_name" name="program_name" size="10" placeholder="program name"> '+
+                '<input id="program_release" name="program_release" size="6" placeholder="release"> '+
+                '<input id="release_version" name="release_version" size="3" placeholder="version">'+
+                '<br>'+
+            '</div>';
+            $("#newProgramForm").append(temp);
+            console.log('add')
+            
+            let prog_length = $("#newProgramForm").children('div[id=program_entity]').length;
+            if (prog_length > 1)  removeProgramButton.hidden = false;
+        });
+        $('#removeProgramButton').on("click", () => {
+            $("#newProgramForm").children('div[id=program_entity]:last').remove();
+            console.log('remove')
+
+            let prog_length = $("#newProgramForm").children('div[id=program_entity]').length;
+            if (prog_length == 1) removeProgramButton.hidden = true;
+        });
+
+        $('#clearProgramButton').on("click", () => {
+            let prog_length = $("#newProgramForm").children('div[id=program_entity]').length;
+            for (var i=0; i<prog_length-1; i++) { $('#removeEmployeeButton').click(); }
+            $('#newProgramForm #employee_name').val("");
+            $('#newProgramForm #username').val("");
+            $('#newProgramForm #employee_level').val(1);
+        });
+
+        // editProgramForm
+        $('#clearProgramChangeButton').on("click", () => {
+            $('#editProgramForm #program_entity_before #program_name').val('')
+            $('#editProgramForm #program_entity_before #program_release').val('')
+            $('#editProgramForm #program_entity_before #release_version').val('')
+            $('#editProgramForm #program_entity_after #program_name').val('')
+            $('#editProgramForm #program_entity_after #program_release').val('')
+            $('#editProgramForm #program_entity_after #release_version').val('')
+        });
+
+        // removeProgramForm
+        $('#clearRemoveProgramButton').on("click", () => {
+            $('#removeProgramForm #program_name').val('')
+            $('#removeProgramForm #program_release').val('')
+            $('#removeProgramForm #release_version').val('')
+        });
+    </script>
 </body>
 </html>

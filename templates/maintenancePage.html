@@ -7,20 +7,19 @@
 </head>
 
 <body>
+    
     <h1>Edit database</h1>
-    <hr class="long-line">
-    <br>
-    <button onclick="window.location.href='{{ url_for('db_lookup') }}';">DB Lookup</button>
+    <hr class="long-line"><br>
+
+    <button onclick="move('{{ url_for('db_lookup') }}')">DB Lookup</button>
     <hr>
     
-    <button onclick="window.location.href='{{ url_for('manage_employees') }}';">edit Employees</button>
-    <span></span>
-    <button onclick="window.location.href='{{ url_for('manage_programs') }}';">edit Programs</button>
-    <span></span>
-    <button onclick="window.location.href='{{ url_for('manage_areas') }}';">edit Areas</button>
+    <button onclick="move('{{ url_for('manage_employees') }}')">edit Employees</button> 
+    <button onclick="move('{{ url_for('manage_programs') }}')">edit Programs</button> 
+    <button onclick="move('{{ url_for('manage_areas') }}')">edit Areas</button>
 
     <br><hr>
-    <div id="export_employee_list">
+    <div id="export_employee_list" style="margin-bottom: 5px;">
         <button id="exportEmployeeListButton">Export employee list</button>
         <label for="file_type_e">as: </label>
         <select id="file_type_e">
@@ -28,7 +27,6 @@
             <option>XML</option>
         </select>
     </div>
-    <br>
     <div id="export_program_areas">
         <button id="exportProgramAreasButton" style="margin-right: 10px">Export list of areas</button>
         <label for="file_type_a">as: </label>
@@ -39,7 +37,13 @@
     </div>
 
     <hr>
-    <button onclick="window.location.href='{{ url_for('homepage') }}';"> Exit Maintenance</button>
+    <button onclick="move('{{ url_for('homepage') }}')"> Exit Maintenance</button>
     <br><br>
+
+    <script>
+        function move(endpoint) {
+            window.location.href = endpoint;
+        }
+    </script>
 </body>
 </html>

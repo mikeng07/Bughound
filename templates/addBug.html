@@ -3,194 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Bug Report Page</title>
+    {% if is_resolution == true %}
+    <title>New Resolution</title>
+    {% else %}
+    <title>New Bug Report</title>
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     
 </head>
 <body>
-    <h2>New Bug Report Page</h2>
-    <!--All the required Attributes here-->
-    <label for="program">Program:</label>
+    {% if is_resolution == true %}
+    <h2>New Resolution</h2>
+    {% else %}
+    <h2>New Bug Report</h2>
+    {% endif %}
+    
+    <hr class="long-line"><br>
 
-    <!-- TODO: will need to be filled out with pre-requiste sql info -->
-    <select id="program">
-        <option value="default">program</option>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label ="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{message}}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-    </select>
-    <select id="release">
-        <option value="default">release</option>
+    {% if is_resolution == true %}
+    <form name="addResForm" action="{{ url_for('add_res') }}" enctype="multipart/form-data" method="POST"></form>
+    {% else %}
+    <form name="addBugForm" action="{{ url_for('add_bug') }}" enctype="multipart/form-data" method="POST">
+    {% endif %}
+        <label for="program" style="margin-left: 23px;">Program:</label>
+        <select id="program" name="program" class="form-control" required>
+            <option value="default" disabled selected>no program</option>
+            {% for program in programs %}
+                <option value="{{program}}">{{program}}</option>
+            {% endfor %}
+        </select>
 
-    </select>
-    <select id="version">
-        <option value="default">version</option>
+        <br>
+        <label for="report_type">Report Type:</label>
+        <select id="report_type" name="report_type" class="form-control" required>
+            <option value="default" disabled selected>no report type</option>
+            {% for report_type in report_types %}
+                <option value="{{report_type}}">{{report_type}}</option>
+            {% endfor %}
+            
+        </select>
+        <br>
+        <label for="severity" style="margin-left: 25px;">Severity:</label>
+        <select id="severity" name="severity" class="form-control" required>
+            <option value="default" disabled selected>none</option>
+            {% for severity in severities %}
+                <option value="{{severity}}">{{severity}}</option>
+            {% endfor %} 
+        </select>
         
-    </select>
-
-    <br>
-    <label for="reportType">Report Type:</label>
-    <select id="reportType">
-        <option value="default">select report type</option>
-        <option >Coding Error</option>
-        <option >Design Issue</option>
-        <option >Suggestion</option>
-        <option >Documentation</option>
-        <option >Hardware</option>
-        <option >Query</option>
+        <br>
+        <label for="reproducible">Reproducible?</label>
+        <input type="checkbox" name="reproducible" id="reproducible" class="form-control"
+            {% if reproducible==1 %}checked{% endif %}
+        >
         
-    </select>
-    <br>
-    <label for="severity">Severity</label>
-    <select id="severity">
-        <option value="default">select severity</option>
-        <option >Mild</option>
-        <option >Infectious</option>
-        <option >Serious</option>
-        <option >Fatal</option>    
-    </select>
-
-    <label for="reproducible">Reproducible?</label>
-    <input type="checkbox" name="reproducible" id="reproducible">
-    
-    <br> <br>
-    <div class="input-container">
-        <label for="problemSummary">Problem Summary</label><br>
-        <textarea type="text" id="problemSummary" name="problemSummary" class="problemSummary" rows="3"></textarea>
-    </div>
-    <br>
-    <div class="input-container">
-        <label for="problem">Problem</label><br>
-        <textarea type="text" id="problem" name="problem" class="problem" rows="3"></textarea>
-    </div>
-    
-    <br>
-    
-    <div class="input-container">
-        <label for="suggestedFix">Suggested Fix</label><br>
-        <textarea type="text" id="suggestedFix" name="suggestedFix" class="suggestedFix" rows="3"></textarea>
-    </div>
-    
-    <br>
-    
-
-    <label for="reportedBy">Reported By</label>
-
-    <!-- TODO: will need to be filled out with users with prerequisite access -->
-    <select id="reportedBy">
-        <option value="default">select user</option>
-
-    </select>
-
-    <label for="dateInput">on</label>
-    <input type="date" id ="dateInput" name ="dateInput">
-    <br>
-     <!--report attachments (if any) TODO: relaying attachements around to the other pages -->
-    <hr>
-    <label for="attachments">Supplementary attachments (optional)</label><br><br>
-    <input type="file" id="attachments" name="attachments" multiple/>
-    
-    <br><br>
-    <hr class="long-line">
-    <br>
-   
-
-    <!--All the optional Attribute here-->
-
-    <!-- TODO: fill out with pre-requiste info -->
-    <label for="functionalArea">Functional Area</label>      
-    <select id="functionalArea">
-        <option value="default">select functional area</option>
-
-    </select>
-
-
-    <label for="assignTo">Assigned To</label>      
-    <select id="assignTo">
-        <option value="default">select user</option>
-
-    </select>
-
-    <br><br>
-    <div class="input-container">
-        <label for="comments">Comments</label><br>
-        <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
-    </div>
-
-    <br>
-    <label for="status">Status</label>      
-    <select id="status">
-        <option value="default">select status</option>
-        <option >Open</option>
-        <option >Closed</option>
-        <option >Resolved</option>
-    </select>
-
-    <label for="priority">Priority</label>      
-    <select id="priority">
-        <option value="default">0</option>
-        <option >1</option>
-        <option >2</option>
-        <option >3</option>
-        <option >4</option>
-        <option >5</option>
-        <option >6</option>
-    </select>
-    <br>
-
-    <label for="resolution">Resolution</label>      
-    <select id="resolution">
-        <option value="default">select resolution type</option>
-        <option >pending</option>
-        <option >fixed</option>
-        <option >cannot be reproduced</option>
-        <option >deferred</option>
-        <option >as designed</option>
-        <option >withdrawn by reporter</option>
-        <option >requires more info</option>
-        <option >disagree with suggestion</option>
-        <option >duplicate</option>
+        <br> <br>
+        <div class="input-container">
+            <label for="problem">Problem</label><br>
+            <textarea type="text" id="problem" name="problem" rows="2" class="form-control problem" required></textarea>
+        </div>
+        <br>
+        <div class="input-container">
+            <label for="problem_summary">Problem Summary</label><br>
+            <textarea type="text" id="problem_summary" name="problem_summary" rows="3" class="form-control summary" required></textarea>
+        </div>
         
-    </select>
-
-    <label for="resolutionVersion">Version</label>      
-    <input id="resolutionVersion" size="7" placeholder="version num">
-
-    <br><br>
-    <label for="resolvedBy">Resolved By</label>
-    <select id="resolvedBy">
-        <option value="default">select user</option>
-
-    </select>
-
-    <label for="dateResolved">on</label>
-    <input type="date" id ="dateResolved" name ="dateResolved">
-
-    <br>
-    <label for="testedBy">Tested By</label>
-    <select id="testedBy">
-        <option value="default">select user</option>
-
-    </select>
-
-    <label for="dateTested">on</label>
-    <input type="date" id ="dateTested" name ="dateTested">
-
-    <label for="treatAsDeferred">Treat as deferred?</label>
-    <input type="checkbox" name="treatAsDeferred" id="treatAsDeferred">
+        <br>
         
-    <br><br>
-    <button id ="submitButton"> Submit</button>
-    <button id ="resetButton"> Reset</button>
-    <button id="backButton">Cancel</button>
+        <div class="input-container">
+            <label for="suggested_fix">Suggested Fix</label><br>
+            <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="form-control suggestedFix"></textarea>
+        </div>
+        
+        <br>
+        
+        <label for="reported_by">Reported by</label>
+        <select id="reported_by" name="reported_by" class="form-control" required>
+            <option value="default" disabled selected>user</option>
+            {% for employee in employees %}
+                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+            {% endfor %} 
+        </select>
 
-    <!-- loading spinner -->
-    <svg class="spinner" id="spinning" viewBox="0 0 50 50">
-        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
-    <br><br>
+        <label for="dateInput">on</label>
+        <input type="date" id ="dateInput" name ="dateInput" class="form-control" required>
+        <br>
 
+        <hr>
+        <label for="attachments">Supplementary attachments (optional)</label><br><br>
+        <input type="file" id="attachments" name="attachments" multiple class="form-control">
+        
+
+        {% if is_resolution == true %}
+
+        <!-- Resolution info -->
+        <br><br>
+        <hr class="long-line"><br>
+
+        <label for="functional_area">Functional Area:</label>
+        <select name="functional_area" id="functional_area" class="form-control">
+            <option value="default" disabled selected>------</option>
+            {% for area in areas %}
+                <option value="{{ area['area_title'] }}">{{ area['area_title'] }}</option>
+            {% endfor %}
+        </select>
+
+        <br>
+        <label for="assigned_to" style="margin-left: 31px;">Assigned to</label>
+        <select name="assigned_to" id="assigned_to" class="form-control">
+            <option value="default" disabled selected>user</option>
+            {% for employee in employees %}
+                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+            {% endfor %} 
+        </select>
+
+        <br><br>
+        <div class="input-container">
+            <label for="comments">Comments</label><br>
+            <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
+        </div>
+
+        <br>
+        <label for="status">Status:</label>      
+        <select id="status" name="status" class="form-control">
+            <option value="default" disabled selected>in-progress (open)</option>
+              {% for s in status %}
+                  <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+          </select>
+
+        <label for="priority">Priority</label>      
+        <select id="priority" name="priority" class="form-control">
+            <option value="default" disabled selected>0</option>
+              {% for p in priority %}
+                  <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+          </select>
+        <br>
+
+        <label for="resolution" style="margin-right: 7px;">Resolution:</label>
+        <select id="resolution" name="resolution" class="form-control">
+            <option value="default" disabled selected>none</option>
+            {% for r in resolution %}
+                <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="resolution_version">Resolution v</label>
+        <select id="resolution_version" name="resolution_version" class="form-control">
+            <option value="default" disabled selected>#</option>
+            {% for r in resolution_version %}
+                <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+        <label for="resolved_by">Resolved by</label>
+        <select id="resolved_by" name="resolved_by" class="form-control">
+            <option value="default" disabled selected>user</option>
+            {% for employee in employees %}
+                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+            {% endfor %} 
+        </select>
+
+        <label for="date_resolved">on</label>
+        <input type="date" id ="date_resolved" name ="dateResolved" class="form-control">
+
+        <br>
+        <label for="tested_by" style="margin-left: 18px;">Tested by</label>
+        <select id="tested_By" name="tested_by" class="form-control">
+            <option value="default" disabled selected>user</option>
+            {% for employee in employees %}
+                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+            {% endfor %} 
+        </select>
+
+        <label for="date_tested">on</label>
+        <input type="date" id ="date_tested" name ="date_tested" class="form-control">
+
+        {% endif %}
+        
+        
+        <hr>
+        {% if is_resolution == true %}
+        <button type="submit" form="addResForm" id="submitButton" value="submit">Submit</button>
+        {% else %}
+        <button type="submit" form="addBugForm" id="submitButton" value="submit">Submit</button>
+        {% endif %}
+        <button id="resetButton">Reset</button>
+        
+        <button onclick="move('{{ url_for('homepage') }}')">Cancel</button>
+
+        <!-- loading spinner -->
+        <svg class="spinner" id="spinning" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+        </svg>
+        <br><br>
+    </form>
+    
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script.js"></script>
-    <script>$('#spinning').toggle();</script>
+    <script>
+        function move(endpoint) {
+            window.location.href = endpoint;
+        }
+
+        $('#spinning').toggle();
+        $('#submitButton').on("click", () => {
+            $('#spinning').toggle();
+            setTimeout(()=> {
+                $('#spinning').toggle();
+            }, 2000);
+        });
+
+        $('#resetButton').on("click", ()=>{
+            console.log('resetting...');
+
+            $("#program").val("default");
+            $("#reportType").val("default");
+            $("#severity").val("default");
+            $("#reproducible").attr('checked', true);
+            $("#problemSummary").val('');
+            $("#problem").val('');
+            $("#suggestedFix").val('');
+            $("#reportedBy").val("default");
+            $('#dateInput').val('');
+            $('#attachments').val('');
+            
+            $("#functionalArea").val("default");
+            $("#assignTo").val("default");
+            $("comments").val('');
+            $("#status").val("default");
+            $('priority').val('default');
+            $("#resolution").val("default");
+            $("#resolutionVersion").val("default");
+            $("#resolvedBy").val("default");
+            $('dateResolved').val('');
+            $("#testedBy").val("default");
+            $('dateTested').val('');
+        });
+    </script>
 </body>
 </html>

@@ -8,7 +8,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-    <h2>Maintenance Lookup</h2>
+    <h1>Maintenance Lookup</h1>
+    <hr class="long-line">
+    <br>
 
     <button onclick="window.location.href='{{ url_for('maintain_db') }}';">Return to maintenance menu</button>
 
@@ -22,9 +24,7 @@
     </select>
     <button id="lookupButton">Search</button>
 
-    <br><br>
-    <hr class="long-line">
-    <br>
+    <hr><br>
 
     <div id="searchResults"></div>
     <!-- 

@@ -8,23 +8,22 @@
 </head>
 <body>
     <h1>Welcome to BugHound, {{username}}</h1>
-    <hr class="long-line">
+    <hr class="long-line"><br>
 
-    <br><b>Bug Menu</b><hr>
-    <button onclick="window.location.href='{{ url_for('add_bug') }}';">Add a Bug</button>
-    <br><br>
-    <button onclick="window.location.href='{{ url_for('update_bug') }}';">Update/Edit a Bug</button>
-    <br><br> 
-    <button onclick="window.location.href='{{ url_for('search_bug') }}';">Search a Bug</button>         
+    <button onclick="move('{{ url_for('add_bug') }}')">Add a Bug</button> 
+    <button onclick="move('{{ url_for('search_bug') }}')">Search a Bug</button> 
 
     {% if access == 3 %}
-    <hr>
-    <button onclick="window.location.href='{{ url_for('maintain_db') }}';">DB Maintenance</button>
+    <button onclick="move('{{ url_for('maintain_db') }}')">DB Maintenance</button>
     {% endif %}
     
     <hr>
-    <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
+    <button onclick="move('{{ url_for('logout') }}')">Logout</button>
 
-
+    <script>
+        function move(endpoint) {
+            window.location.href = endpoint;
+        }
+    </script>
 </body>
 </html> 
