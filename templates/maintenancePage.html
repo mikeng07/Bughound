@@ -4,6 +4,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+
+    <script>
+        var db_lookup = "{{ url_for('db_lookup') }}";
+        var manage_employees = "{{ url_for('manage_employees') }}";
+        var manage_programs = "{{ url_for('manage_programs') }}";
+        var manage_areas = "{{ url_for('manage_areas') }}";
+        var homepage = "{{url_for('homepage')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 
 <body>
@@ -11,12 +21,12 @@
     <h1>Edit database</h1>
     <hr class="long-line"><br>
 
-    <button onclick="move('{{ url_for('db_lookup') }}')">DB Lookup</button>
+    <button onclick="move(db_lookup)">DB Lookup</button>
     <hr>
     
-    <button onclick="move('{{ url_for('manage_employees') }}')">edit Employees</button> 
-    <button onclick="move('{{ url_for('manage_programs') }}')">edit Programs</button> 
-    <button onclick="move('{{ url_for('manage_areas') }}')">edit Areas</button>
+    <button onclick="move(manage_employees)">edit Employees</button> 
+    <button onclick="move(manage_programs)">edit Programs</button> 
+    <button onclick="move(manage_areas)">edit Areas</button>
 
     <br><hr>
     <div id="export_employee_list" style="margin-bottom: 5px;">
@@ -37,13 +47,8 @@
     </div>
 
     <hr>
-    <button onclick="move('{{ url_for('homepage') }}')"> Exit Maintenance</button>
+    <button onclick="move(homepage)"> Exit Maintenance</button>
     <br><br>
 
-    <script>
-        function move(endpoint) {
-            window.location.href = endpoint;
-        }
-    </script>
 </body>
 </html>

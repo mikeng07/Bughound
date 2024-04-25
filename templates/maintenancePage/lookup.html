@@ -6,13 +6,18 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>Maintenance Lookup</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        var maintain_db = "{{url_for('maintain_db')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 <body>
     <h1>Maintenance Lookup</h1>
     <hr class="long-line">
     <br>
 
-    <button onclick="window.location.href='{{ url_for('maintain_db') }}';">Return to maintenance menu</button>
+    <button onclick="move(maintain_db)">Return to maintenance menu</button>
 
     <br><br>
 

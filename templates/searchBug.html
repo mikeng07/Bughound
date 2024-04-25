@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>Bug Lookup/Edit</title>
+    <script>
+        var homepage = "{{url_for('homepage')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 <body>
     <h2>Bug Lookup</h2>
 
-    <button onclick="window.location.href='{{ url_for('homepage') }}';">Back to Home</button>
+    <button onclick="move(homepage)">Back to Home</button>
 
     <br><br>
 

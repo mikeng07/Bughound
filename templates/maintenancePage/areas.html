@@ -4,13 +4,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (A)</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+
+    <script>
+        var maintain_db = "{{url_for('maintain_db')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 <body>
     <h1>Edit database - areas</h1>
 
     <hr class="long-line">
     <br>
-    <button onclick="move('{{ url_for('maintain_db') }}')">Return to maintenance menu</button>
+    <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
 
@@ -23,7 +29,6 @@
                     <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
             {% endfor %}
         </select>
-        <button type="button" id="program_list_refresh">↻</button>
     
             <div id="area_entity" style="margin-bottom: 5px;">
                 <input id="area_title" name="area_title" size="30" placeholder="functional area">
@@ -49,16 +54,15 @@
                 <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
             {% endfor %}
         </select>
-        <button type="button" id="program_list_refresh_c">↻</button>
         
         <br>
         <div id="area_entity_before" style="margin-bottom: 5px;">
             <label for="area_title" style="margin-right: 5px;">Area before change: </label>
-            <input id="area_title" name="area_title" size="15" placeholder="functional area">
+            <input id="area_title" name="area_title" size="30" placeholder="functional area">
         </div>
         <div id="area_entity_after">
             <label for="area_title" style="margin-right: 17px;">Area after change: </label>
-            <input id="area_title" name="area_title" size="15" placeholder="functional area">
+            <input id="area_title" name="area_title" size="30" placeholder="functional area">
         </div>
     </form>
     
@@ -77,11 +81,10 @@
                 <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
             {% endfor %}
         </select>
-        <button type="button" id="program_list_refresh_r">↻</button>
         
         <br>
         <label for="area_title">Area being removed: </label>
-        <input id="area_title" name="area_title" size="15" placeholder="functional area">
+        <input id="area_title" name="area_title" size="30" placeholder="functional area">
     </form>
     
     <button id="clearRemoveAreaButton">Clear</button>
@@ -94,10 +97,6 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        function move(endpoint) {
-            window.location.href = endpoint;
-        }
-
         // newAreaForm
         $('#newAreaButton').on("click", () => {
             

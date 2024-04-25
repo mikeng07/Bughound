@@ -5,25 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>BugHound Home</title>
+    <script>
+        let username = '{{username}}';
+        let access = '{{access}}';
+
+        localStorage.setItem('username', username);
+        localStorage.setItem('access', access);
+
+        // endpoints
+        var add_bug = "{{url_for('add_bug')}}";
+        var search_bug = "{{url_for('search_bug')}}";
+        var maintain_db = "{{url_for('maintain_db')}}";
+        var logout = "{{url_for('logout')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 <body>
+    
     <h1>Welcome to BugHound, {{username}}</h1>
     <hr class="long-line"><br>
 
-    <button onclick="move('{{ url_for('add_bug') }}')">Add a Bug</button> 
-    <button onclick="move('{{ url_for('search_bug') }}')">Search a Bug</button> 
+    <button onclick="move(add_bug)">Add a Bug</button> 
+    <button onclick="move(search_bug)">Search a Bug</button> 
 
     {% if access == 3 %}
-    <button onclick="move('{{ url_for('maintain_db') }}')">DB Maintenance</button>
+    <button onclick="move(maintain_db)">DB Maintenance</button>
     {% endif %}
     
     <hr>
-    <button onclick="move('{{ url_for('logout') }}')">Logout</button>
+    <button onclick="move(logout)">Logout</button>
 
-    <script>
-        function move(endpoint) {
-            window.location.href = endpoint;
-        }
-    </script>
 </body>
 </html> 

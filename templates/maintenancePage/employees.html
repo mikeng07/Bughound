@@ -4,13 +4,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (E)</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+
+    <script>
+        var maintain_db = "{{url_for('maintain_db')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
 </head>
 <body>
     <h1>Edit database - employees</h1>
 
     <hr class="long-line">
     <br>
-    <button onclick="move('{{ url_for('maintain_db') }}')">Return to maintenance menu</button>
+    <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
 
@@ -19,6 +25,7 @@
         <div id="employee_entity" style="margin-bottom: 5px;">
             <input id="employee_name" name="employee_name" size="10" placeholder="employee name">
             <input id="username" name="username" size="7" placeholder="username">
+            <label for="employee_level">| Access lvl</label>
             <select id="employee_level" name="employee_level" required>
                 <option value=1>1</option>
                 <option value=2>2</option>
@@ -41,7 +48,7 @@
     <h3>Edit Employee Access Level</h3>
     <form id="accessChangeEmployeeForm" action="" method="POST">
         <label for="employee_name" style="margin-right: 22px;">For employee:</label>
-        <input id="username" name="username" size="7" placeholder="username"><br>
+        <input id="username" name="username" size="7" placeholder="username" style="margin-bottom: 5px;"><br>
     
         <label for="employee_level">New access level:</label>
         <select id="employee_level" name="level_change" required>
@@ -72,17 +79,14 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        function move(endpoint) {
-            window.location.href = endpoint;
-        }
-
         // newEmployeeForm
         $('#newEmployeeButton').on("click", () => {
             
             let temp = '<div id="employee_entity" style="margin-bottom: 5px;">'+
                 '<input id="employee_name" name="employee_name" size="10" placeholder="employee name"> '+
                 '<input id="username" name="username" size="7" placeholder="username"> '+
-                '<select id="level_change" name="level_change" required>'+
+                '<label for="employee_level">| Access lvl </label>'+
+                '<select id="employee_level" name="level_change" required>'+
                     '<option value=1>1</option>'+
                     '<option value=2>2</option>'+
                     '<option value=3>3</option>'+

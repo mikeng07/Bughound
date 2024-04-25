@@ -70,7 +70,6 @@ def set_static_report_values():
 def index():
     print("initial landing...")
     
-
     if 'username' in session and 'loggedIn' in session is True:
         print("welcome back")
         return redirect("/index")
@@ -147,7 +146,7 @@ def maintain_db():
     verify_login()
     
     print('db maintenance...')
-    return render_template('maintenancePage.html', access=session['user_level'], username=session['username'])
+    return render_template('maintenancePage.html')
 
 # manage employee page
 @app.route('/manage_employees')
