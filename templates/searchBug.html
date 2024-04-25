@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>Bug Lookup/Edit</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         var homepage = "{{url_for('homepage')}}";
 
@@ -12,18 +13,17 @@
     </script>
 </head>
 <body>
-    <h2>Bug Lookup</h2>
+    <h1>Bug Lookup</h1>
+    <hr class="long-line">
+    <br>
 
     <button onclick="move(homepage)">Back to Home</button>
-
     <br><br>
-
+    
     <input type="search" id="searchInput" placeholder="Enter Bug ID">
     <button id="searchButton">Search</button>
 
-    <br><br>
-    <hr class="long-line">
-    <br>
+    <hr><br>
 
     <div id="searchResults"></div>
     <!-- 
@@ -32,7 +32,5 @@
     
     <br>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>

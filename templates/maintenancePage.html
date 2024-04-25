@@ -13,13 +13,18 @@
         var homepage = "{{url_for('homepage')}}";
 
         function move(endpoint) { window.location.href = endpoint; }
+
+        if (localStorage.getItem('access') != 3) {
+            move(homepage);
+            alert('Restricted location. Returning to homepage...')
+        }
     </script>
 </head>
 
 <body>
-    
-    <h1>Edit database</h1>
+    <h1>Database Maintenance</h1>
     <hr class="long-line"><br>
+    
 
     <button onclick="move(db_lookup)">DB Lookup</button>
     <hr>

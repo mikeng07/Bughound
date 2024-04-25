@@ -9,6 +9,11 @@
         var maintain_db = "{{url_for('maintain_db')}}";
 
         function move(endpoint) { window.location.href = endpoint; }
+
+        if (localStorage.getItem('access') != 3) {
+            move("{{url_for('homepage')}}");
+            alert('Restricted location. Returning to homepage...')
+        }
     </script>
 </head>
 <body>
