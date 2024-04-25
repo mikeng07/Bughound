@@ -105,4 +105,4 @@ INSERT INTO Areas (area_title) VALUES ("Networking");
 INSERT INTO Areas (area_title) VALUES ("Software");
 
 
-DELETE FROM Users;
+-- DELETE FROM Users;

@@ -3,10 +3,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (E)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
-
     <script>
         var maintain_db = "{{url_for('maintain_db')}}";
+        var self = "{{url_for('manage_employees')}}"
 
         function move(endpoint) { window.location.href = endpoint; }
 
@@ -24,11 +25,23 @@
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
+    <div id="employee_results">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
 
     <h3>Add Employees</h3>
-    <form id="newEmployeeForm" action="" method="POST">
+    <form id="newEmployeeForm" action="/insert" method="POST">
         <div id="employee_entity" style="margin-bottom: 5px;">
-            <input id="employee_name" name="employee_name" size="10" placeholder="employee name">
+            <input id="employee_name" name="employee_name" size="15" placeholder="employee name">
             <input id="username" name="username" size="7" placeholder="username">
             <label for="employee_level">| Access lvl</label>
             <select id="employee_level" name="employee_level" required>
@@ -44,54 +57,83 @@
 
     <button id="clearEmployeeButton">Clear</button>
     <button type="submit" form="newEmployeeForm">Add new employee(s)</button>
-    <div id="new_employee_res">
-        <!-- <span>successful</span> -->
-    </div>
-    <hr>    
 
-
-    <h3>Edit Employee Access Level</h3>
-    <form id="accessChangeEmployeeForm" action="" method="POST">
-        <label for="employee_name" style="margin-right: 22px;">For employee:</label>
-        <input id="username" name="username" size="7" placeholder="username" style="margin-bottom: 5px;"><br>
-    
-        <label for="employee_level">New access level:</label>
-        <select id="employee_level" name="level_change" required>
-            <option value=1>1</option>
-            <option value=2>2</option>
-            <option value=3>3</option>
-        </select>
-    </form>
-
-    <button id="clearAccessChangeButton">Clear</button>
-    <button type="submit" form="accessChangeEmployeeForm">Change Access Level</button>
-    <div id="change_employee_res">
-        <!-- <span>successful</span> -->
-    </div>
     <hr>
 
-    <h3>Remove Employee</h3>
-    <form id="removeEmployeeForm" action="" method="POST">
-        <input id="employee_name" name="employee_name" size="10" placeholder="employee name">
-        <input id="username" name="username" size="7" placeholder="username">
-    </form>
+    <table class="fixedSize">
+        <span>
+            <h3>Employee List</h3>
+            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
+        </span>
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Username</th>
+                <th scope="col">Pwd Hash</th>
+                <th scope="col">User Level</th>
+                <th scope="col">Operations</th>
+            </tr><br>
+        </thead>
 
-    <button id="clearRemoveEmployeeButton">Clear</button>
-    <button type="submit" form="removeEmployeeForm">Remove Employee</button>
-    <div id="remove_employee_res">
-        <!-- <span>successful</span> -->
-    </div>
+        {% for row in employees %}
+        <tr>
+            <td>{{ row['user_realname'] }}</td>
+            <td>{{ row['user_name'] }}</td>
+            <td class="overflow">{{ row['user_pass'] }}</td>
+            <td>{{ row['user_access'] }}</td>
+         
+            <td>
+                <a href="/update/{{row['user_id']}}" data-toggle="modal" data-target="#modaledit{{row['user_id']}}">Edit</a> |
+                <a href="/delete/{{row['user_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+            </td>
+        </tr>
 
+        <div id="modaledit{{row['user_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Employee</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <form id="accessChangeEmployeeForm" action="/edit" method="POST">
+                        <input hidden id="user_id" name="user_id" value="{{row['user_id']}}">
+                        <label for="employee_name" class="inner-modal">Employee name:</label>
+                        <input id="employee_name" name="employee_name" class="inner-modal input" size="15" placeholder="{{row['user_realname']}}">
+                        <br>
+                        <label for="employee_level" class="inner-modal">Username:</label>
+                        <input id="username" name="username" class="inner-modal input" size="7" placeholder="{{row['user_name']}}">
+                        <br>
+                        <label for="employee_level" class="inner-modal">New access level:</label>
+                        <select id="employee_level" name="employee_level" class="inner-modal input" required>
+                            <option value=1>1</option>
+                            <option value=2>2</option>
+                            <option value=3>3</option>
+                        </select>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal" form="accessChangeEmployeeForm"><b>Make changes</b></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </table>
+
+
+    <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script>
         // newEmployeeForm
         $('#newEmployeeButton').on("click", () => {
             
             let temp = '<div id="employee_entity" style="margin-bottom: 5px;">'+
-                '<input id="employee_name" name="employee_name" size="10" placeholder="employee name"> '+
+                '<input id="employee_name" name="employee_name" size="15" placeholder="employee name"> '+
                 '<input id="username" name="username" size="7" placeholder="username"> '+
                 '<label for="employee_level">| Access lvl </label>'+
-                '<select id="employee_level" name="level_change" required>'+
+                '<select id="employee_level" name="employee_level" required>'+
                     '<option value=1>1</option>'+
                     '<option value=2>2</option>'+
                     '<option value=3>3</option>'+
@@ -120,17 +162,6 @@
             $('#newEmployeeForm #employee_level').val(1);
         });
 
-        // accessChangeForm
-        $('#clearAccessChangeButton').on("click", () => {
-            $('#accessChangeEmployeeForm #username').val("");
-            $('#accessChangeEmployeeForm #employee_level').val(1);
-        });
-
-        // removeEmployeeForm
-        $('#clearRemoveEmployeeButton').on("click", () => {
-            $('#removeEmployeeForm #employee_name').val("");
-            $('#removeEmployeeForm #username').val("");
-        });
     </script>
 </body>
 </html>

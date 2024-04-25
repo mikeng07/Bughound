@@ -36,17 +36,25 @@ def verify_access():
         return render_template('index.html', access=session['user_level'], username=session['username'])
 
 def get_all_MySQL_results(sql_list: str | list[str]):
-    connection = pymysql.connect(**db_config)
 
     # result pile
     data = []
 
+    connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
 
-        for sql in sql_list:
-            cursor.execute(sql)
-            data.append(cursor.fetchall())
+        if type(sql_list) is str:
+            print(sql_list, "is a string")
+            cursor.execute(sql_list)
+            data = cursor.fetchall()
             connection.commit()
+            
+        else:
+            for sql in sql_list:
+                # print(sql)
+                cursor.execute(sql)
+                data.append(cursor.fetchall())
+                connection.commit()
 
     return data
 
@@ -151,34 +159,31 @@ def maintain_db():
 # manage employee page
 @app.route('/manage_employees')
 def manage_employees():
-    # username = session['username']
-    # userlevel =session['user_level']
+    username = session['username']
+    userlevel= session['user_level']
     
     verify_access()
     verify_login()
     
-    return render_template('maintenancePage/employees.html')
-    
-    # sql = 'SELECT * FROM users'
-    # data = get_all_MySQL_results(sql)
-     
-    # return render_template('manage_employee.html', employees=data, username=username, userlevel=userlevel)
+    sql = 'SELECT * FROM users'
+    data = get_all_MySQL_results(sql)
+    print(data)
+    return render_template('maintenancePage/employees.html', employees=data, username=username, userlevel=userlevel)
 
 # manage program page
 @app.route('/manage_programs')
 def manage_programs():
-    # username = session['username']
-    # userlevel =session['user_level']
+    username = session['username']
+    userlevel =session['user_level']
     
     verify_access()
     verify_login()
     
-    return render_template('maintenancePage/programs.html')
-    
-    # sql = 'SELECT * FROM programs'
-    # data = get_all_MySQL_results(sql)
+    sql = 'SELECT * FROM programs'
+    data = get_all_MySQL_results(sql)
+    print(data)
      
-    # return render_template('manage_program.html', program=data, username=username, userlevel=userlevel)
+    return render_template('maintenancePage/programs.html', programs=data, username=username, userlevel=userlevel)
 
 # manage area page
 @app.route('/manage_areas')
@@ -206,28 +211,72 @@ def db_lookup():
     return render_template("maintenancePage/lookup.html")
 
 
+## helper functions (maintenance parts) 
+def insert_to_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
+    
+    stmt = "INSERT INTO "+ table +" "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+            
+        for n in range(len(data[0])):
+            # get value n from each of the arrays in data
+            values = [data[k][n] for k in range(len(data))]
+            
+            cursor.execute(stmt, values)
+            connection.commit()
+            id = cursor.lastrowid
+            flash(msg.format(data[msgVal][n]))
+    
+        print("insert complete")    
+
+def update_table(table, query_conditions, data, msg, msgVal=0):
+    
+    stmt = "UPDATE "+ table +" SET "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        flash(msg.format(data[msgVal]))
+    
+    print('update complete')
+        
+def remove_from_table(table, query_conditions, data, msg, msgVal=0):
+    
+    stmt = "DELETE FROM "+ table +" WHERE "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        flash(msg.format(data[msgVal]))
+        
+    print('remove complete')
+
+
 # insert new employee (maintenancePage/employee)
-@app.route('/insert', methods=['POST']) #type:ignore
+@app.route('/insert', methods=['POST']) # type: ignore
 def insert():
     verify_access()
     verify_login()
     
     if request.method == "POST":
-        #flash("Data Inserted Successfully")
-        name = request.form['name']
-        username = request.form['username']
-        password = request.form['password']
-        userlevel = request.form['userlevel']
+        employee_names = request.form.getlist("employee_name")
+        usernames = request.form.getlist("username")
+        employee_levels = request.form.getlist("employee_level")
         
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO users (name, username, password, userlevel) VALUES (%s, %s, %s, %s)", (name, username, password, userlevel))
-            connection.commit()
-            emp_id = cursor.lastrowid
-            message = f"Employee {name} was successfully added."
-
-        flash(message=message)
-        return redirect(url_for('manage_employee'))
+        # default passwords (fill list to similar size)
+        passwords = [hashlib.sha256(bytes("user", "utf-8")).hexdigest() for _ in range(len(employee_names))]
+        
+        data = [usernames, passwords, employee_names, employee_levels]
+        conditions = "(user_name, user_pass, user_realname, user_access) VALUES (%s, %s, %s, %s)"
+        msg = "Employee '%s' was successfully added."
+        
+        # insert
+        insert_to_table(table="users", query_conditions=conditions, msg=msg, data=data)
+        
+        return redirect(url_for('manage_employees'))
 
 # update an employee
 @app.route('/edit', methods=['POST','GET']) #type:ignore
@@ -236,21 +285,19 @@ def edit():
     verify_login()
     
     if request.method == "POST":
-        emp_id = request.form['emp_id']
-        name = request.form['name']
-        username = request.form['username']
-        password = request.form['password']
+        user_id = request.form['user_id']
+        name = request.form['employee_name']
+        username = request.form['user_name']
         userlevel = request.form['userlevel']
         
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("UPDATE users SET name=%s, username=%s, password=%s, userlevel=%s WHERE emp_id=%s", (name, username, password, userlevel, emp_id))
-            connection.commit()
-            
-            message = f"Employee {name} was successfully updated."
+        data = [name, username, userlevel, user_id]
+        conditions = "name=%s, username=%s, userlevel=%s WHERE emp_id=%s"
+        msg = "Employee '%s' was successfully updated."
         
-        flash(message=message)
-        return redirect(url_for('manage_employee'))
+        # update
+        update_table("users", conditions, data, msg)
+        return redirect(url_for('manage_employees'))
+        
 
 # delete an employee
 @app.route('/delete/<string:id_data>', methods = ['GET'])
@@ -259,15 +306,11 @@ def delete(id_data):
     verify_access()
     verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM users WHERE emp_id=%s", (id_data,))
-        
-        connection.commit()
-        message=f"Employee with id {id_data} was successfully deleted"
+    conditions = "user_id=%s"
+    msg = "Employee with id %s was successfully deleted"
     
-        flash(message=message)
-        return redirect(url_for('manage_employee'))
+    remove_from_table("users", conditions, id_data, msg)
+    return redirect(url_for('manage_employees'))
 
 
 # add a program (maintenancePage/program)
@@ -278,19 +321,19 @@ def add_program():
     verify_login()
     
     if request.method == "POST":
-        program = request.form['program']
-        program_release = request.form['release']
-        program_version = request.form['version']
+        program = request.form['program_name']
+        program_release = request.form['program_release']
+        program_version = request.form['release_version']
         
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO programs (program,program_release,program_version) VALUES (%s, %s, %s)", (program, program_release, program_version))
+            cursor.execute("INSERT INTO programs (program_name,program_version,release_version) VALUES (%s, %s, %s)", (program, program_release, program_version))
             connection.commit()
             prog_id = cursor.lastrowid
             message = f"Program {program}:{prog_id} was successfully added."
         
         flash(message=message)
-        return redirect(url_for('manage_program'))
+        return redirect(url_for('manage_programs'))
 
 # edit a program
 @app.route('/edit_program', methods=['POST','GET']) #type:ignore
@@ -299,10 +342,10 @@ def edit_program():
     verify_login()
     
     if request.method == "POST":
-        prog_id = request.form['prog_id']
-        program = request.form['program']
-        program_release = request.form['release']
-        program_version = request.form['version']
+        prog_id = request.form['program_id']
+        program = request.form['program_name']
+        program_release = request.form['program_release']
+        program_version = request.form['program_version']
         
         
         connection = pymysql.connect(**db_config)
@@ -726,4 +769,4 @@ def export_data():
 
 # automatic
 if __name__ == "__main__":
-    app.run(debug=debugVal)
+    app.run(debug=debugVal, host='localhost', )

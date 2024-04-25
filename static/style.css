@@ -68,6 +68,25 @@ input[type=date]{
 	
 }
 
+.fixedSize {
+  width: 100%;
+  white-space: nowrap;
+  table-layout: fixed;
+}
+
+.overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inner-modal {
+  margin-left: 1%;
+
+}
+.inner-modal.input {
+  margin-right: 1%;
+}
+
 /* submission spinner (createPage) */
 .spinner {
     animation: rotate 2s linear infinite;

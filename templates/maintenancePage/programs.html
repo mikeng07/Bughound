@@ -3,10 +3,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (P)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 
     <script>
         var maintain_db = "{{url_for('maintain_db')}}";
+        var self = "{{url_for('manage_programs')}}";
 
         function move(endpoint) { window.location.href = endpoint; }
 
@@ -24,9 +26,20 @@
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
+    <div id="program_results">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
 
     <h3>Add Programs</h3>
-    <form id="newProgramForm" action="" method="POST">
+    <form id="newProgramForm" action="/add_program" method="POST">
         <div id="program_entity" style="margin-bottom: 5px;">
             <input id="program_name" name="program_name" size="10" placeholder="program name">
             <input id="program_release" name="program_release" size="6" placeholder="release">
@@ -39,49 +52,71 @@
     
     <button id="clearProgramButton">Clear</button>
     <button type="submit" form="newProgramForm">Add new programs</button>
-    <div id="new_program_res">
-        <!-- <span>successful</span> -->
-    </div>
-    <hr>      
 
-    <h3>Edit Programs</h3>
-    <form id="editProgramForm" action="" method="POST">
-        <label for="program_entity_before">Program before change:</label>
-        <div id="program_entity_before" style="margin-bottom: 10px;">
-            <input id="program_name" name="program_name" size="10" placeholder="program name">
-            <input id="program_release" name="program_release" size="6" placeholder="release">
-            <input id="release_version" name="release_version" size="3" placeholder="version">
+    <hr>
+
+    <table class="fixedSize">
+        <span>
+            <h3>Program List</h3>
+            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
+        </span>
+        <thead>
+            <tr>
+                <th scope="col">Program</th>
+                <th scope="col">Release</th>
+                <th scope="col">Version</th>
+                <th scope="col">Operations</th>
+            </tr><br>
+        </thead>
+
+        {% for row in programs %}
+        <tr>
+            <td>{{ row['program_name'] }}</td>
+            <td>{{ row['program_version'] }}</td>
+            <td>{{ row['release_version'] }}</td>
+            <td>
+                <a href="/update_program/{{row['program_id']}}" data-toggle="modal" data-target="#modaledit{{row['program_id']}}">Edit</a> |
+                <a href="/delete_program/{{row['program_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+            </td>
+        </tr>
+
+        <div id="modaledit{{row['program_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h3>Edit Programs</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    
+                    <form id="editProgramForm" action="/edit_program" method="POST">
+                        <input hidden id="program_id" name="program_id" value="{{row['program_id']}}">
+                        
+                        <label for="program_entity_after" class="inner-modal">Program after change (leave blank for no change):</label>
+                        <div id="program_entity_changes" class="inner-modal input">
+                            <input id="program_name" name="program_name" size="10" placeholder="program name">
+                            <input id="program_release" name="program_release" size="6" placeholder="release">
+                            <input id="release_version" name="release_version" size="3" placeholder="version">
+                        </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal" form="editProgramForm">Make program edit</button>
+                        <!-- <button type="button" class="btn btn-default" id="clearProgramChangeButton">Clear</button> -->
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <label for="program_entity_after">Program after change (leave blank for no change):</label>
-        <div id="program_entity_after">
-            <input id="program_name" name="program_name" size="10" placeholder="program name">
-            <input id="program_release" name="program_release" size="6" placeholder="release">
-            <input id="release_version" name="release_version" size="3" placeholder="version">
-        </div>
-    </form>
+            
+        {% endfor %}
+
+    </table>
+
     
-    <button id="clearProgramChangeButton">Clear</button>
-    <button type="submit" form="editProgramForm">Make program edit</button>
-    <div id="change_program_res">
-        <!-- <span>successful</span> -->
-    </div><hr>
-
-    <h3>Remove Program</h3>
-    <form id="removeProgramForm" action="" method="POST">
-        <input id="program_name" name="program_name" size="10" placeholder="program name">
-        <input id="program_release" name="program_release" size="6" placeholder="release">
-        <input id="release_version" name="release_version" size="3" placeholder="version">
-    </form>
-
-    <button id="clearRemoveProgramButton">Clear</button>
-    <button type="submit" form="removeProgramForm">Remove program</button>
-    <div id="remove_program_res">
-        <!-- <span>successful</span> -->
-    </div>
-
-
+    <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script>
         // newProgramForm
         $('#newProgramButton').on("click", () => {
@@ -114,22 +149,6 @@
             $('#newProgramForm #employee_level').val(1);
         });
 
-        // editProgramForm
-        $('#clearProgramChangeButton').on("click", () => {
-            $('#editProgramForm #program_entity_before #program_name').val('')
-            $('#editProgramForm #program_entity_before #program_release').val('')
-            $('#editProgramForm #program_entity_before #release_version').val('')
-            $('#editProgramForm #program_entity_after #program_name').val('')
-            $('#editProgramForm #program_entity_after #program_release').val('')
-            $('#editProgramForm #program_entity_after #release_version').val('')
-        });
-
-        // removeProgramForm
-        $('#clearRemoveProgramButton').on("click", () => {
-            $('#removeProgramForm #program_name').val('')
-            $('#removeProgramForm #program_release').val('')
-            $('#removeProgramForm #release_version').val('')
-        });
     </script>
 </body>
 </html>
