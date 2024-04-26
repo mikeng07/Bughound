@@ -73,6 +73,64 @@ def set_static_report_values():
 
     return report_types, severities, priority, status, resolution, resolution_version
 
+def capitalize(strings):
+    for i, string in enumerate(strings):
+        strings[i] = string[0].upper() + string[1:]
+    return strings
+
+
+## helper functions (maintenance parts) 
+def insert_to_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
+    
+    stmt = "INSERT INTO "+ table +" "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+            
+        for n in range(len(data[0])):
+            # get value n from each of the arrays in data
+            
+            values = [data[k][n] for k in range(len(data))]
+            message = msg.format(data[msgVal][n]) 
+            try:
+                cursor.execute(stmt, values)
+                connection.commit()
+                id = cursor.lastrowid
+            except:
+                message = "'{}' happens to be a dupe in table:{}".format(data[msgVal][n], table)
+            finally:
+                if should_flash:
+                    flash(message)
+    
+        print("insert complete")    
+
+def update_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
+    
+    stmt = "UPDATE "+ table +" SET "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        if should_flash:
+            flash(msg.format(data[msgVal]))
+    
+    print('update complete')
+        
+def remove_from_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
+    
+    stmt = "DELETE FROM "+ table +" WHERE "+ query_conditions
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        if should_flash:
+            flash(msg.format(data[msgVal]))
+        
+    print('remove complete')
+
+
 # initial landing (Login)
 @app.route("/")
 def index():
@@ -193,71 +251,18 @@ def manage_areas():
     
     verify_access()
     verify_login()
+        
+    sql = [
+      "SELECT * FROM programs",
+      "SELECT * FROM ((program_areas INNER JOIN programs ON program_areas.program_id=programs.program_id) INNER JOIN areas ON program_areas.area_id=areas.area_id) ORDER BY programs.program_id, areas.area_id"
+    ]
     
-    # return render_template('maintenancePage/areas.html')
+    programs, data = get_all_MySQL_results(sql)
     
-    sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs', 'SELECT * FROM program_areas']
-    areas, programs, program_areas = get_all_MySQL_results(sql_list)
-    
-    data = []
-    
-    print(areas)
+    print(data)
     print(programs)
-    print(program_areas)
     
-    # for pa in program_areas:
-    #     pi = pa['program_id']
-    #     ai = pa['area_id']
-    
-    # return render_template('maintenancePage/areas.html', programs=programs)
     return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, username=username, userlevel=userlevel)
-
-
-## helper functions (maintenance parts) 
-def insert_to_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
-    
-    stmt = "INSERT INTO "+ table +" "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-            
-        for n in range(len(data[0])):
-            # get value n from each of the arrays in data
-            values = [data[k][n] for k in range(len(data))]
-            
-            cursor.execute(stmt, values)
-            connection.commit()
-            id = cursor.lastrowid
-            if should_flash:
-                flash(msg.format(data[msgVal][n]))
-    
-        print("insert complete")    
-
-def update_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
-    
-    stmt = "UPDATE "+ table +" SET "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
-    
-    print('update complete')
-        
-def remove_from_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
-    
-    stmt = "DELETE FROM "+ table +" WHERE "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
-        
-    print('remove complete')
 
 
 # insert new employee (maintenancePage/employee)
@@ -315,7 +320,6 @@ def edit(id_data):
         update_table("users", conditions, data, msg, -1)
         
     return redirect(url_for('manage_employees'))
-        
 
 # delete an employee
 @app.route('/delete/<string:id_data>', methods = ['GET'])
@@ -393,79 +397,80 @@ def delete_program(id_data):
     verify_access()
     verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM programs WHERE prog_id=%s", (id_data,))
-        
-        connection.commit()
-        message=f"Program with id {id_data} was successfully deleted"
+    conditions = "program_id=%s"
+    msg = "Program with id '{}' was successfully deleted"
+    remove_from_table("users", conditions, (id_data), msg)
     
-        flash(message=message)
-        return redirect(url_for('manage_program'))
+    # kill from program_areas
+    remove_from_table(table="program_areas", query_conditions="program_id=%s", data=(id_data), should_flash=False)
+    
+    flash(f"All areas related to Program with id '{id_data}' have been successfully removed")
+
+    return redirect(url_for('manage_programs'))
+
 
 
 # add an area (maintenancePage/area)
-@app.route('/add_area', methods=['POST']) #type:ignore
+@app.route('/add_area', methods=['POST'])
 def add_area():
 
     verify_access()
     verify_login()
     
-    if request.method == "POST":
-        areas = request.form.getlist('area_title')
-        prog_id = request.form['program_list']
-        
-        skip = False
-        
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM programs")
-            result = cursor.fetchone()
-            print(result['COUNT(*)']) #type:ignore
-            connection.commit()
-            '''
-            cursor.execute("SELECT prog_id FROM programs where program=%s",(program,))
-            prog_id = cursor.fetchone()
-            print(prog_id)
-            '''
+    areas = request.form.getlist('area_title')
+    prog_id = request.form['program_list']
+    
+    # capitalize all area entries (makes it easier for everyone)
+    areas = capitalize(areas)
+    
+    skip = False
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        # check if any programs are available
+        cursor.execute("SELECT COUNT(*) FROM programs")
+        result = cursor.fetchone()
+        # print(result['COUNT(*)']) #type:ignore
+        connection.commit()
 
-            if result['COUNT(*)'] == 0: #type:ignore
-                flash("Cannot add area - programs table is empty.")
-                skip = True
-            else:
-                pass
+        if result['COUNT(*)'] == 0: #type:ignore
+            flash("Cannot add area - programs table is empty.")
+            skip = True
         
-        if not skip:
-            print(areas, prog_id)            
-            conditions = "(area,prog_id) VALUES (%s, %s)"
-            prog_id_list = [prog_id for _ in range(len(areas))]
-            msg = "Area '%s' was successfully added."
+    if skip == False:        
+        # commit to areas
+        insert_to_table(table="areas", query_conditions="(area_title) VALUES (%s)", data=[areas], should_flash=False)
         
-        insert_to_table("areas", conditions, [areas, prog_id_list], msg)
+        # commit to program_areas
+        print(areas, prog_id)    
+        conditions = "(area_id, program_id) VALUES ((SELECT area_id from areas where area_title=%s), %s)"
+        prog_id_list = [prog_id for _ in range(len(areas))]
+        msg = "Area '{}' was successfully added."
+    
+        insert_to_table("program_areas", conditions, [areas, prog_id_list], msg)
 
-        return redirect(url_for('manage_areas'))
+    return redirect(url_for('manage_areas'))
 
 # edit an area 
-@app.route('/edit_area', methods=['POST','GET']) #type:ignore
-def edit_area():
+@app.route('/edit_area/<string:id_data>', methods=['POST']) #type:ignore
+def edit_area(id_data):
 
     verify_access()
     verify_login()
     
-    if request.method == "POST":
-        prog_id = request.form['prog_id']
-        area = request.form['area']
-        area_id = request.form['area_id']
-               
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("UPDATE areas SET area=%s, prog_id=%s WHERE area_id=%s", (area,prog_id, area_id))
-            connection.commit()
+    prog_id = request.form['prog_id']
+    area = request.form['area']
+    area_id = request.form['area_id']
             
-            message = f"Areas {area} was successfully updated."
-       
-        flash(message=message)
-        return redirect(url_for('manage_area'))
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE areas SET area=%s, prog_id=%s WHERE area_id=%s", (area,prog_id, area_id))
+        connection.commit()
+        
+        message = f"Areas {area} was successfully updated."
+    
+    flash(message=message)
+    return redirect(url_for('manage_area'))
 
 # delete an area
 @app.route('/delete_area/<string:id_data>', methods = ['GET'])
@@ -474,15 +479,11 @@ def delete_area(id_data):
     verify_access()
     verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM areas WHERE area_id=%s", (id_data,))
-        
-        connection.commit()
-        message=f"Area with id {id_data} was successfully deleted"
+    conditions = "pa_id=%s"
+    msg = "Connection between program and area at id {} was successfully deleted"
     
-        flash(message=message)
-        return redirect(url_for('manage_area'))
+    remove_from_table("program_areas", conditions, (id_data), msg)
+    return redirect(url_for('manage_areas'))
 
 
 # updateBug.html --------------------------------

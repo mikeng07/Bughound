@@ -45,7 +45,7 @@
             <input id="program_release" name="program_release" size="6" placeholder="release">
             <input id="release_version" name="release_version" size="3" placeholder="version">
             <button type="button" id="newProgramButton">+</button> 
-            <button type="button" id="removeProgramButton" hidden=true>-</button>
+            <button type="button" id="removeProgramButton" hidden=true>--</button>
             
         </div>
     </form>
@@ -60,7 +60,7 @@
             <h3>Program List</h3>
             <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
         </span>
-        <br>
+        <br><hr>
         <thead>
             <tr>
                 <th scope="col">ID</th>
@@ -68,10 +68,11 @@
                 <th scope="col">Release</th>
                 <th scope="col">Version</th>
                 <th scope="col">Operations</th>
-            </tr><br>
+            </tr>
         </thead>
 
         {% for row in programs %}
+
         <tr>
             <td>{{ row['program_id'] }}</td>
             <td>{{ row['program_name'] }}</td>
@@ -87,7 +88,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Edit Programs</h3>
+                        <h3>Edit Program</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     

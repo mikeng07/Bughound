@@ -29,9 +29,10 @@ CREATE TABLE Programs (
 );
 CREATE TABLE Areas (
     area_id             INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    area_title          VARCHAR(255) NOT NULL
+    area_title          VARCHAR(255) NOT NULL UNIQUE
 );
 CREATE TABLE program_areas (                                            -- bridge table b/t 'programs' and 'areas'
+    pa_id               INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     program_id          INT NOT NULL,
     area_id             INT NOT NULL,
     FOREIGN KEY (program_id) REFERENCES Programs (program_id),          -- connects to Programs:programs_id
@@ -85,7 +86,8 @@ CREATE TABLE Attachments (
 -- DROP TABLE program_areas;
 -- DROP TABLE Programs;
 -- DROP TABLE Bugs;
--- DROP TABLE Areas, Users;
+-- DROP TABLE Areas;
+-- DROP TABLE Users;
 
 -- TEST POPULATION OF TABLES -----------------------------------------
 
@@ -103,6 +105,14 @@ INSERT INTO Areas (area_title) VALUES ("Front-end");
 INSERT INTO Areas (area_title) VALUES ("Hardware");
 INSERT INTO Areas (area_title) VALUES ("Networking");
 INSERT INTO Areas (area_title) VALUES ("Software");
+
+
+INSERT INTO program_areas (program_id, area_id) VALUES (1,2);
+INSERT INTO program_areas (program_id, area_id) VALUES (1,10);
+INSERT INTO program_areas (program_id, area_id) VALUES (2,3);
+INSERT INTO program_areas (program_id, area_id) VALUES (2,4);
+INSERT INTO program_areas (program_id, area_id) VALUES (3,1);
+INSERT INTO program_areas (program_id, area_id) VALUES (3,10);
 
 
 -- DELETE FROM Users;

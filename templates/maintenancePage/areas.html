@@ -41,23 +41,24 @@
     <h3>Add Areas</h3>
     <form id="newAreaForm" action="/add_area" method="POST">
         <label for="program_list">Add to program:</label>      
-        <select id="program_list" style="margin-bottom: 5px;">
+        <select id="program_list" name="program_list" style="margin-bottom: 5px;">
             <option value="default" disabled selected>------</option>
             {% for program in programs %}
-                    <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
             {% endfor %}
         </select>
     
             <div id="area_entity" style="margin-bottom: 5px;">
                 <input id="area_title" name="area_title" size="30" placeholder="functional area">
                 <button type="button" id="newAreaButton">+</button>
-                <button type="button" id="removeAreaButton" hidden=true>-</button>
+                <button type="button" id="removeAreaButton" hidden=true>--</button>
                 <br>
             </div>
     </form>
     
     <button id="clearAreaButton">Clear</button>
     <button type="submit" form="newAreaForm">Add new Area(s)</button>
+
     <hr>
     
     <table class="fixedSize">
@@ -65,7 +66,7 @@
             <h3>Area List</h3>
             <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
         </span>
-        <br>
+        <br><hr>
         <thead>
             <tr>
                 <th scope="col">Prog ID</th>
@@ -75,10 +76,11 @@
                 <th scope="col" class="overflow">Version</th>
                 <th scope="col">Area</th>
                 <th scope="col" class="overflow">Operations</th>
-            </tr><br>
+            </tr>
         </thead>
-
+        
         {% for row in program_areas %}
+
         <tr>
             <td>{{ row['program_id'] }}</td>
             <td>{{ row['area_id'] }}</td>
@@ -89,15 +91,15 @@
             <td>{{ row['release_version'] }}</td>
 
             <!-- area name -->
-            <td>{{ row['area'] }}</td>
+            <td>{{ row['area_title'] }}</td>
 
+            <td>
+                <a href="/update_area{{row['pa_id']}}" data-toggle="modal" data-target="#modaledit{{row['pa_id']}}">Edit</a> |
+                <a href="/delete_area/{{row['pa_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+            </td>
         </tr>
-        <td>
-            <a href="/update/{{row['area_id']}}" data-toggle="modal" data-target="#modaledit{{row['area_id']}}">Edit</a> |
-            <a href="/delete_area/{{row['area_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
-        </td>
 
-        <div id="modaledit{{row['area_id']}}" class="modal fade" role="dialog">
+        <div id="modaledit{{row['pa_id']}}" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -105,25 +107,36 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
 
-                    <form id="editAreaForm" action="/edit_area" method="POST">
-                        <input hidden id="program_id" name="program_id" value="{{row['program_id']}}">
-                        <input hidden id="area_id" name="area_id" value="{{row['area_id']}}">
-                        <div id="area_entity" class="inner-modal">
-                            <label for="area_title" style="margin-right: 17px;">Area after change: </label>
-                            <input id="area_title" name="area_title" size="30" placeholder="functional area">
+                    <form id="editAreaForm{{row['pa_id']}}" action="/edit_area{{row['pa_id']}}" method="POST">
+                        <div id="area_entity_changes" class="inner-modal input">
+                            <input hidden id="area_id" name="area_id" value="{{row['area_id']}}">
+                            <label for="area_title" style="margin-left: 17px;">new Program: </label>
+                            <select id="program_list" name="program_list" style="margin-bottom: 5px;">
+                                {% for program in programs %}
+                                    {% if program["program_id"] == row["program_id"] %}
+                                    <option value="{{ program['program_id'] }}" disabled selected>{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                                    {% else %}
+                                    <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select><br>
+                            <label for="area_title" style="margin-left: 17px; margin-right: 29px;">new Area: </label>
+                            <input id="area_title" name="area_title" size="30" placeholder="{{row['area_title']}}">
                         </div>
                     </form>
+
                     <div class="modal-footer">
-                        <button type="submit" form="editAreaForm">Make area edit</button>
+                        <button type="submit" class="btn btn-primary" form="editAreaForm{{row['pa_id']}}">Make area edit</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
+
         {% endfor %}
+
     </table>
 
-    
 
     <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -151,24 +164,13 @@
             if (area_length == 1) removeAreaButton.hidden = true;
         });
 
-        $('#clearEmployeeButton').on("click", () => {
+        $('#clearAreaButton').on("click", () => {
             let area_length = $("#newAreaForm").children('div[id=area_entity]').length;
             for (var i=0; i<area_length-1; i++) { $('#removeAreaButton').click(); }
-            $('#newAreaForm #employee_name').val("");
-            $('#newAreaForm #username').val("");
-            $('#newAreaForm #employee_level').val(1);
+            $('#newAreaForm #program_list').val("default");
+            $('#newAreaForm #area_title').val("");
         });
 
-        // areaChangeForm
-        $('#clearAreaChangeButton').on("click", () => {
-            $('#accessChangeEmployeeForm #username').val("");
-            $('#accessChangeEmployeeForm #employee_level').val(1);
-        });
-
-        // removeAreaForm
-        $('#clearRemoveAreaButton').on("click", () => {
-            $('#removeAreaForm #area_title').val("");
-        });
     </script>
 </body>
 </html>
