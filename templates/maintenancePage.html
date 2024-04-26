@@ -3,10 +3,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 
     <script>
-        var db_lookup = "{{ url_for('db_lookup') }}";
         var manage_employees = "{{ url_for('manage_employees') }}";
         var manage_programs = "{{ url_for('manage_programs') }}";
         var manage_areas = "{{ url_for('manage_areas') }}";
@@ -23,11 +23,7 @@
 
 <body>
     <h1>Database Maintenance</h1>
-    <hr class="long-line"><br>
-    
-
-    <button onclick="move(db_lookup)">DB Lookup</button>
-    <hr>
+    <hr class="long-line">
     
     <button onclick="move(manage_employees)">edit Employees</button> 
     <button onclick="move(manage_programs)">edit Programs</button> 
@@ -37,15 +33,17 @@
     <div id="export_employee_list" style="margin-bottom: 5px;">
         <button id="exportEmployeeListButton">Export employee list</button>
         <label for="file_type_e">as: </label>
-        <select id="file_type_e">
+        <select id="file_type_e" class="user">
+            <option selected disabled>File type</option>
             <option>TXT</option>
             <option>XML</option>
         </select>
     </div>
     <div id="export_program_areas">
-        <button id="exportProgramAreasButton" style="margin-right: 10px">Export list of areas</button>
+        <button id="exportProgramAreasButton" style="margin-right: 14px">Export list of areas</button>
         <label for="file_type_a">as: </label>
-        <select id="file_type_a">
+        <select id="file_type_a" class="user">
+            <option selected disabled>File type</option>
             <option>TXT</option>
             <option>XML</option>
         </select>

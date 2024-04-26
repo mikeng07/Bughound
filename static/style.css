@@ -1,3 +1,11 @@
+body {
+  margin-left: 5px;
+}
+
+hr {
+  margin-right: 5px;
+}
+
 .problemSummary{
 
     width: 100%;
@@ -12,10 +20,13 @@
     height: 3px; /* Set the height of the line */
     background-color: black; /* Line color */
     margin: 0; /* Remove default margin */
+    margin-left: -5px;
+    margin-bottom: 20px;
 }
 
 .input-container {
     display: flex;
+    margin-bottom: -15px;
     /* flex-direction: row-reverse; Reverse the order of flex items */
 }
 
@@ -27,10 +38,10 @@
 
 /* margins are different b/t summary, problem, and suggestedFix */
 .input-container .problem {
-    margin-left: 81px;
+    margin-left: 86px;
 }
 .input-container .suggestedFix {
-  margin-left: 44px;
+  margin-left: 47px;
 }
 
 h1 {
@@ -58,6 +69,15 @@ h2 {
   margin: 3px 2px;
   cursor: pointer;
 }
+
+select {
+  width: 40%;
+}
+
+select.numeral, select.user {
+  width: auto;
+}
+
 input[type=number]{
 	width: 10%;
 	padding: 10px 10px;
@@ -68,15 +88,30 @@ input[type=date]{
 	
 }
 
+div.inline-parent {
+  width: 100%;
+  position: relative;
+}
+
+div.inline-child {
+  top: 0;
+  right: 5px;
+  bottom: 0;
+  position: absolute;
+}
+
 .fixedSize {
   width: 100%;
   white-space: nowrap;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .overflow {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.overflow.pwd {
+  max-width: 0;
 }
 
 .inner-modal {

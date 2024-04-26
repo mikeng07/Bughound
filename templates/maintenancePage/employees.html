@@ -21,7 +21,7 @@
     <h1>Edit database - employees</h1>
 
     <hr class="long-line">
-    <br>
+    
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
@@ -41,16 +41,16 @@
     <h3>Add Employees</h3>
     <form id="newEmployeeForm" action="/insert" method="POST">
         <div id="employee_entity" style="margin-bottom: 5px;">
-            <input id="employee_name" name="employee_name" size="15" placeholder="employee name">
-            <input id="username" name="username" size="7" placeholder="username">
-            <label for="employee_level">| Access lvl</label>
-            <select id="employee_level" name="employee_level" required>
+            <input id="employee_name" name="employee_name" size="12" placeholder="employee name">
+            <input id="username" name="username" size="12" placeholder="username">
+            <select id="employee_level" name="employee_level" class="numeral" required>
+                <option disabled selected>access lvl</option>
                 <option value=1>1</option>
                 <option value=2>2</option>
                 <option value=3>3</option>
             </select>
             <button type="button" id="newEmployeeButton">+</button> 
-            <button type="button" id="removeEmployeeButton" hidden=true>-</button>
+            <button type="button" id="removeEmployeeButton" hidden=true>--</button>
             <br>
         </div>
     </form>
@@ -65,22 +65,25 @@
             <h3>Employee List</h3>
             <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
         </span>
+        <br>
         <thead>
             <tr>
+                <th scope="col">ID</th>
                 <th scope="col">Name</th>
                 <th scope="col">Username</th>
-                <th scope="col">Pwd Hash</th>
-                <th scope="col">User Level</th>
+                <th scope="col">Acc Lvl</th>
+                <th scope="col" class="overflow">Pwd Hash</th>
                 <th scope="col">Operations</th>
             </tr><br>
         </thead>
 
         {% for row in employees %}
         <tr>
+            <td>{{ row['user_id'] }}</td>
             <td>{{ row['user_realname'] }}</td>
             <td>{{ row['user_name'] }}</td>
-            <td class="overflow">{{ row['user_pass'] }}</td>
             <td>{{ row['user_access'] }}</td>
+            <td class="overflow pwd">{{ row['user_pass'] }}</td>
          
             <td>
                 <a href="/update/{{row['user_id']}}" data-toggle="modal" data-target="#modaledit{{row['user_id']}}">Edit</a> |
@@ -95,8 +98,7 @@
                         <h4 class="modal-title">Update Employee</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-                    <form id="accessChangeEmployeeForm" action="/edit" method="POST">
-                        <input hidden id="user_id" name="user_id" value="{{row['user_id']}}">
+                    <form id="accessChangeEmployeeForm/{{row['user_id']}}" action="/edit/{{row['user_id']}}" method="POST">
                         <label for="employee_name" class="inner-modal">Employee name:</label>
                         <input id="employee_name" name="employee_name" class="inner-modal input" size="15" placeholder="{{row['user_realname']}}">
                         <br>
@@ -105,13 +107,14 @@
                         <br>
                         <label for="employee_level" class="inner-modal">New access level:</label>
                         <select id="employee_level" name="employee_level" class="inner-modal input" required>
+                            <option value=0 selected disabled>0</option>
                             <option value=1>1</option>
                             <option value=2>2</option>
                             <option value=3>3</option>
                         </select>
                     </form>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal" form="accessChangeEmployeeForm"><b>Make changes</b></button>
+                        <button type="submit" class="btn btn-primary" form="accessChangeEmployeeForm/{{row['user_id']}}"><b>Make changes</b></button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -130,10 +133,10 @@
         $('#newEmployeeButton').on("click", () => {
             
             let temp = '<div id="employee_entity" style="margin-bottom: 5px;">'+
-                '<input id="employee_name" name="employee_name" size="15" placeholder="employee name"> '+
-                '<input id="username" name="username" size="7" placeholder="username"> '+
-                '<label for="employee_level">| Access lvl </label>'+
-                '<select id="employee_level" name="employee_level" required>'+
+                '<input id="employee_name" name="employee_name" size="12" placeholder="employee name"> '+
+                '<input id="username" name="username" size="12" placeholder="username"> '+
+                '<select id="employee_level" name="employee_level" class="numeral" required>'+
+                    '<option disabled selected>access lvl</option>'+
                     '<option value=1>1</option>'+
                     '<option value=2>2</option>'+
                     '<option value=3>3</option>'+

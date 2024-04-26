@@ -3,10 +3,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB Maintenance (A)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
 
     <script>
         var maintain_db = "{{url_for('maintain_db')}}";
+        var self = "{{url_for('manage_areas')}}";
 
         function move(endpoint) { window.location.href = endpoint; }
 
@@ -20,18 +22,29 @@
     <h1>Edit database - areas</h1>
 
     <hr class="long-line">
-    <br>
+
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
+    <div id="area_results">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
 
     <h3>Add Areas</h3>
-    <form id="newAreaForm" action="" method="POST">
+    <form id="newAreaForm" action="/add_area" method="POST">
         <label for="program_list">Add to program:</label>      
         <select id="program_list" style="margin-bottom: 5px;">
             <option value="default" disabled selected>------</option>
             {% for program in programs %}
-                    <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
+                    <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
             {% endfor %}
         </select>
     
@@ -45,63 +58,78 @@
     
     <button id="clearAreaButton">Clear</button>
     <button type="submit" form="newAreaForm">Add new Area(s)</button>
-    <div id="new_area_res">
-        <!-- <span>successful</span> -->
-    </div><hr>
+    <hr>
     
-
-    <h3>Edit Areas</h3>
-    <form id="editAreaForm" action="" method="POST">
-        <label for="program_list_c">Referenced program:</label>      
-        <select id="program_list_c" style="margin-bottom: 5px;">
-            <option value="default" disabled selected>------</option>
-            {% for program in programs %}
-                <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
-            {% endfor %}
-        </select>
-        
+    <table class="fixedSize">
+        <span>
+            <h3>Area List</h3>
+            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
+        </span>
         <br>
-        <div id="area_entity_before" style="margin-bottom: 5px;">
-            <label for="area_title" style="margin-right: 5px;">Area before change: </label>
-            <input id="area_title" name="area_title" size="30" placeholder="functional area">
+        <thead>
+            <tr>
+                <th scope="col">Prog ID</th>
+                <th scope="col">Area ID</th>
+                <th scope="col" class="overflow">Program</th>
+                <th scope="col" class="overflow">Release</th>
+                <th scope="col" class="overflow">Version</th>
+                <th scope="col">Area</th>
+                <th scope="col" class="overflow">Operations</th>
+            </tr><br>
+        </thead>
+
+        {% for row in program_areas %}
+        <tr>
+            <td>{{ row['program_id'] }}</td>
+            <td>{{ row['area_id'] }}</td>
+
+            <!-- program name, release, version -->
+            <td>{{ row['program_name'] }}</td>
+            <td>{{ row['program_version'] }}</td>
+            <td>{{ row['release_version'] }}</td>
+
+            <!-- area name -->
+            <td>{{ row['area'] }}</td>
+
+        </tr>
+        <td>
+            <a href="/update/{{row['area_id']}}" data-toggle="modal" data-target="#modaledit{{row['area_id']}}">Edit</a> |
+            <a href="/delete_area/{{row['area_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+        </td>
+
+        <div id="modaledit{{row['area_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Area</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form id="editAreaForm" action="/edit_area" method="POST">
+                        <input hidden id="program_id" name="program_id" value="{{row['program_id']}}">
+                        <input hidden id="area_id" name="area_id" value="{{row['area_id']}}">
+                        <div id="area_entity" class="inner-modal">
+                            <label for="area_title" style="margin-right: 17px;">Area after change: </label>
+                            <input id="area_title" name="area_title" size="30" placeholder="functional area">
+                        </div>
+                    </form>
+                    <div class="modal-footer">
+                        <button type="submit" form="editAreaForm">Make area edit</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="area_entity_after">
-            <label for="area_title" style="margin-right: 17px;">Area after change: </label>
-            <input id="area_title" name="area_title" size="30" placeholder="functional area">
-        </div>
-    </form>
+        {% endfor %}
+    </table>
+
     
-    <button id="clearAreaChangeButton">Clear</button>
-    <button type="submit" form="editAreaForm">Make area edit(s)</button>
-    <div id="change_area_res">
-        <!-- <span>successful</span> -->
-    </div><hr>
 
-    <h3>Remove Area from Program</h3>
-    <form id="removeAreaForm" action="" method="POST">
-        <label for="program_list_r">Referenced program:</label>      
-        <select id="program_list_r" style="margin-bottom: 5px;">
-            <option value="default" disabled selected>------</option>
-            {% for program in programs %}
-                <option value="{{ program['program_id'] }}">{{ program['program_name']+" "+program["program_version"]+" "+program["release_version"] }}</option>
-            {% endfor %}
-        </select>
-        
-        <br>
-        <label for="area_title">Area being removed: </label>
-        <input id="area_title" name="area_title" size="30" placeholder="functional area">
-    </form>
-    
-    <button id="clearRemoveAreaButton">Clear</button>
-    <button type="submit" form="editAreaForm">Make area edit(s)</button>
-    <div id="remove_area_res">
-        <!-- <span>successful</span> -->
-    </div>
-
-
-
+    <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   <script>
         // newAreaForm
         $('#newAreaButton').on("click", () => {
             

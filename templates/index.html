@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>BugHound Home</title>
     <script>
@@ -24,17 +25,23 @@
 <body>
     
     <h1>Welcome to BugHound, {{username}}</h1>
-    <hr class="long-line"><br>
+    <hr class="long-line">
 
     <button onclick="move(add_bug)">Add a Bug</button> 
     <button onclick="move(search_bug)">Search a Bug</button> 
-
-    {% if access == 3 %}
-    <button onclick="move(maintain_db)"><b>DB Maintenance</b></button>
-    {% endif %}
     
     <hr>
-    <button onclick="move(logout)">Logout</button>
+    <div class="inline-parent">
+        <button onclick="move(logout)">Logout</button>
+        
+        {% if access == 3 %}
+        <div class="inline-child">
+            <span>|</span>
+            <button onclick="move(maintain_db)"><b>DB Maintenance</b></button>
+        </div>
+        {% endif %}
+    </div>
+    
 
 </body>
 </html> 

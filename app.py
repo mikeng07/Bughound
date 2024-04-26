@@ -188,27 +188,29 @@ def manage_programs():
 # manage area page
 @app.route('/manage_areas')
 def manage_areas():
-    # username = session['username']
-    # userlevel =session['user_level']
+    username = session['username']
+    userlevel =session['user_level']
     
     verify_access()
     verify_login()
     
-    return render_template('maintenancePage/areas.html')
+    # return render_template('maintenancePage/areas.html')
     
-    # sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs']
-    # data, programs = get_all_MySQL_results(sql_list)
+    sql_list = ['SELECT * FROM areas', 'SELECT * FROM programs', 'SELECT * FROM program_areas']
+    areas, programs, program_areas = get_all_MySQL_results(sql_list)
     
-    # return render_template('manage_area.html', areas=data, programs=programs, username=username, userlevel=userlevel)
-
-# db lookup page (initial)
-@app.route('/db_lookup')
-def db_lookup():
+    data = []
     
-    verify_access()
-    verify_login()
+    print(areas)
+    print(programs)
+    print(program_areas)
     
-    return render_template("maintenancePage/lookup.html")
+    # for pa in program_areas:
+    #     pi = pa['program_id']
+    #     ai = pa['area_id']
+    
+    # return render_template('maintenancePage/areas.html', programs=programs)
+    return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, username=username, userlevel=userlevel)
 
 
 ## helper functions (maintenance parts) 
@@ -226,11 +228,12 @@ def insert_to_table(table, query_conditions, data, msg, msgVal=0, should_flash=T
             cursor.execute(stmt, values)
             connection.commit()
             id = cursor.lastrowid
-            flash(msg.format(data[msgVal][n]))
+            if should_flash:
+                flash(msg.format(data[msgVal][n]))
     
         print("insert complete")    
 
-def update_table(table, query_conditions, data, msg, msgVal=0):
+def update_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
     
     stmt = "UPDATE "+ table +" SET "+ query_conditions
     
@@ -238,11 +241,12 @@ def update_table(table, query_conditions, data, msg, msgVal=0):
     with connection.cursor() as cursor:
         cursor.execute(stmt, data)
         connection.commit()
-        flash(msg.format(data[msgVal]))
+        if should_flash:
+            flash(msg.format(data[msgVal]))
     
     print('update complete')
         
-def remove_from_table(table, query_conditions, data, msg, msgVal=0):
+def remove_from_table(table, query_conditions, data, msg, msgVal=0, should_flash=True):
     
     stmt = "DELETE FROM "+ table +" WHERE "+ query_conditions
     
@@ -250,53 +254,67 @@ def remove_from_table(table, query_conditions, data, msg, msgVal=0):
     with connection.cursor() as cursor:
         cursor.execute(stmt, data)
         connection.commit()
-        flash(msg.format(data[msgVal]))
+        if should_flash:
+            flash(msg.format(data[msgVal]))
         
     print('remove complete')
 
 
 # insert new employee (maintenancePage/employee)
-@app.route('/insert', methods=['POST']) # type: ignore
+@app.route('/insert', methods=['POST'])
 def insert():
     verify_access()
     verify_login()
     
-    if request.method == "POST":
-        employee_names = request.form.getlist("employee_name")
-        usernames = request.form.getlist("username")
-        employee_levels = request.form.getlist("employee_level")
-        
-        # default passwords (fill list to similar size)
-        passwords = [hashlib.sha256(bytes("user", "utf-8")).hexdigest() for _ in range(len(employee_names))]
-        
-        data = [usernames, passwords, employee_names, employee_levels]
-        conditions = "(user_name, user_pass, user_realname, user_access) VALUES (%s, %s, %s, %s)"
-        msg = "Employee '%s' was successfully added."
-        
-        # insert
-        insert_to_table(table="users", query_conditions=conditions, msg=msg, data=data)
-        
-        return redirect(url_for('manage_employees'))
+    employee_names = request.form.getlist("employee_name")
+    usernames = request.form.getlist("username")
+    employee_levels = request.form.getlist("employee_level")
+    
+    # default passwords (fill list to similar size)
+    passwords = [hashlib.sha256(bytes("user", "utf-8")).hexdigest() for _ in range(len(employee_names))]
+    
+    data = [usernames, passwords, employee_names, employee_levels]
+    conditions = "(user_name, user_pass, user_realname, user_access) VALUES (%s, %s, %s, %s)"
+    msg = "Employee '{}' was successfully added."
+    
+    # insert
+    insert_to_table(table="users", query_conditions=conditions, msg=msg, data=data, msgVal=2)
+    
+    return redirect(url_for('manage_employees'))
 
 # update an employee
-@app.route('/edit', methods=['POST','GET']) #type:ignore
-def edit():
+@app.route('/edit/<string:id_data>', methods=['POST'])
+def edit(id_data):
     verify_access()
     verify_login()
+            
+    data = []
+    conditions = []
     
-    if request.method == "POST":
-        user_id = request.form['user_id']
-        name = request.form['employee_name']
-        username = request.form['user_name']
-        userlevel = request.form['userlevel']
-        
-        data = [name, username, userlevel, user_id]
-        conditions = "name=%s, username=%s, userlevel=%s WHERE emp_id=%s"
-        msg = "Employee '%s' was successfully updated."
+    name = request.form['employee_name']
+    if name != "":
+        conditions.append("user_realname=%s")
+        data.append(name)
+    
+    username = request.form['username']
+    if username != "":
+        conditions.append("user_name=%s")
+        data.append(username)
+    
+    userlevel = request.form['employee_level']
+    if userlevel != 0:
+        conditions.append("user_access=%s")
+        data.append(userlevel)
+    
+    if len(conditions) > 0:
+        conditions = ','.join(conditions) + " WHERE user_id=%s"
+        msg = "Employee id '{}' was successfully updated."
+        data.append(id_data)
         
         # update
-        update_table("users", conditions, data, msg)
-        return redirect(url_for('manage_employees'))
+        update_table("users", conditions, data, msg, -1)
+        
+    return redirect(url_for('manage_employees'))
         
 
 # delete an employee
@@ -307,7 +325,7 @@ def delete(id_data):
     verify_login()
     
     conditions = "user_id=%s"
-    msg = "Employee with id %s was successfully deleted"
+    msg = "Employee with id '{}' was successfully deleted"
     
     remove_from_table("users", conditions, id_data, msg)
     return redirect(url_for('manage_employees'))
@@ -321,42 +339,52 @@ def add_program():
     verify_login()
     
     if request.method == "POST":
-        program = request.form['program_name']
-        program_release = request.form['program_release']
-        program_version = request.form['release_version']
+        program = request.form.getlist('program_name')
+        program_release = request.form.getlist('program_release')
+        program_version = request.form.getlist('release_version')
         
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO programs (program_name,program_version,release_version) VALUES (%s, %s, %s)", (program, program_release, program_version))
-            connection.commit()
-            prog_id = cursor.lastrowid
-            message = f"Program {program}:{prog_id} was successfully added."
+        data = [program, program_release, program_version]
+        conditions = "(program_name,program_version,release_version) VALUES (%s, %s, %s)"
+        msg = "Program {} was successfully added."
         
-        flash(message=message)
+        insert_to_table("programs", conditions, data, msg)
+        
         return redirect(url_for('manage_programs'))
 
 # edit a program
-@app.route('/edit_program', methods=['POST','GET']) #type:ignore
-def edit_program():
+@app.route('/edit_program/<string:id_data>', methods=['POST']) #type:ignore
+def edit_program(id_data):
     verify_access()
     verify_login()
+        
+    data = []
+    conditions = []
     
-    if request.method == "POST":
-        prog_id = request.form['program_id']
-        program = request.form['program_name']
-        program_release = request.form['program_release']
-        program_version = request.form['program_version']
+    program = request.form['program_name']
+    if program != "":
+        conditions.append("program=%s")
+        data.append(program)
+    
+    program_release = request.form['program_release']
+    if program_release != "":
+        conditions.append("program_version=%s")
+        data.append(program_release)
+    
+    release_version = request.form['release_version']
+    if release_version != "":
+        conditions.append("release_version=%s")
+        data.append(release_version)
+    
+    print(program, program_release, release_version)
+    
+    if len(conditions) > 0:
+        conditions = ",".join(conditions) + " WHERE program_id=%s"
+        msg = "Program with id '{}' was successfully updated."
+        data.append(id_data)
         
-        
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute("UPDATE programs SET program=%s, program_release=%s, program_version=%s WHERE prog_id=%s", (program,program_release, program_version,prog_id))
-            connection.commit()
-            
-            message = f"Program {program} was successfully updated."
-        
-        flash(message=message)
-        return redirect(url_for('manage_program'))
+        update_table("programs", conditions, data, msg, -1)
+    
+    return redirect(url_for('manage_programs'))
 
 # delete a program
 @app.route('/delete_program/<string:id_data>', methods = ['GET'])
@@ -384,10 +412,10 @@ def add_area():
     verify_login()
     
     if request.method == "POST":
-        print(request.form)
-        area = request.form['area']
+        areas = request.form.getlist('area_title')
+        prog_id = request.form['program_list']
         
-        prog_id = request.form['prog_id']
+        skip = False
         
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
@@ -402,17 +430,20 @@ def add_area():
             '''
 
             if result['COUNT(*)'] == 0: #type:ignore
-                message="Cannot add area - programs table is empty."
+                flash("Cannot add area - programs table is empty.")
+                skip = True
             else:
-                print(area, prog_id)
-                cursor.execute("INSERT INTO areas (area,prog_id) VALUES (%s, %s)", (area, prog_id))
-                connection.commit()
-                prog_id = cursor.lastrowid
-                message = f"Area {area} was successfully added."
+                pass
+        
+        if not skip:
+            print(areas, prog_id)            
+            conditions = "(area,prog_id) VALUES (%s, %s)"
+            prog_id_list = [prog_id for _ in range(len(areas))]
+            msg = "Area '%s' was successfully added."
+        
+        insert_to_table("areas", conditions, [areas, prog_id_list], msg)
 
-
-        flash(message=message)
-        return redirect(url_for('manage_area'))
+        return redirect(url_for('manage_areas'))
 
 # edit an area 
 @app.route('/edit_area', methods=['POST','GET']) #type:ignore

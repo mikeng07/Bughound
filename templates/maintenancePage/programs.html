@@ -22,7 +22,7 @@
     <h1>Edit database - programs</h1>
 
     <hr class="long-line">
-    <br>
+
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
     <hr>
 
@@ -60,8 +60,10 @@
             <h3>Program List</h3>
             <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
         </span>
+        <br>
         <thead>
             <tr>
+                <th scope="col">ID</th>
                 <th scope="col">Program</th>
                 <th scope="col">Release</th>
                 <th scope="col">Version</th>
@@ -71,6 +73,7 @@
 
         {% for row in programs %}
         <tr>
+            <td>{{ row['program_id'] }}</td>
             <td>{{ row['program_name'] }}</td>
             <td>{{ row['program_version'] }}</td>
             <td>{{ row['release_version'] }}</td>
@@ -83,15 +86,12 @@
         <div id="modaledit{{row['program_id']}}" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
-
                     <div class="modal-header">
                         <h3>Edit Programs</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     
-                    <form id="editProgramForm" action="/edit_program" method="POST">
-                        <input hidden id="program_id" name="program_id" value="{{row['program_id']}}">
-                        
+                    <form id="editProgramForm{{row['program_id']}}" action="/edit_program/{{row['program_id']}}" method="POST">
                         <label for="program_entity_after" class="inner-modal">Program after change (leave blank for no change):</label>
                         <div id="program_entity_changes" class="inner-modal input">
                             <input id="program_name" name="program_name" size="10" placeholder="program name">
@@ -100,8 +100,7 @@
                         </div>
                     </form>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal" form="editProgramForm">Make program edit</button>
-                        <!-- <button type="button" class="btn btn-default" id="clearProgramChangeButton">Clear</button> -->
+                        <button type="submit" class="btn btn-primary" form="editProgramForm{{row['program_id']}}">Make program edit</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
