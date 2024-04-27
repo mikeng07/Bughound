@@ -22,7 +22,7 @@ db_config = {
 }
 
 
-# helper functions
+# helper functions (client-side/general)
 def verify_login():
     if "loggedin" not in session or 'loggedIn' in session is False:
          print('not logged in')
@@ -35,7 +35,123 @@ def verify_access():
         print('access not high enough')
         return render_template('index.html', access=session['user_level'], username=session['username'])
 
-def get_all_MySQL_results(sql_list: str | list[str]):
+def set_static_report_values():
+    report_types = [
+        'Coding Error', 'Design Issue', 'Hardware', 
+        'Suggestion', 'Documentation', 'Query']
+
+    severities = ['Mild','Infectious','Serious','Fatal']
+    priority=[1,2,3,4,5,6]
+    status=['Open', 'Closed', 'Resolved']
+    resolution=['Pending', 'Fixed', 'Irreproducible', 
+                'Deferred', 'As designed','Withdrawn by reporter', 
+                'Need more info', 'Disagree with suggestion', 'Duplicate']
+    resolution_version=[1,2,3,4]
+
+    return report_types, severities, priority, status, resolution, resolution_version
+
+def title(strings):
+    for i, string in enumerate(strings):
+        strings[i] = string.title()
+    return strings
+
+
+## helper functions (table functions) 
+def insert_to_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
+    
+    stmt = " ".join(["INSERT INTO", table, query_conditions])
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+            
+        for n in range(len(data[0])):
+            # get value n from each of the arrays in data
+            
+            values = [data[k][n] for k in range(len(data))]
+            message = msg.format(data[msgVal][n]) 
+            try:
+                cursor.execute(stmt, values)
+                connection.commit()
+                id = cursor.lastrowid
+            except:
+                message = "'{}' happens to be a dupe in table:{}".format(data[msgVal][n], table)
+            finally:
+                if should_flash:
+                    flash(message)
+    
+        print("insert complete")
+
+def unique_area_insert(area):
+    
+    # verify if queried area already exists
+    results = select_from_table(table="areas", selection="area_id", query_conditions="area_title=%s", data=[area])
+    
+    if len(results) == 0:
+        # result does not exist, so we commit new addition to areas
+        insert_to_table(table="areas", query_conditions="(area_title) VALUES (%s)", data=[area], should_flash=False)
+        results = select_from_table(table="areas", selection="area_id", query_conditions="area_title=%s", data=[area])
+    
+    print(results)
+    # return area_id of area
+    return results[0]['area_id'] #type:ignore
+
+def unique_area_inserts(areas):
+    if len(areas) == 1:
+        return unique_area_insert(areas)
+    
+    return [unique_area_insert(area) for area in areas]
+
+def update_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
+    
+    stmt = " ".join(["UPDATE", table, "SET", query_conditions])
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        if should_flash:
+            flash(msg.format(data[msgVal]))
+    
+    print('update complete')
+        
+def remove_from_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True, selection=""):
+    
+    stmt = " ".join(["DELETE", selection, "FROM", table, "WHERE", query_conditions])
+    
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        cursor.execute(stmt, data)
+        connection.commit()
+        if should_flash:
+            flash(msg.format(data[msgVal]))
+        
+    print('remove complete')
+
+def select_from_table(table, query_conditions="", data=None, selection="*", msg="", msgVal=0, should_flash=False):
+    
+    stmt = ["SELECT", selection, "FROM", table]
+    if query_conditions != "":
+        stmt.append("WHERE")
+        stmt.append(query_conditions)
+    stmt = " ".join(stmt)
+        
+    connection = pymysql.connect(**db_config)
+    with connection.cursor() as cursor:
+        if data is not None:
+            cursor.execute(stmt, data)
+        else:
+            cursor.execute(stmt)
+
+        results = cursor.fetchall()
+            
+        connection.commit()
+        
+        if should_flash and data is not None:
+            flash(msg.format(data[msgVal]))
+    
+    return results
+
+def get_all_table_results(sql_list: str | list[str]):
 
     # result pile
     data = []
@@ -57,78 +173,6 @@ def get_all_MySQL_results(sql_list: str | list[str]):
                 connection.commit()
 
     return data
-
-def set_static_report_values():
-    report_types = [
-        'Coding Error', 'Design Issue', 'Hardware', 
-        'Suggestion', 'Documentation', 'Query']
-
-    severities = ['Mild','Infectious','Serious','Fatal']
-    priority=[1,2,3,4,5,6]
-    status=['Open', 'Closed', 'Resolved']
-    resolution=['Pending', 'Fixed', 'Irreproducible', 
-                'Deferred', 'As designed','Withdrawn by reporter', 
-                'Need more info', 'Disagree with suggestion', 'Duplicate']
-    resolution_version=[1,2,3,4]
-
-    return report_types, severities, priority, status, resolution, resolution_version
-
-def capitalize(strings):
-    for i, string in enumerate(strings):
-        strings[i] = string[0].upper() + string[1:]
-    return strings
-
-
-## helper functions (maintenance parts) 
-def insert_to_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
-    
-    stmt = "INSERT INTO "+ table +" "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-            
-        for n in range(len(data[0])):
-            # get value n from each of the arrays in data
-            
-            values = [data[k][n] for k in range(len(data))]
-            message = msg.format(data[msgVal][n]) 
-            try:
-                cursor.execute(stmt, values)
-                connection.commit()
-                id = cursor.lastrowid
-            except:
-                message = "'{}' happens to be a dupe in table:{}".format(data[msgVal][n], table)
-            finally:
-                if should_flash:
-                    flash(message)
-    
-        print("insert complete")    
-
-def update_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
-    
-    stmt = "UPDATE "+ table +" SET "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
-    
-    print('update complete')
-        
-def remove_from_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
-    
-    stmt = "DELETE FROM "+ table +" WHERE "+ query_conditions
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
-        
-    print('remove complete')
 
 
 # initial landing (Login)
@@ -223,9 +267,8 @@ def manage_employees():
     verify_access()
     verify_login()
     
-    sql = 'SELECT * FROM users'
-    data = get_all_MySQL_results(sql)
-    print(data)
+    data = get_all_table_results('SELECT * FROM users')
+    # print(data)
     return render_template('maintenancePage/employees.html', employees=data, username=username, userlevel=userlevel)
 
 # manage program page
@@ -237,9 +280,8 @@ def manage_programs():
     verify_access()
     verify_login()
     
-    sql = 'SELECT * FROM programs'
-    data = get_all_MySQL_results(sql)
-    print(data)
+    data = get_all_table_results('SELECT * FROM programs')
+    # print(data)
      
     return render_template('maintenancePage/programs.html', programs=data, username=username, userlevel=userlevel)
 
@@ -254,15 +296,14 @@ def manage_areas():
         
     sql = [
       "SELECT * FROM programs",
+      "SELECT * FROM areas",
       "SELECT * FROM ((program_areas INNER JOIN programs ON program_areas.program_id=programs.program_id) INNER JOIN areas ON program_areas.area_id=areas.area_id) ORDER BY programs.program_id, areas.area_id"
     ]
     
-    programs, data = get_all_MySQL_results(sql)
+    programs, areas, data = get_all_table_results(sql)
+    # print(data,'\n',programs)
     
-    print(data)
-    print(programs)
-    
-    return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, username=username, userlevel=userlevel)
+    return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, areas=areas, username=username, userlevel=userlevel)
 
 
 # insert new employee (maintenancePage/employee)
@@ -409,7 +450,6 @@ def delete_program(id_data):
     return redirect(url_for('manage_programs'))
 
 
-
 # add an area (maintenancePage/area)
 @app.route('/add_area', methods=['POST'])
 def add_area():
@@ -420,9 +460,9 @@ def add_area():
     areas = request.form.getlist('area_title')
     prog_id = request.form['program_list']
     
-    # capitalize all area entries (makes it easier for everyone)
-    areas = capitalize(areas)
-    
+    print('program_id',prog_id)
+    print('areas:', areas)
+        
     skip = False
     
     connection = pymysql.connect(**db_config)
@@ -437,44 +477,57 @@ def add_area():
             flash("Cannot add area - programs table is empty.")
             skip = True
         
-    if skip == False:        
-        # commit to areas
-        insert_to_table(table="areas", query_conditions="(area_title) VALUES (%s)", data=[areas], should_flash=False)
+    if skip == False:
+        # return the full list of area_ids (new and existing) based on form
+        area_ids = unique_area_inserts(areas)
         
         # commit to program_areas
-        print(areas, prog_id)    
-        conditions = "(area_id, program_id) VALUES ((SELECT area_id from areas where area_title=%s), %s)"
-        prog_id_list = [prog_id for _ in range(len(areas))]
+        print(areas, '\n', area_ids, '\n', prog_id)    
+        conditions = "(area_id, program_id) VALUES (%s, %s)"
+        prog_id_list = [prog_id for _ in range(len(area_ids))]
         msg = "Area '{}' was successfully added."
     
-        insert_to_table("program_areas", conditions, [areas, prog_id_list], msg)
+        insert_to_table("program_areas", conditions, [area_ids, prog_id_list], msg)
 
     return redirect(url_for('manage_areas'))
 
-# edit an area 
-@app.route('/edit_area/<string:id_data>', methods=['POST']) #type:ignore
-def edit_area(id_data):
+# edit a program-area relationship 
+@app.route('/edit_program_area/<string:pa_id>', methods=['POST'])
+def edit__program_area(pa_id):
 
     verify_access()
     verify_login()
     
-    prog_id = request.form['prog_id']
-    area = request.form['area']
-    area_id = request.form['area_id']
-            
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE areas SET area=%s, prog_id=%s WHERE area_id=%s", (area,prog_id, area_id))
-        connection.commit()
-        
-        message = f"Areas {area} was successfully updated."
+    row_prog_id = request.form['row_program_id']
+    prog_id = request.form['program_list']
     
-    flash(message=message)
-    return redirect(url_for('manage_area'))
+    if prog_id != row_prog_id:
+        # update program_id in program_areas
+        print('changing program')
+        conditions = "program_id=%s WHERE pa_id=%s"
+        msg = "Relationship of area has been changed to program with id '{}'"
+        update_table("program_areas", conditions, (prog_id, pa_id), msg, 1)
+    
+    area = request.form['area_title']
+    if area != "":    
+        # update area name (make a new area entry if needed)
+        print('changing area title')
+        
+        # get area_id of new area OR the existing area (user typed a dupe) 
+        new_area_id = unique_area_insert(area)
+        
+        # update area_id in program_areas via pa_id
+        # form area_id -> result area_id
+                
+        conditions = "area_id=%s WHERE pa_id=%s"
+        msg = "Area was successfully updated to id '{}'"
+        update_table("program_areas", conditions, (new_area_id, pa_id), msg)   
+    
+    return redirect(url_for('manage_areas'))
 
 # delete an area
-@app.route('/delete_area/<string:id_data>', methods = ['GET'])
-def delete_area(id_data):
+@app.route('/delete_area/<string:pa_id>', methods = ['GET'])
+def delete_area(pa_id):
 
     verify_access()
     verify_login()
@@ -482,7 +535,7 @@ def delete_area(id_data):
     conditions = "pa_id=%s"
     msg = "Connection between program and area at id {} was successfully deleted"
     
-    remove_from_table("program_areas", conditions, (id_data), msg)
+    remove_from_table("program_areas", conditions, (pa_id), msg)
     return redirect(url_for('manage_areas'))
 
 
@@ -496,7 +549,7 @@ def update_bug():
     
     sql_list = ['SELECT * FROM bugs', 'SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
 
-    data, programs, areas, employees = get_all_MySQL_results(sql_list)
+    data, programs, areas, employees = get_all_table_results(sql_list)
     print(data)
 
     report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
@@ -655,7 +708,7 @@ def add_bug():
 
 
     sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
-    programs, areas, employees = get_all_MySQL_results(sql_list)
+    programs, areas, employees = get_all_table_results(sql_list)
     print(programs)
     print(areas)
     print(employees)
@@ -720,7 +773,7 @@ def search_bug():
             sql += " WHERE " + " AND ".join(conditions)
        
         sql_list.append(sql)
-        programs, areas, employees, search_result = get_all_MySQL_results(sql_list)
+        programs, areas, employees, search_result = get_all_table_results(sql_list)
 
         # if the request method is GET, render the add_bug page with the necessary form data
         report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
@@ -730,7 +783,7 @@ def search_bug():
         # redirect to a success page
         return render_template('search_bug_result.html', result=search_result, username=username, userlevel=userlevel,programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
     
-    programs, areas, employees = get_all_MySQL_results(sql_list)
+    programs, areas, employees = get_all_table_results(sql_list)
     
     # if the request method is GET, render the add_bug page with the necessary form data
     report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()

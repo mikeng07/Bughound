@@ -114,6 +114,11 @@ div.inline-child {
   max-width: 0;
 }
 
+.no_list_results {
+  width: 100%;
+  text-align: center;
+}
+
 .inner-modal {
   margin-left: 1%;
 
@@ -121,6 +126,7 @@ div.inline-child {
 .inner-modal.input {
   margin-right: 1%;
 }
+
 
 /* submission spinner (createPage) */
 .spinner {

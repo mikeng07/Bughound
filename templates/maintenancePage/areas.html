@@ -27,33 +27,30 @@
     <hr>
 
     <div id="area_results">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
+        {% include 'flash_results.html' %}
     </div>
 
     <h3>Add Areas</h3>
     <form id="newAreaForm" action="/add_area" method="POST">
         <label for="program_list">Add to program:</label>      
-        <select id="program_list" name="program_list" style="margin-bottom: 5px;">
+        <select id="program_list" name="program_list" style="margin-bottom: 5px; width: 140px;">
             <option value="default" disabled selected>------</option>
             {% for program in programs %}
                 <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
             {% endfor %}
         </select>
     
-            <div id="area_entity" style="margin-bottom: 5px;">
-                <input id="area_title" name="area_title" size="30" placeholder="functional area">
-                <button type="button" id="newAreaButton">+</button>
-                <button type="button" id="removeAreaButton" hidden=true>--</button>
-                <br>
-            </div>
+        <div id="area_entity" style="margin-bottom: 5px;">
+            <input id="area_title" name="area_title" list="area_title_options" size="30" placeholder="functional area">
+            <datalist id="area_title_options" style="width: 300px;">
+                {% for area in areas %}
+                    <option data-value="{{ area['area_id'] }}" value="{{ area['area_title'] }}"></option>
+                {% endfor %}
+            </datalist>
+            <button type="button" id="newAreaButton">+</button>
+            <button type="button" id="removeAreaButton" hidden=true>--</button>
+            <br>
+        </div>
     </form>
     
     <button id="clearAreaButton">Clear</button>
@@ -106,22 +103,32 @@
                         <h3>Edit Area</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-
-                    <form id="editAreaForm{{row['pa_id']}}" action="/edit_area{{row['pa_id']}}" method="POST">
+                    
+                    <form id="editAreaForm{{row['pa_id']}}" action="/edit_program_area/{{row['pa_id']}}" method="POST">
                         <div id="area_entity_changes" class="inner-modal input">
-                            <input hidden id="area_id" name="area_id" value="{{row['area_id']}}">
-                            <label for="area_title" style="margin-left: 17px;">new Program: </label>
+                            <input hidden id="row_program_id" name="row_program_id" value="{{row['program_id']}}">
+                            <label for="program_list" style="margin-left: 17px;">new Program: </label>
                             <select id="program_list" name="program_list" style="margin-bottom: 5px;">
                                 {% for program in programs %}
                                     {% if program["program_id"] == row["program_id"] %}
-                                    <option value="{{ program['program_id'] }}" disabled selected>{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                                    <option value="{{ program['program_id'] }}" selected>{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
                                     {% else %}
                                     <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </select><br>
-                            <label for="area_title" style="margin-left: 17px; margin-right: 29px;">new Area: </label>
-                            <input id="area_title" name="area_title" size="30" placeholder="{{row['area_title']}}">
+
+                            <label for="area_title" style="margin-left: 17px; margin-right: 28px;">new Area: </label>
+                            <input id="area_title" name="area_title" list="area_title_options" size="21">
+                            <datalist id="area_title_options">
+                                {% for area in areas %}
+                                    {% if row['area_title'] == area['area_title'] %}
+                                    <option data-value="{{ area['area_id'] }}" value="{{ area['area_title'] }}" disabled selected></option>    
+                                    {% else %}
+                                    <option data-value="{{ area['area_id'] }}" value="{{ area['area_title'] }}"></option>
+                                    {% endif %}
+                                {% endfor %}
+                            </datalist>
                         </div>
                     </form>
 
@@ -136,6 +143,13 @@
         {% endfor %}
 
     </table>
+    {% if not program_areas %}
+        {% include 'no_results.html' %}
+    {% endif %}
+
+
+    <br>
+    <hr class="long-line">
 
 
     <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
@@ -147,7 +161,12 @@
         $('#newAreaButton').on("click", () => {
             
             let temp = '<div id="area_entity" style="margin-bottom: 5px;">'+
-                '<input id="area_title" name="area_title" size="30" placeholder="functional area">'+
+                '<input id="area_title" name="area_title" list="area_title_options" size="30" placeholder="functional area">'+
+                '<datalist id="area_title_options">'+
+                    '{% for area in areas %}'+
+                        '<option data-value="' + "{{ area['area_id'] }}" + ' value="' + "{{ area['area_title'] }}"+'"></option>' +
+                    '{% endfor %}'+
+               ' </datalist>'+
                 '<br>'+
             '</div>';
             $("#newAreaForm").append(temp);

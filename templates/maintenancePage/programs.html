@@ -27,15 +27,7 @@
     <hr>
 
     <div id="program_results">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
+        {% include 'flash_results.html' %}
     </div>
 
     <h3>Add Programs</h3>
@@ -111,7 +103,12 @@
         {% endfor %}
 
     </table>
+    {% if not programs %}
+        {% include 'no_results.html' %}
+    {% endif %}
 
+    <br>
+    <hr class="long-line">
     
     <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

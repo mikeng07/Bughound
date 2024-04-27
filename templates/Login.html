@@ -12,7 +12,7 @@
 <body>
   <h1>Bughound Login</h1>
   <hr class="long-line">
-  <br><br><br><br>
+  <br>
   
   <form id="loginForm" action="/" method="POST">
     <div class="container">
@@ -20,16 +20,16 @@
       <input type="text" id="username" placeholder="Enter Username" name="username" required>
     </div>
 
-    <div class="container">
+    <div class="container" align-items="center">
       <label for="password" style="margin-right: 5px;"><b>Password</b></label>
       <input type="password" id="password" placeholder="Enter Password" name="password" required>
     </div>
     
-    <br>
     <div class="container" style="margin-left: 40px;">
       <button id="loginButton" type="submit">Login</button>
       <button id="forgotPasswordButton" type="button" onclick="forgotPassword()">Forgot Password?</button>  
     </div>
+    
   </form>
   <script>
     function forgotPassword() {alert('not available yet, sorry!');}
