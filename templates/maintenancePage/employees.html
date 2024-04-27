@@ -23,6 +23,7 @@
     <hr class="long-line">
     
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
+    <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
     <hr>
 
     <div id="employee_results">
@@ -32,11 +33,11 @@
 
     <h3>Add Employees</h3>
     <form id="newEmployeeForm" action="/insert" method="POST">
-        <div id="employee_entity" style="margin-bottom: 5px;">
+        <div id="employee_entity" class="add-entity">
             <input id="employee_name" name="employee_name" size="12" placeholder="employee name">
             <input id="username" name="username" size="12" placeholder="username">
             <select id="employee_level" name="employee_level" class="numeral" required>
-                <option disabled selected>access lvl</option>
+                <option disabled selected>lvl</option>
                 <option value=1>1</option>
                 <option value=2>2</option>
                 <option value=3>3</option>
@@ -51,30 +52,26 @@
     <button type="submit" form="newEmployeeForm">Add new employee(s)</button>
 
     <hr>
+    
+    <h3>Employee List</h3>
 
     <table class="fixedSize">
-        <span>
-            <h3>Employee List</h3>
-            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
-        </span>
-        <br><hr>
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Username</th>
-                <th scope="col">Acc Lvl</th>
-                <th scope="col" class="overflow">Pwd Hash</th>
-                <th scope="col">Operations</th>
-            </tr>
+        <thead class="fixedHeader">
+            <th scope="col" style="text-align:right;">ID</th>
+            <th scope="col" style="text-align:center;">Lvl</th>
+            <th scope="col">Name</th>
+            <th scope="col">Username</th>
+            <th scope="col">Pwd Hash</th>
+            <th scope="col">Operations</th>
         </thead>
 
         {% for row in employees %}
+
         <tr>
-            <td>{{ row['user_id'] }}</td>
+            <td style="text-align:right;">{{ row['user_id'] }}</td>
+            <td style="text-align:center;">{{ row['user_access'] }}</td>
             <td>{{ row['user_realname'] }}</td>
             <td>{{ row['user_name'] }}</td>
-            <td>{{ row['user_access'] }}</td>
             <td class="overflow pwd">{{ row['user_pass'] }}</td>
             
             {% if row['user_realname'] != "ADMIN" and row['user_realname'] != "USER" %}
@@ -94,21 +91,23 @@
                         <h4 class="modal-title">Update Employee</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-                    <form id="accessChangeEmployeeForm/{{row['user_id']}}" action="/edit/{{row['user_id']}}" method="POST">
-                        <label for="employee_name" class="inner-modal">Employee name:</label>
-                        <input id="employee_name" name="employee_name" class="inner-modal input" size="15" placeholder="{{row['user_realname']}}">
-                        <br>
-                        <label for="employee_level" class="inner-modal">Username:</label>
-                        <input id="username" name="username" class="inner-modal input" size="7" placeholder="{{row['user_name']}}">
-                        <br>
-                        <label for="employee_level" class="inner-modal">New access level:</label>
-                        <select id="employee_level" name="employee_level" class="inner-modal input" required>
-                            <option value=0 selected disabled>0</option>
-                            <option value=1>1</option>
-                            <option value=2>2</option>
-                            <option value=3>3</option>
-                        </select>
-                    </form>
+                    <div class="modal-body">
+                        <form id="accessChangeEmployeeForm/{{row['user_id']}}" action="/edit/{{row['user_id']}}" method="POST">
+                            <label for="employee_name" class="inner-modal" style="margin-left: 10px;">Employee name:</label>
+                            <input id="employee_name" name="employee_name" class="inner-modal input" size="15" placeholder="{{row['user_realname']}}">
+                            <br>
+                            <label for="employee_level" class="inner-modal" style="margin-left: 51px;">Username:</label>
+                            <input id="username" name="username" class="inner-modal input" size="15" placeholder="{{row['user_name']}}">
+                            <br>
+                            <label for="employee_level" class="inner-modal" style="margin-left: 9px;">New access level:</label>
+                            <select id="employee_level" name="employee_level" class="numeral" required>
+                                <option value=0 selected disabled>0</option>
+                                <option value=1>1</option>
+                                <option value=2>2</option>
+                                <option value=3>3</option>
+                            </select>
+                        </form>
+                    </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" form="accessChangeEmployeeForm/{{row['user_id']}}"><b>Make changes</b></button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -116,7 +115,9 @@
                 </div>
             </div>
         </div>
+
         {% endfor %}
+        
     </table>
 
     {% if not employees %}
@@ -134,11 +135,11 @@
         // newEmployeeForm
         $('#newEmployeeButton').on("click", () => {
             
-            let temp = '<div id="employee_entity" style="margin-bottom: 5px;">'+
+            let temp = '<div id="employee_entity" class="add-entity">'+
                 '<input id="employee_name" name="employee_name" size="12" placeholder="employee name"> '+
                 '<input id="username" name="username" size="12" placeholder="username"> '+
                 '<select id="employee_level" name="employee_level" class="numeral" required>'+
-                    '<option disabled selected>access lvl</option>'+
+                    '<option disabled selected>lvl</option>'+
                     '<option value=1>1</option>'+
                     '<option value=2>2</option>'+
                     '<option value=3>3</option>'+

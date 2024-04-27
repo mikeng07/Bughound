@@ -24,6 +24,7 @@
     <hr class="long-line">
 
     <button onclick="move(maintain_db)">Return to maintenance menu</button>
+    <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
     <hr>
 
     <div id="program_results">
@@ -32,7 +33,7 @@
 
     <h3>Add Programs</h3>
     <form id="newProgramForm" action="/add_program" method="POST">
-        <div id="program_entity" style="margin-bottom: 5px;">
+        <div id="program_entity" class="add-entity">
             <input id="program_name" name="program_name" size="10" placeholder="program name">
             <input id="program_release" name="program_release" size="6" placeholder="release">
             <input id="release_version" name="release_version" size="3" placeholder="version">
@@ -47,13 +48,10 @@
 
     <hr>
 
+    <h3>Program List</h3>
+
     <table class="fixedSize">
-        <span>
-            <h3>Program List</h3>
-            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
-        </span>
-        <br><hr>
-        <thead>
+        <thead class="fixedHeader">
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Program</th>
@@ -103,6 +101,7 @@
         {% endfor %}
 
     </table>
+
     {% if not programs %}
         {% include 'no_results.html' %}
     {% endif %}
@@ -118,7 +117,7 @@
         // newProgramForm
         $('#newProgramButton').on("click", () => {
             
-            let temp = '<div id="program_entity" style="margin-bottom: 5px;">'+
+            let temp = '<div id="program_entity" class="add-entity">'+
                 '<input id="program_name" name="program_name" size="10" placeholder="program name"> '+
                 '<input id="program_release" name="program_release" size="6" placeholder="release"> '+
                 '<input id="release_version" name="release_version" size="3" placeholder="version">'+

@@ -23,81 +23,91 @@
 
     <hr class="long-line">
 
-    <button onclick="move(maintain_db)">Return to maintenance menu</button>
+    <button style="margin-bottom: 10px;" onclick="move(maintain_db)">Return to maintenance menu</button>
+    <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
+    <br>
+
+    <span id="radioSpan" style="margin-left: 20px;">
+        <input type="radio" name="area_options_group" id="add_area_radio" value="add" checked>
+        <label style="margin-right: 10px;">Add area</label>
+        <input type="radio" name="area_options_group" id="edit_area_radio" value="edit">
+        <label>Edit area name</label>
+    </span>
+
     <hr>
 
     <div id="area_results">
         {% include 'flash_results.html' %}
     </div>
 
-    <h3>Add Areas</h3>
-    <form id="newAreaForm" action="/add_area" method="POST">
-        <label for="program_list" style="margin-left: 10px;">to program:</label>      
-        <select id="program_list" name="program_list">
-            <option value="default" disabled selected>------</option>
-            {% for program in programs %}
-                <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
-            {% endfor %}
-        </select>
     
-        <div id="area_entity" style="margin-bottom: 5px;">
-            <input id="area_title" name="area_title" list="area_title_options" size="30" placeholder="functional area">
-            <datalist id="area_title_options" style="width: 300px;">
-                {% for area in areas %}
-                    <option data-value="{{ area['area_id'] }}" value="{{ area['area_title'] }}"></option>
+    <div id="addAreaBlock">
+        <h3>Add Areas</h3>
+        <form id="newAreaForm" action="/add_area" method="POST" style="margin-top: 10px; ">
+            <label for="program_list" style="margin-left: 10px;">to program:</label>      
+            <select id="program_list" name="program_list" style="width: 203px;">
+                <option value="default" disabled selected>------</option>
+                {% for program in programs %}
+                    <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
                 {% endfor %}
-            </datalist>
-            <button type="button" id="newAreaButton">+</button>
-            <button type="button" id="removeAreaButton" hidden=true>--</button>
-            <br>
-        </div>
-    </form>
-    
-    <button id="clearAreaButton">Clear</button>
-    <button type="submit" form="newAreaForm">Add new Area(s)</button>
+            </select>
         
-    <hr>
+            <div id="area_entity" class="add-entity">
+                <input id="area_title" name="area_title" list="area_title_options" size="30" placeholder="functional area">
+                <datalist id="area_title_options" style="width: 300px;">
+                    {% for area in areas %}
+                        <option data-value="{{ area['area_id'] }}" value="{{ area['area_title'] }}"></option>
+                    {% endfor %}
+                </datalist>
+                <button type="button" id="newAreaButton">+</button>
+                <button type="button" id="removeAreaButton" hidden=true>--</button>
+                <br>
+            </div>
+        </form>
+        
+        <button id="clearAreaButton">Clear</button>
+        <button type="submit" form="newAreaForm">Add new Area(s)</button>
+        <hr>
+    </div>
 
-    <h3>Edit Existing Area Names</h3>
-    <form id="editAreaNameForm" action="/edit_area" method="POST">
-        <label for="area_list" style="margin-left: 10px;">From:</label>
-        <select id="area_list" name="area_list" style="width: 150px;">
-            <option value="default" disabled selected>------</option>
-            {% for area in areas %}
-                <option value="{{ area['area_id'] }}"> {{ area['area_title'] }} </option>
-            {% endfor %}
-        </select>
-        <label>to</label>
-        <input id="new_area_title" name="new_area_title" size="auto" placeholder="new area name">
-    </form>
-
-    <button id="clearAreaNameButton">Clear</button>
-    <button type="submit" form="editAreaNameForm">Change Area Name</button>
-
-    <hr>
+    <div id="editAreaNameBlock">
+        <h3>Edit Existing Area Names</h3>
+        <form id="editAreaNameForm" action="/edit_area" method="POST" style="margin-top: 10px; margin-bottom: 11px;">
+            <label for="area_list" style="margin-left: 12px;">from:</label>
+            <select id="area_list" name="area_list" style="width: 189px;">
+                <option value="default" disabled selected>------</option>
+                {% for area in areas %}
+                    <option value="{{ area['area_id'] }}"> {{ area['area_title'] }} </option>
+                {% endfor %}
+            </select><br>
+            <label style="margin-left: 31px;">to:</label>
+            <input id="new_area_title" name="new_area_title" size="auto" placeholder="new area name">
+        </form>
     
+        <button id="clearAreaNameButton">Clear</button>
+        <button type="submit" form="editAreaNameForm">Change Area Name</button>
+        <hr>
+    </div>
+    
+    <h3>Area List</h3>
+
     <table class="fixedSize">
-        <span>
-            <h3>Area List</h3>
-            <button id="list_refresh" type="button" onclick="move(self)">↻ Refresh list</button>
-        </span>
-        <br><hr>
-        <thead>
+        <thead class="fixedHeader">
             <tr>
-                <th scope="col">Prog ID</th>
-                <th scope="col">Area ID</th>
-                <th scope="col" class="overflow">Program</th>
-                <th scope="col" class="overflow">Release</th>
-                <th scope="col" class="overflow">Version</th>
+                <th scope="col" style="text-align:right;">P.ID</th>
+                <th scope="col">A.ID</th>
+                <th scope="col">Program</th>
+                <th scope="col">Release</th>
+                <th scope="col">Version</th>
                 <th scope="col">Area</th>
-                <th scope="col" class="overflow">Operations</th>
+                <th scope="col">Operations</th>
             </tr>
         </thead>
         
         {% for row in program_areas %}
 
         <tr>
-            <td>{{ row['program_id'] }}</td>
+            <td style="text-align:right;">{{ row['program_id'] }}</td>
             <td>{{ row['area_id'] }}</td>
 
             <!-- program name, release, version -->
@@ -188,7 +198,9 @@
 
         {% endfor %}
 
+
     </table>
+    
     {% if not program_areas %}
         {% include 'no_results.html' %}
     {% endif %}
@@ -206,7 +218,7 @@
         // newAreaForm
         $('#newAreaButton').on("click", () => {
             
-            let temp = '<div id="area_entity" style="margin-bottom: 5px;">'+
+            let temp = '<div id="area_entity" class="add-entity">'+
                 '<input id="area_title" name="area_title" list="area_title_options" size="30" placeholder="functional area">'+
                 '<datalist id="area_title_options">'+
                     '{% for area in areas %}'+
@@ -240,6 +252,13 @@
             $('#editAreaNameForm #area_list').val('default');
             $('#editAreaNameForm #new_area_title').val('');
         })
+
+        $('input[name="area_options_group"]').on("change", (e) => {
+            $('#addAreaBlock').toggle();
+            $('#editAreaNameBlock').toggle();
+        });
+
+        $('#editAreaNameBlock').toggle();
 
     </script>
 </body>

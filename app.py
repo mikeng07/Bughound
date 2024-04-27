@@ -219,7 +219,7 @@ def login_auth():
             return redirect('/')
 
 # invoke logout
-@app.route('/logout', methods=['POST','GET'])
+@app.route('/logout', methods=['POST','GET', 'PUT'])
 def logout():
     print('making logout request...')
 
@@ -232,7 +232,7 @@ def logout():
         flash(message=message)
     return redirect('/')
 
-@app.route("/change_pwd", methods=["POST",])
+@app.route("/change_pwd", methods=["POST", "PUT"])
 def change_password():
     
     username = request.form["pw_username"]  
@@ -271,7 +271,7 @@ def change_password():
     return redirect(url_for("/"))
 
 # homepage (index)
-@app.route('/homepage', methods=["GET"])
+@app.route('/homepage')
 def homepage():
     print('homepage...')
     print("session:", session.items())
@@ -366,7 +366,7 @@ def insert():
     return redirect(url_for('manage_employees'))
 
 # update an employee
-@app.route('/edit/<string:id_data>', methods=['POST'])
+@app.route('/edit/<string:id_data>', methods=['POST', 'PUT'])
 def edit(id_data):
     verify_access()
     verify_login()
@@ -400,7 +400,7 @@ def edit(id_data):
     return redirect(url_for('manage_employees'))
 
 # delete an employee
-@app.route('/delete/<string:id_data>', methods = ['GET'])
+@app.route('/delete/<string:id_data>', methods = ['GET', 'DELETE'])
 def delete(id_data):
 
     verify_access()
@@ -433,7 +433,7 @@ def add_program():
     return redirect(url_for('manage_programs'))
 
 # edit a program
-@app.route('/edit_program/<string:id_data>', methods=['POST']) #type:ignore
+@app.route('/edit_program/<string:id_data>', methods=['POST', 'PUT']) #type:ignore
 def edit_program(id_data):
     verify_access()
     verify_login()
@@ -468,7 +468,7 @@ def edit_program(id_data):
     return redirect(url_for('manage_programs'))
 
 # delete a program
-@app.route('/delete_program/<string:id_data>', methods = ['GET'])
+@app.route('/delete_program/<string:id_data>', methods = ['GET', 'DELETE'])
 def delete_program(id_data):
 
     verify_access()
@@ -534,7 +534,7 @@ def add_area():
     return redirect(url_for('manage_areas'))
 
 # edit a program-area connection
-@app.route('/edit_program_area/<string:pa_id>', methods=['POST'])
+@app.route('/edit_program_area/<string:pa_id>', methods=['POST', 'PUT'])
 def edit_program_area(pa_id):
 
     verify_access()
@@ -570,7 +570,7 @@ def edit_program_area(pa_id):
     return redirect(url_for('manage_areas'))
 
 # edit an area
-@app.route('/edit_area', methods=["POST"])
+@app.route('/edit_area', methods=["POST", 'PUT'])
 def edit_area():
     
     area_id = request.form['area_list']
@@ -587,7 +587,7 @@ def edit_area():
     return redirect(url_for("manage_areas"))
 
 # delete an area connection to a program
-@app.route('/delete_program_area/<string:pa_id>', methods = ['GET'])
+@app.route('/delete_program_area/<string:pa_id>', methods = ['GET', 'DELETE'])
 def delete_program_area(pa_id):
 
     verify_access()
@@ -601,7 +601,7 @@ def delete_program_area(pa_id):
     return redirect(url_for('manage_areas'))
 
 # delete area (and all connections to all programs)
-@app.route('/delete_area/<string:area_id>', methods= ['GET'])
+@app.route('/delete_area/<string:area_id>', methods= ['GET', 'DELETE'])
 def delete_area(area_id):
     
     verify_access()
@@ -617,6 +617,8 @@ def delete_area(area_id):
     remove_from_table("areas", conditions, (area_id), msg)
     return redirect(url_for('manage_areas'))
 
+
+# bug report stuff -----------------------------------------------
 
 # updateBug.html --------------------------------
 @app.route('/update_bug')
@@ -783,7 +785,7 @@ def add_bug():
         
         # redirect to a success page
         flash(message=message)
-        return redirect(url_for('add_bug'))
+        return redirect(url_for('homepage'))
 
 
     sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
@@ -795,7 +797,7 @@ def add_bug():
     # if the request method is GET, render the add_bug page with the necessary form data
     report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
 
-    return render_template('addBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
+    return render_template('bugReport.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
 
 
 # @app.route('/update',methods=['POST','GET'])
