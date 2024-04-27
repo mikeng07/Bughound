@@ -76,11 +76,15 @@
             <td>{{ row['user_name'] }}</td>
             <td>{{ row['user_access'] }}</td>
             <td class="overflow pwd">{{ row['user_pass'] }}</td>
-         
+            
+            {% if row['user_realname'] != "ADMIN" and row['user_realname'] != "USER" %}
             <td>
                 <a href="/update/{{row['user_id']}}" data-toggle="modal" data-target="#modaledit{{row['user_id']}}">Edit</a> |
-                <a href="/delete/{{row['user_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+                <a href="/delete/{{row['user_id']}}" onclick="return confirm('Confirm Deletion of Employee info?')">Delete</a>
             </td>
+            {% else %}
+            <td>N/A | N/A</td>
+            {% endif %}
         </tr>
 
         <div id="modaledit{{row['user_id']}}" class="modal fade" role="dialog">

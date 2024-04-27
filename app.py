@@ -95,12 +95,6 @@ def unique_area_insert(area):
     # return area_id of area
     return results[0]['area_id'] #type:ignore
 
-def unique_area_inserts(areas):
-    if len(areas) == 1:
-        return unique_area_insert(areas)
-    
-    return [unique_area_insert(area) for area in areas]
-
 def update_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
     
     stmt = " ".join(["UPDATE", table, "SET", query_conditions])
@@ -383,18 +377,17 @@ def add_program():
     verify_access()
     verify_login()
     
-    if request.method == "POST":
-        program = request.form.getlist('program_name')
-        program_release = request.form.getlist('program_release')
-        program_version = request.form.getlist('release_version')
-        
-        data = [program, program_release, program_version]
-        conditions = "(program_name,program_version,release_version) VALUES (%s, %s, %s)"
-        msg = "Program {} was successfully added."
-        
-        insert_to_table("programs", conditions, data, msg)
-        
-        return redirect(url_for('manage_programs'))
+    program = request.form.getlist('program_name')
+    program_release = request.form.getlist('program_release')
+    program_version = request.form.getlist('release_version')
+    
+    data = [program, program_release, program_version]
+    conditions = "(program_name,program_version,release_version) VALUES (%s, %s, %s)"
+    msg = "Program {} was successfully added."
+    
+    insert_to_table("programs", conditions, data, msg)
+    
+    return redirect(url_for('manage_programs'))
 
 # edit a program
 @app.route('/edit_program/<string:id_data>', methods=['POST']) #type:ignore
@@ -457,43 +450,49 @@ def add_area():
     verify_access()
     verify_login()
     
+    skip = False # a flag
     areas = request.form.getlist('area_title')
-    prog_id = request.form['program_list']
     
-    print('program_id',prog_id)
-    print('areas:', areas)
+    while "" in areas:
+        areas.remove("")
+    # print('areas:', areas)
+    
+    if len(areas) == 0:
+        flash('No areas added: none were listed.')
+    else:
+        # add all areas
+        insert_to_table(table="areas", query_conditions="(area_title) VALUES (%s)", data=[areas], should_flash=False)        
         
-    skip = False
-    
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        # check if any programs are available
-        cursor.execute("SELECT COUNT(*) FROM programs")
-        result = cursor.fetchone()
-        # print(result['COUNT(*)']) #type:ignore
-        connection.commit()
+        try:
+            prog_id = request.form['program_list']
+            connection = pymysql.connect(**db_config)
+            with connection.cursor() as cursor:
+                # check if program exists
+                cursor.execute(f"SELECT COUNT(*) FROM programs WHERE program_id={prog_id}")
+                result = cursor.fetchone()
+                print(result) #type:ignore
+                connection.commit()
 
-        if result['COUNT(*)'] == 0: #type:ignore
-            flash("Cannot add area - programs table is empty.")
-            skip = True
-        
-    if skip == False:
-        # return the full list of area_ids (new and existing) based on form
-        area_ids = unique_area_inserts(areas)
-        
-        # commit to program_areas
-        print(areas, '\n', area_ids, '\n', prog_id)    
-        conditions = "(area_id, program_id) VALUES (%s, %s)"
-        prog_id_list = [prog_id for _ in range(len(area_ids))]
-        msg = "Area '{}' was successfully added."
-    
-        insert_to_table("program_areas", conditions, [area_ids, prog_id_list], msg)
+                if result['COUNT(*)'] == 0: #type:ignore
+                    flash("Cannot add area - program does not exist.")
+                    skip = True
+                
+            if skip == False:
+                # commit to program_areas
+                print(areas, '\n', prog_id)
+                conditions = "(area_id, program_id) VALUES ((SELECT area_id from areas where area_title=%s), %s)"
+                prog_id_list = [prog_id for _ in range(len(areas))]
+                msg = "Area '{}' was successfully added."
+                insert_to_table("program_areas", conditions, [areas, prog_id_list], msg)
+        except:
+            # request.form['program_list'] does not exist
+            flash("Note: No program assigned to added areas.")
 
     return redirect(url_for('manage_areas'))
 
 # edit a program-area relationship 
 @app.route('/edit_program_area/<string:pa_id>', methods=['POST'])
-def edit__program_area(pa_id):
+def edit_program_area(pa_id):
 
     verify_access()
     verify_login()
@@ -508,26 +507,28 @@ def edit__program_area(pa_id):
         msg = "Relationship of area has been changed to program with id '{}'"
         update_table("program_areas", conditions, (prog_id, pa_id), msg, 1)
     
-    area = request.form['area_title']
-    if area != "":    
+    try:
+        area = request.form['area_title']
+    
         # update area name (make a new area entry if needed)
         print('changing area title')
         
         # get area_id of new area OR the existing area (user typed a dupe) 
         new_area_id = unique_area_insert(area)
         
-        # update area_id in program_areas via pa_id
-        # form area_id -> result area_id
-                
+        # update area_id in program_areas with new_area_id via pa_id
         conditions = "area_id=%s WHERE pa_id=%s"
         msg = "Area was successfully updated to id '{}'"
-        update_table("program_areas", conditions, (new_area_id, pa_id), msg)   
+        update_table("program_areas", conditions, (new_area_id, pa_id), msg)
+    except:
+        # request.form['area_title'] does not exist
+        flash("No changes made to area relationship.") 
     
     return redirect(url_for('manage_areas'))
 
 # delete an area
-@app.route('/delete_area/<string:pa_id>', methods = ['GET'])
-def delete_area(pa_id):
+@app.route('/delete_program_area/<string:pa_id>', methods = ['GET'])
+def delete_program_area(pa_id):
 
     verify_access()
     verify_login()
@@ -535,7 +536,24 @@ def delete_area(pa_id):
     conditions = "pa_id=%s"
     msg = "Connection between program and area at id {} was successfully deleted"
     
+    # remove from program_areas
     remove_from_table("program_areas", conditions, (pa_id), msg)
+    return redirect(url_for('manage_areas'))
+
+@app.route('/delete_area/<string:area_id>', methods= ['GET'])
+def delete_area(area_id):
+    
+    verify_access()
+    verify_login()
+    
+    conditions = "area_id=%s"
+    # remove from program_areas (since area_id is a foreign key)
+    remove_from_table(table="program_areas", query_conditions=conditions, data=(area_id), should_flash=False)
+    flash(f"All program connections to area with id '{area_id}' have been successfully deleted.")
+    
+    # remove from areas (no foreign key relations remain ^^)
+    msg = "Area with id '{}' has been deleted."
+    remove_from_table("areas", conditions, (area_id), msg)
     return redirect(url_for('manage_areas'))
 
 

@@ -91,8 +91,8 @@
             <td>{{ row['area_title'] }}</td>
 
             <td>
-                <a href="/update_area{{row['pa_id']}}" data-toggle="modal" data-target="#modaledit{{row['pa_id']}}">Edit</a> |
-                <a href="/delete_area/{{row['pa_id']}}" onclick="return confirm('Confirm Delete?')">Delete</a>
+                <a href="/update_program_area{{row['pa_id']}}" data-toggle="modal" data-target="#modaledit{{row['pa_id']}}">Edit</a> |
+                <a href="/remove_program_area/{{row['area_id']}}" data-toggle="modal" data-target="#modaldel{{row['area_id']}}">Delete</a>
             </td>
         </tr>
 
@@ -103,7 +103,7 @@
                         <h3>Edit Area</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-                    
+
                     <form id="editAreaForm{{row['pa_id']}}" action="/edit_program_area/{{row['pa_id']}}" method="POST">
                         <div id="area_entity_changes" class="inner-modal input">
                             <input hidden id="row_program_id" name="row_program_id" value="{{row['program_id']}}">
@@ -111,7 +111,7 @@
                             <select id="program_list" name="program_list" style="margin-bottom: 5px;">
                                 {% for program in programs %}
                                     {% if program["program_id"] == row["program_id"] %}
-                                    <option value="{{ program['program_id'] }}" selected>{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                                    <option value="{{ program['program_id'] }}" disabled selected>{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
                                     {% else %}
                                     <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
                                     {% endif %}
@@ -119,7 +119,7 @@
                             </select><br>
 
                             <label for="area_title" style="margin-left: 17px; margin-right: 28px;">new Area: </label>
-                            <input id="area_title" name="area_title" list="area_title_options" size="21">
+                            <input id="area_title" name="area_title" list="area_title_options" size="21" placeholder="{{row['area_title']}}">
                             <datalist id="area_title_options">
                                 {% for area in areas %}
                                     {% if row['area_title'] == area['area_title'] %}
@@ -134,6 +134,34 @@
 
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" form="editAreaForm{{row['pa_id']}}">Make area edit</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modaldel{{row['area_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Remove Area</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="inner-modal">
+                        <b>
+                            <div>Current program: (id: {{row['program_id']}}, name: {{ row['program_name'] }} R{{ row["program_version"]|string }} v{{ row["release_version"]|string }})</div>
+                            <div>Current area: (id: {{row['area_id']}}, title: {{row['area_title']}})</div>
+                        </b>
+                        <br>
+                        <div><b>Detach</b> the current area from the program, <b>OR</b></div>
+                        <div><b>Delete</b> the current area, and remove across all programs</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <a href="/delete_program_area/{{row['pa_id']}}" onclick="return confirm('Confirm Area detachment?')">Detach</a>
+                        <span></span>
+                        <a href="/delete_area/{{row['area_id']}}" onclick="return confirm('Confirm Area removal?')">Delete</a>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
