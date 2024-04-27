@@ -30,28 +30,29 @@
     <button onclick="move(manage_areas)">edit Areas</button>
 
     <br><hr>
-    <div id="export_employee_list" style="margin-bottom: 5px;">
-        <button id="exportEmployeeListButton">Export employee list</button>
-        <label for="file_type_e">as: </label>
-        <select id="file_type_e" class="user">
-            <option selected disabled>File type</option>
-            <option>TXT</option>
-            <option>XML</option>
+    <form id="exportForm" action="/export_data" method="POST">
+        
+        <button type="submit">Export:</button>
+        <select id="table_name" name="table_name" style="width: 125px">
+            <option value="employees">Employees</option>
+            <option value="programs">Programs</option>
+            <option value="areas">Areas</option>
+            <option value="bugs">Bugs</option>
         </select>
-    </div>
-    <div id="export_program_areas">
-        <button id="exportProgramAreasButton" style="margin-right: 14px">Export list of areas</button>
-        <label for="file_type_a">as: </label>
-        <select id="file_type_a" class="user">
+
+        <label for="data_type">as: </label>
+        <select id="data_type" name="data_type" class="user">
             <option selected disabled>File type</option>
-            <option>TXT</option>
-            <option>XML</option>
+            <option value="ascii">Text</option>
+            <option value="xml">XML</option>
         </select>
-    </div>
+    </form>
 
     <hr>
     <button onclick="move(homepage)"> Exit Maintenance</button>
     <br><br>
+
+    {% include 'flash_results.html' %}
 
 </body>
 </html>

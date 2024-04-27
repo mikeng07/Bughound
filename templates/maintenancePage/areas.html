@@ -19,7 +19,7 @@
     </script>
 </head>
 <body>
-    <h1>Edit database - areas</h1>
+    <h1>Edit database - Areas</h1>
 
     <hr class="long-line">
 
@@ -32,8 +32,8 @@
 
     <h3>Add Areas</h3>
     <form id="newAreaForm" action="/add_area" method="POST">
-        <label for="program_list">Add to program:</label>      
-        <select id="program_list" name="program_list" style="margin-bottom: 5px; width: 140px;">
+        <label for="program_list" style="margin-left: 10px;">to program:</label>      
+        <select id="program_list" name="program_list">
             <option value="default" disabled selected>------</option>
             {% for program in programs %}
                 <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
@@ -55,6 +55,24 @@
     
     <button id="clearAreaButton">Clear</button>
     <button type="submit" form="newAreaForm">Add new Area(s)</button>
+        
+    <hr>
+
+    <h3>Edit Existing Area Names</h3>
+    <form id="editAreaNameForm" action="/edit_area" method="POST">
+        <label for="area_list" style="margin-left: 10px;">From:</label>
+        <select id="area_list" name="area_list" style="width: 150px;">
+            <option value="default" disabled selected>------</option>
+            {% for area in areas %}
+                <option value="{{ area['area_id'] }}"> {{ area['area_title'] }} </option>
+            {% endfor %}
+        </select>
+        <label>to</label>
+        <input id="new_area_title" name="new_area_title" size="auto" placeholder="new area name">
+    </form>
+
+    <button id="clearAreaNameButton">Clear</button>
+    <button type="submit" form="editAreaNameForm">Change Area Name</button>
 
     <hr>
     
@@ -217,6 +235,11 @@
             $('#newAreaForm #program_list').val("default");
             $('#newAreaForm #area_title').val("");
         });
+
+        $('#clearAreaNameButton').on("click", () => {
+            $('#editAreaNameForm #area_list').val('default');
+            $('#editAreaNameForm #new_area_title').val('');
+        })
 
     </script>
 </body>

@@ -55,6 +55,12 @@ def title(strings):
         strings[i] = string.title()
     return strings
 
+def encode_password(password, enc_type="sha256"):
+    
+    if enc_type == "sha256":
+        return hashlib.sha256(bytes(password, "utf-8")).hexdigest()
+
+    return hash(password)
 
 ## helper functions (table functions) 
 def insert_to_table(table, query_conditions, data, msg="", msgVal=0, should_flash=True):
@@ -188,7 +194,7 @@ def login_auth():
     username = request.form['username']
     password = request.form['password']
 
-    encoded_password = hashlib.sha256(bytes(password, "utf-8")).hexdigest()
+    encoded_password = encode_password(password)
 
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
@@ -226,6 +232,43 @@ def logout():
         flash(message=message)
     return redirect('/')
 
+@app.route("/change_pwd", methods=["POST",])
+def change_password():
+    
+    username = request.form["pw_username"]  
+    
+    new_password = request.form['new_password']
+    new_password2 = request.form["new_password2"]
+    
+    # verify that the new password is correct (since it's done twice)
+    if new_password != new_password2:
+        flash("Your new password didn't match twice. A reminder:")
+        flash(f"new password: {new_password}")
+        flash(f"new pwd (again): {new_password2}")
+    
+    else:        
+        connection = pymysql.connect(**db_config)
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
+            employee = cursor.fetchone()
+            
+        if employee:
+            
+            # Security issue: DON'T actually do this off the rip
+            # Have some OTHER kind of verification in place (an email, for example)
+            
+            conditions = "user_pass=%s WHERE user_id=%s"
+            data = (encode_password(new_password), employee['user_id']) # type:ignore
+            update_table(table="Users", query_conditions=conditions, data=data, should_flash=False)
+            
+            flash("Your password has been successfully changed (and don't try to forget it!)")
+            flash(f'Your new password is: {new_password}')
+            
+        else:
+            flash("Your username didn't match. You typed:")
+            flash(f"Username: {username}")
+    
+    return redirect(url_for("/"))
 
 # homepage (index)
 @app.route('/homepage', methods=["GET"])
@@ -490,7 +533,7 @@ def add_area():
 
     return redirect(url_for('manage_areas'))
 
-# edit a program-area relationship 
+# edit a program-area connection
 @app.route('/edit_program_area/<string:pa_id>', methods=['POST'])
 def edit_program_area(pa_id):
 
@@ -526,7 +569,24 @@ def edit_program_area(pa_id):
     
     return redirect(url_for('manage_areas'))
 
-# delete an area
+# edit an area
+@app.route('/edit_area', methods=["POST"])
+def edit_area():
+    
+    area_id = request.form['area_list']
+    new_area_title = request.form['new_area_title']
+    
+    print('area_id:', area_id)
+    print('new title:', new_area_title)
+    
+    conditions = "area_title=%s WHERE area_id=%s"
+    msg = "Area name has been changed to '{}'"
+    
+    update_table('areas', conditions, (new_area_title, area_id), msg, 1)
+    
+    return redirect(url_for("manage_areas"))
+
+# delete an area connection to a program
 @app.route('/delete_program_area/<string:pa_id>', methods = ['GET'])
 def delete_program_area(pa_id):
 
@@ -540,6 +600,7 @@ def delete_program_area(pa_id):
     remove_from_table("program_areas", conditions, (pa_id), msg)
     return redirect(url_for('manage_areas'))
 
+# delete area (and all connections to all programs)
 @app.route('/delete_area/<string:area_id>', methods= ['GET'])
 def delete_area(area_id):
     
@@ -828,7 +889,7 @@ def export_data():
     verify_access()
     verify_login()
     
-    if request.method == 'POST':
+    try:
         table_name = request.form['table_name']
         data_type = request.form['data_type']
         connection = pymysql.connect(**db_config)
@@ -850,6 +911,7 @@ def export_data():
             tree = ElementTree(root)
             if data_type == "xml":
                 tree.write(f"{table_name}.xml", encoding="utf-8", xml_declaration=True)
+                
             elif data_type == "ascii":
                 with open(f"{table_name}.txt", "w") as f:
                     for row in rows:
@@ -862,12 +924,14 @@ def export_data():
             # close the database connection
             cursor.close()
             connection.close()
-            message = f"Table {table_name} with type {data_type} was successfully exported."
-            flash(message=message)
-            return redirect(url_for('export_data'))
-
-
-    return render_template('export_data.html', username=username, userlevel=userlevel)
+        
+        message = f"Table '{table_name}' with type '{data_type}' was successfully exported."
+    except:
+        message = "File type has not been chosen."    
+        
+    flash(message=message)
+    return redirect(url_for('maintain_db'))
+        
 
 
 # automatic
