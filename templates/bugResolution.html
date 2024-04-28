@@ -1,0 +1,105 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+    <title>New Resolution</title>
+    <script>
+        var homepage = "{{url_for('homepage')}}";
+    
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
+</head>
+<body>
+    <h1>New Resolution</h1>
+    <hr class="long-line">
+
+    <form name="addResForm" action="{{ url_for('add_res') }}" enctype="multipart/form-data" method="POST">
+    <!-- Resolution info -->
+    <br><br>
+    <hr class="long-line">
+
+    <label for="functional_area">Functional Area:</label>
+    <select name="functional_area" id="functional_area" class="">
+        <option value="default" disabled selected>------</option>
+        {% for area in areas %}
+            <option value="{{ area['area_title'] }}">{{ area['area_title'] }}</option>
+        {% endfor %}
+    </select>
+
+    <br>
+    <label for="assigned_to" style="margin-left: 30px;">Assigned to</label>
+    <select name="assigned_to" id="assigned_to" class="user">
+        <option value="default" disabled selected>user</option>
+        {% for employee in employees %}
+            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+        {% endfor %} 
+    </select>
+
+    <br>
+    <div class="input-container">
+        <label for="comments">Comments</label><br>
+        <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
+    </div>
+
+    <br>
+    <label for="status" style="margin-left: 40px;">Status:</label>      
+    <select id="status" name="status">
+        <option value="default" disabled selected>in-progress (open)</option>
+            {% for s in status %}
+                <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+        </select>
+
+    <label for="priority">| Priority</label>      
+    <select id="priority" name="priority" class="numeral">
+        <option value="default" disabled selected>0</option>
+            {% for p in priority %}
+                <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+        </select>
+    <br>
+
+    <label for="resolution" style="margin-left: 9px;">Resolution:</label>
+    <select id="resolution" name="resolution">
+        <option value="default" disabled selected>none</option>
+        {% for r in resolution %}
+            <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="resolution_version">, version</label>
+    <select id="resolution_version" name="resolution_version" class="numeral">
+        <option value="default" disabled selected>#</option>
+        {% for r in resolution_version %}
+            <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+    </select>
+
+    <br>
+    <label for="resolved_by">Resolved by</label>
+    <select id="resolved_by" name="resolved_by" class="user">
+        <option value="default" disabled selected>user</option>
+        {% for employee in employees %}
+            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+        {% endfor %} 
+    </select>
+
+    <label for="date_resolved">on</label>
+    <input type="date" id ="date_resolved" name ="dateResolved" class="">
+
+    <br>
+    <label for="tested_by" style="margin-left: 18px;">Tested by</label>
+    <select id="tested_By" name="tested_by" class="user">
+        <option value="default" disabled selected>user</option>
+        {% for employee in employees %}
+            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+        {% endfor %} 
+    </select>
+
+    <label for="date_tested">on</label>
+    <input type="date" id ="date_tested" name ="date_tested" class="">
+    </form>
+</body>
+</html>

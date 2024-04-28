@@ -70,12 +70,13 @@ h2 {
   cursor: pointer;
 }
 
-select {
-  width: 40%;
-}
 
 select.numeral, select.user {
   width: auto;
+}
+
+select.fixed {
+  width: 200px;
 }
 
 input[type=number]{

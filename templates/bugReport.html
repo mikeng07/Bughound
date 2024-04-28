@@ -20,251 +20,112 @@
     
 </head>
 <body>
-    {% if is_resolution == true %}
-    <h1>New Resolution</h1>
-    {% else %}
     <h1>New Bug Report</h1>
-    {% endif %}
-    
     <hr class="long-line">
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-success alert-dismissable" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label ="close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                {{message}}
-            </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+    <form name="addBugForm" action="{{url_for('add_bug')}}" enctype="multipart/form-data" method="POST">
 
-    {% if is_resolution == true %}
-    <form name="addResForm" action="{{ url_for('add_res') }}" enctype="multipart/form-data" method="POST"></form>
-    {% else %}
-    <form name="addBugForm" action="{{ url_for('add_bug') }}" enctype="multipart/form-data" method="POST">
-    {% endif %}
+        <div>
+            <label for="program_id" style="margin-left: 23px;">Program:</label>
+            <select id="program_id" name="program_id" class="fixed" required>
+                <option value="default" disabled selected>Program</option>
+                {% for program in programs %}
+                <option value="{{ program['program_id'] }}">
+                    {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-    <div>
-        <label for="program" style="margin-left: 23px;">Program:</label>
-        <select id="program" name="program" class="" required>
-            <option value="default" disabled selected>no program</option>
-            {% for program in programs %}
-            <option value="{{ program['program_id'] }}">{{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}</option>
-            {% endfor %}
-        </select>
-    </div>
+        <div>
+            <label for="report_type">Report Type:</label>
+            <select id="report_type" name="report_type"required>
+                <option value="default" disabled selected>Report type</option>
+                {% for report_type in report_types %}
+                    <option value="{{report_type}}">{{report_type}}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-    <div class="form-group>">
-        <label for="report_type">Report Type:</label>
-        <select id="report_type" name="report_type" class="" required>
-            <option value="default" disabled selected>no report type</option>
-            {% for report_type in report_types %}
-                <option value="{{report_type}}">{{report_type}}</option>
-            {% endfor %}
-        </select>
-    </div>
+        <div>
+            <label for="severity" style="margin-left: 30px;">Severity:</label>
+            <select id="severity" name="severity" style="width: auto;" required>
+                <option value="default" disabled selected>None</option>
+                {% for severity in severities %}
+                    <option value="{{severity}}">{{severity}}</option>
+                {% endfor %} 
+            </select>
+        </div>
+        
+        <div>
+            <label for="reproducible">Reproducible?</label>
+            <input type="checkbox" name="reproducible" id="reproducible">
+        </div>
 
-    <div class="form-group">
-        <label for="severity" style="margin-left: 30px;">Severity:</label>
-        <select id="severity" name="severity" class="" required>
-            <option value="default" disabled selected>none</option>
-            {% for severity in severities %}
-                <option value="{{severity}}">{{severity}}</option>
+        <div class="input-container">
+            <label for="problem_summary">Problem Summary</label><br>
+            <textarea type="text" id="problem_summary" name="problem_summary" rows="2" class="summary" required></textarea>
+        </div>
+        
+        <br>
+
+        <div class="input-container">
+            <label for="problem">Problem</label><br>
+            <textarea type="text" id="problem" name="problem" rows="3" class="problem" required></textarea>
+        </div>
+        
+        <br>
+        
+        <div class="input-container">
+            <label for="suggested_fix">Suggested Fix</label><br>
+            <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="suggestedFix"></textarea>
+        </div>
+        
+        <br>
+        
+        <label for="reported_by">Reported by</label>
+        <select id="reported_by" name="reported_by" class="user" required>
+            <option value="default" disabled selected>user</option>
+            {% for employee in employees %}
+                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
             {% endfor %} 
         </select>
 
-        <label for="reproducible">Reproducible?</label>
-        <input type="checkbox" name="reproducible" id="reproducible" class=""
-            {% if reproducible == 1 %}checked{% endif %}
-        >
+        <label for="date_reported">on</label>
+        <input type="date" id ="date_reported" name ="date_reported" class="" required>
+        <br>
 
-    </div>
-
-
-    <div class="input-container">
-        <label for="problem">Problem</label><br>
-        <textarea type="text" id="problem" name="problem" rows="2" class="problem" required></textarea>
-    </div>
-    <br>
-    <div class="input-container">
-        <label for="problem_summary">Problem Summary</label><br>
-        <textarea type="text" id="problem_summary" name="problem_summary" rows="3" class="summary" required></textarea>
-    </div>
-    
-    <br>
-    
-    <div class="input-container">
-        <label for="suggested_fix">Suggested Fix</label><br>
-        <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="suggestedFix"></textarea>
-    </div>
-    
-    <br>
-    
-    <label for="reported_by">Reported by</label>
-    <select id="reported_by" name="reported_by" class="user" required>
-        <option value="default" disabled selected>user</option>
-        {% for employee in employees %}
-            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
-        {% endfor %} 
-    </select>
-
-    <label for="dateInput">on</label>
-    <input type="date" id ="dateInput" name ="dateInput" class="" required>
-    <br>
-
-    <hr>
-    <label for="attachments">Supplementary attachments (optional)</label><br>
-    <input type="file" id="attachments" name="attachments" multiple class="">
-    
-
-
-    {% if is_resolution == true %}
-
-    <!-- Resolution info -->
-    <br><br>
-    <hr class="long-line">
-
-    <label for="functional_area">Functional Area:</label>
-    <select name="functional_area" id="functional_area" class="">
-        <option value="default" disabled selected>------</option>
-        {% for area in areas %}
-            <option value="{{ area['area_title'] }}">{{ area['area_title'] }}</option>
-        {% endfor %}
-    </select>
-
-    <br>
-    <label for="assigned_to" style="margin-left: 30px;">Assigned to</label>
-    <select name="assigned_to" id="assigned_to" class="user">
-        <option value="default" disabled selected>user</option>
-        {% for employee in employees %}
-            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
-        {% endfor %} 
-    </select>
-
-    <br>
-    <div class="input-container">
-        <label for="comments">Comments</label><br>
-        <textarea type="text" id="comments" name="comments" class="comments" rows="3"></textarea>
-    </div>
-
-    <br>
-    <label for="status" style="margin-left: 40px;">Status:</label>      
-    <select id="status" name="status">
-        <option value="default" disabled selected>in-progress (open)</option>
-            {% for s in status %}
-                <option value="{{ s }}">{{ s }}</option>
-            {% endfor %}
-        </select>
-
-    <label for="priority">| Priority</label>      
-    <select id="priority" name="priority" class="numeral">
-        <option value="default" disabled selected>0</option>
-            {% for p in priority %}
-                <option value="{{ p }}">{{ p }}</option>
-            {% endfor %}
-        </select>
-    <br>
-
-    <label for="resolution" style="margin-left: 9px;">Resolution:</label>
-    <select id="resolution" name="resolution">
-        <option value="default" disabled selected>none</option>
-        {% for r in resolution %}
-            <option value="{{ r }}">{{ r }}</option>
-        {% endfor %}
-    </select>
-
-    <label for="resolution_version">, version</label>
-    <select id="resolution_version" name="resolution_version" class="numeral">
-        <option value="default" disabled selected>#</option>
-        {% for r in resolution_version %}
-            <option value="{{ r }}">{{ r }}</option>
-        {% endfor %}
-    </select>
-
-    <br>
-    <label for="resolved_by">Resolved by</label>
-    <select id="resolved_by" name="resolved_by" class="user">
-        <option value="default" disabled selected>user</option>
-        {% for employee in employees %}
-            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
-        {% endfor %} 
-    </select>
-
-    <label for="date_resolved">on</label>
-    <input type="date" id ="date_resolved" name ="dateResolved" class="">
-
-    <br>
-    <label for="tested_by" style="margin-left: 18px;">Tested by</label>
-    <select id="tested_By" name="tested_by" class="user">
-        <option value="default" disabled selected>user</option>
-        {% for employee in employees %}
-            <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
-        {% endfor %} 
-    </select>
-
-    <label for="date_tested">on</label>
-    <input type="date" id ="date_tested" name ="date_tested" class="">
-
-
-    {% endif %}
-    
-    <hr>
-    {% if is_resolution == true %}
-    <button type="submit" form="addResForm" id="submitButton" value="submit">Submit</button>
-    {% else %}
-    <button type="submit" form="addBugForm" id="submitButton" value="submit">Submit</button>
-    {% endif %}
-    <button id="resetButton">Reset</button>
-    
-    <button onclick="move(homepage)">Cancel</button>
-
-    <!-- loading spinner -->
-    <svg class="spinner" id="spinning" viewBox="0 0 50 50">
-        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
-    <br><br>
+        <hr>
+        <label for="file">Supplementary attachments (optional)</label><br>
+        <input type="file" id="file" name="file" multiple>
+        <br><br>
+        <hr class="long-line">
+        
+        <button type="submit">Submit</button>
+        <button id="resetButton">Reset</button>
+        <button onclick="move(homepage)">Cancel</button>
     </form>
+    
+
+
+    {% include 'flash_results.html' %}
     
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
 
-        $('#spinning').toggle();
-        $('#submitButton').on("click", () => {
-            $('#spinning').toggle();
-            setTimeout(()=> {
-                $('#spinning').toggle();
-            }, 2000);
-        });
-
         $('#resetButton').on("click", ()=>{
             console.log('resetting...');
 
             $("#program").val("default");
-            $("#reportType").val("default");
+            $("#report_type").val("default");
             $("#severity").val("default");
-            $("#reproducible").attr('checked', true);
-            $("#problemSummary").val('');
+            $("#reproducible").prop('checked', false);
+            $("#problem_summary").val('');
             $("#problem").val('');
-            $("#suggestedFix").val('');
-            $("#reportedBy").val("default");
-            $('#dateInput').val('');
-            $('#attachments').val('');
-            
-            $("#functionalArea").val("default");
-            $("#assignTo").val("default");
-            $("comments").val('');
-            $("#status").val("default");
-            $('priority').val('default');
-            $("#resolution").val("default");
-            $("#resolutionVersion").val("default");
-            $("#resolvedBy").val("default");
-            $('dateResolved').val('');
-            $("#testedBy").val("default");
-            $('dateTested').val('');
+            $("#suggested_fix").val('');
+            $("#reported_by").val("default");
+            $('#date_input').val('');
+            $('#file').val('');
         });
     </script>
 </body>
