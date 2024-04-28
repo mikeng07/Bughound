@@ -86,7 +86,7 @@
         <select id="reported_by" name="reported_by" class="user" required>
             <option value="default" disabled selected>user</option>
             {% for employee in employees %}
-                <option value="{{employee['user_realname']}}">{{employee['user_realname']}}</option>
+                <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
             {% endfor %} 
         </select>
 

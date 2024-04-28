@@ -72,7 +72,8 @@
             <td style="text-align:center;">{{ row['user_access'] }}</td>
             <td>{{ row['user_realname'] }}</td>
             <td>{{ row['user_name'] }}</td>
-            <td class="overflow pwd">{{ row['user_pass'] }}</td>
+            {% set partial_pass = row['user_pass'][:18] + "..." %}
+            <td class="overflow pwd">{{ partial_pass }}</td>
             
             {% if row['user_realname'] != "ADMIN" and row['user_realname'] != "USER" %}
             <td>

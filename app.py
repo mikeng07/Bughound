@@ -67,25 +67,25 @@ def insert_to_table(table, query_conditions, data, msg="", msgVal=0, should_flas
     
     stmt = " ".join(["INSERT INTO", table, query_conditions])
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-            
-        for n in range(len(data[0])):
-            # get value n from each of the arrays in data
-            
-            values = [data[k][n] for k in range(len(data))]
-            message = msg.format(data[msgVal][n]) 
-            try:
-                cursor.execute(stmt, values)
-                connection.commit()
-                id = cursor.lastrowid
-            except:
-                message = "'{}' happens to be a dupe in table:{}".format(data[msgVal][n], table)
-            finally:
-                if should_flash:
-                    flash(message)
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+                
+            for n in range(len(data[0])):
+                # get value n from each of the arrays in data
+                
+                values = [data[k][n] for k in range(len(data))]
+                message = msg.format(data[msgVal][n]) 
+                try:
+                    cursor.execute(stmt, values)
+                    connection.commit()
+                    
+                except:
+                    message = "'{}' happens to be a dupe in table:{}".format(data[msgVal][n], table)
+                finally:
+                    if should_flash:
+                        flash(message)
     
-        print("insert complete")
+    print("insert complete")
 
 def unique_area_insert(area):
     
@@ -105,12 +105,12 @@ def update_table(table, query_conditions, data, msg="", msgVal=0, should_flash=T
     
     stmt = " ".join(["UPDATE", table, "SET", query_conditions])
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(stmt, data)
+            connection.commit()
+            if should_flash:
+                flash(msg.format(data[msgVal]))
     
     print('update complete')
         
@@ -118,12 +118,12 @@ def remove_from_table(table, query_conditions, data, msg="", msgVal=0, should_fl
     
     stmt = " ".join(["DELETE", selection, "FROM", table, "WHERE", query_conditions])
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute(stmt, data)
-        connection.commit()
-        if should_flash:
-            flash(msg.format(data[msgVal]))
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(stmt, data)
+            connection.commit()
+            if should_flash:
+                flash(msg.format(data[msgVal]))
         
     print('remove complete')
 
@@ -135,19 +135,19 @@ def select_from_table(table, query_conditions="", data=None, selection="*", msg=
         stmt.append(query_conditions)
     stmt = " ".join(stmt)
         
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        if data is not None:
-            cursor.execute(stmt, data)
-        else:
-            cursor.execute(stmt)
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            if data is not None:
+                cursor.execute(stmt, data)
+            else:
+                cursor.execute(stmt)
 
-        results = cursor.fetchall()
+            results = cursor.fetchall()
+                
+            connection.commit()
             
-        connection.commit()
-        
-        if should_flash and data is not None:
-            flash(msg.format(data[msgVal]))
+            if should_flash and data is not None:
+                flash(msg.format(data[msgVal]))
     
     return results
 
@@ -156,21 +156,21 @@ def get_all_table_results(sql_list: str | list[str]):
     # result pile
     data = []
 
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
 
-        if type(sql_list) is str:
-            print(sql_list, "is a string")
-            cursor.execute(sql_list)
-            data = cursor.fetchall()
-            connection.commit()
-            
-        else:
-            for sql in sql_list:
-                # print(sql)
-                cursor.execute(sql)
-                data.append(cursor.fetchall())
+            if type(sql_list) is str:
+                print(sql_list, "is a string")
+                cursor.execute(sql_list)
+                data = cursor.fetchall()
                 connection.commit()
+                
+            else:
+                for sql in sql_list:
+                    # print(sql)
+                    cursor.execute(sql)
+                    data.append(cursor.fetchall())
+                    connection.commit()
 
     return data
 
@@ -196,27 +196,27 @@ def login_auth():
 
     encoded_password = encode_password(password)
 
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
-        employee = cursor.fetchone()
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
+            employee = cursor.fetchone()
 
-        # print(employee)
-        # print(encoded_password)
+            # print(employee)
+            # print(encoded_password)
 
-        if employee and employee['user_pass'] == encoded_password: # type:ignore
-            session['loggedin'] = True
-            session['username'] = username
-            session['user_level'] = int(employee["user_access"])   # type:ignore
+            if employee and employee['user_pass'] == encoded_password: # type:ignore
+                session['loggedin'] = True
+                session['username'] = username
+                session['user_level'] = int(employee["user_access"])   # type:ignore
 
-            print('login successful')
-            return redirect('/homepage')
-        
-        else:
-            print("incorrect username/password")
-            message = f"Incorrect username or password"
-            flash(message=message)
-            return redirect('/')
+                print('login successful')
+                return redirect('/homepage')
+            
+            else:
+                print("incorrect username/password")
+                message = f"Incorrect username or password"
+                flash(message=message)
+                return redirect('/')
 
 # invoke logout
 @app.route('/logout', methods=['POST','GET', 'PUT'])
@@ -247,10 +247,10 @@ def change_password():
         flash(f"new pwd (again): {new_password2}")
     
     else:        
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
-            employee = cursor.fetchone()
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
+                employee = cursor.fetchone()
             
         if employee:
             
@@ -273,15 +273,15 @@ def change_password():
 # homepage (index)
 @app.route('/homepage')
 def homepage():
-    print('homepage...')
-    print("session:", session.items())
-
     username = session['username']
     userlevel =session['user_level']
     #print("pp", username,userlevel)
-
+    
     verify_login()
-
+    
+    print('homepage...')
+    print("session:", session.items())
+    
     return render_template('index.html', username=username, access=userlevel)
 
 
@@ -304,6 +304,8 @@ def manage_employees():
     verify_access()
     verify_login()
     
+    print('managing employees...')
+    
     data = get_all_table_results('SELECT * FROM users')
     # print(data)
     return render_template('maintenancePage/employees.html', employees=data, username=username, userlevel=userlevel)
@@ -316,6 +318,8 @@ def manage_programs():
     
     verify_access()
     verify_login()
+    
+    print('managing programs...')
     
     data = get_all_table_results('SELECT * FROM programs')
     # print(data)
@@ -330,6 +334,8 @@ def manage_areas():
     
     verify_access()
     verify_login()
+    
+    print('managing areas...')
         
     sql = [
       "SELECT * FROM programs",
@@ -342,12 +348,60 @@ def manage_areas():
     
     return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, areas=areas, username=username, userlevel=userlevel)
 
+# export db table in a certain file type
+@app.route('/export_data', methods=['GET', 'POST'])
+def export_data():
+        
+    verify_access()
+    verify_login()
+    
+    try:
+        table_name = request.form['table_name']
+        data_type = request.form['data_type']
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                
+                cursor.execute(f'SELECT * FROM {table_name}')
+                rows = cursor.fetchall()
+                # create a root element for the XML file
+                root = Element(table_name)
+                
+                # iterate over the rows and create subelements for each record
+                for row in rows:
+                    record = SubElement(root, "record")
+                    for key, value in row.items(): #type:ignore
+                        field = SubElement(record, key)
+                        field.text = str(value)
+                
+                # generate the XML file and save it to disk
+                tree = ElementTree(root)
+                if data_type == "xml":
+                    tree.write(f"{table_name}.xml", encoding="utf-8", xml_declaration=True)
+                    
+                elif data_type == "ascii":
+                    with open(f"{table_name}.txt", "w") as f:
+                        for row in rows:
+                            for key, value in row.items(): #type:ignore
+                                f.write(f"{key}: {value}\n")
+                            f.write("\n")
+                else:
+                    print("Invalid data type")
+        
+        message = f"Table '{table_name}' with type '{data_type}' was successfully exported."
+    except:
+        message = "File type has not been chosen."    
+        
+    flash(message=message)
+    return redirect(url_for('maintain_db'))
+
 
 # insert new employee (maintenancePage/employee)
 @app.route('/insert', methods=['POST'])
 def insert():
     verify_access()
     verify_login()
+    
+    print('adding employee...')
     
     employee_names = request.form.getlist("employee_name")
     usernames = request.form.getlist("username")
@@ -370,6 +424,8 @@ def insert():
 def edit(id_data):
     verify_access()
     verify_login()
+    
+    print('editing employee...')
             
     data = []
     conditions = []
@@ -406,6 +462,8 @@ def delete(id_data):
     verify_access()
     verify_login()
     
+    print('deleting employee...')
+    
     conditions = "user_id=%s"
     msg = "Employee with id '{}' was successfully deleted"
     
@@ -419,6 +477,8 @@ def add_program():
 
     verify_access()
     verify_login()
+    
+    print('adding program...')
     
     program = request.form.getlist('program_name')
     program_release = request.form.getlist('program_release')
@@ -437,6 +497,8 @@ def add_program():
 def edit_program(id_data):
     verify_access()
     verify_login()
+    
+    print('editing program...')
         
     data = []
     conditions = []
@@ -474,6 +536,8 @@ def delete_program(id_data):
     verify_access()
     verify_login()
     
+    print('deleting program...')
+    
     conditions = "program_id=%s"
     msg = "Program with id '{}' was successfully deleted"
     remove_from_table("users", conditions, (id_data), msg)
@@ -492,6 +556,8 @@ def add_area():
 
     verify_access()
     verify_login()
+    
+    print('adding area...')
     
     skip = False # a flag
     areas = request.form.getlist('area_title')
@@ -540,6 +606,8 @@ def edit_program_area(pa_id):
     verify_access()
     verify_login()
     
+    print('editing program-area relation...')
+    
     row_prog_id = request.form['row_program_id']
     prog_id = request.form['program_list']
     
@@ -573,6 +641,11 @@ def edit_program_area(pa_id):
 @app.route('/edit_area', methods=["POST", 'PUT'])
 def edit_area():
     
+    verify_access()
+    verify_login()
+    
+    print('editing area')
+    
     area_id = request.form['area_list']
     new_area_title = request.form['new_area_title']
     
@@ -593,6 +666,8 @@ def delete_program_area(pa_id):
     verify_access()
     verify_login()
     
+    print('deleting program-area relation...')
+    
     conditions = "pa_id=%s"
     msg = "Connection between program and area at id {} was successfully deleted"
     
@@ -607,6 +682,8 @@ def delete_area(area_id):
     verify_access()
     verify_login()
     
+    print('deleting area...')
+    
     conditions = "area_id=%s"
     # remove from program_areas (since area_id is a foreign key)
     remove_from_table(table="program_areas", query_conditions=conditions, data=(area_id), should_flash=False)
@@ -620,6 +697,152 @@ def delete_area(area_id):
 
 # bug report stuff -----------------------------------------------
 
+# bugReport.html ------------------------------
+@app.route('/add_bug', methods=['GET', 'POST'])
+def add_bug():
+    username = session['username']
+    userlevel =session['user_level']
+    
+    verify_login()
+    
+    # posting a new report
+    if request.method == 'POST':
+        
+        print('posting bug report...')
+        
+        program_id = request.form.get('program_id')
+        report_type = request.form.get('report_type')
+        severity = request.form.get('severity')
+        reproducible = request.form.get('reproducible')       
+        problem_summary = request.form.get('problem_summary')
+        problem = request.form.get('problem')
+        suggested_fix = request.form.get("suggested_fix")
+        reporter_id = request.form.get('reported_by')
+        date_reported = request.form.get('date_reported')   
+        
+        # reproducible has two states: "on" and "None"
+        if reproducible == "on":
+            reproducible = True
+        else:
+            reproducible = False
+        
+        # Get the file attachment from the form
+        attachments = request.files.getlist('file')
+        
+        # check filename of the first file and empty file content
+        is_length_one     = len(attachments) == 1
+        has_empty_filename = attachments[0].filename == ''
+        has_empty_content  = attachments[0].read() == b'' 
+        
+        # above conditions answer if there are any attachments
+        has_attachments = True
+        if is_length_one and has_empty_filename and has_empty_content:
+            # the filename is empty (and file.read() will also be empty())
+            has_attachments = False
+        
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+            
+                # 1. make bug
+                sql  = "INSERT INTO bugs (program_id, bug_type, bug_severity, bug_title, bug_description, bug_suggestion, bug_reproducible, user_reporter_id, bug_find_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                data = (program_id, report_type, severity, problem_summary, problem, suggested_fix, reproducible, reporter_id, date_reported)
+                cursor.execute(sql, data)
+                connection.commit()
+                bug_id= cursor.lastrowid
+                
+                flash(f"Bug with id '{bug_id}' was successfully added.")
+                
+                # 2. add attachments (if any)
+                if has_attachments:            
+                    sql = "INSERT INTO attachments (attach_name, attach_content, bug_id) VALUES (%s, %s, %s)"
+                    for attachment in attachments:
+                        data = (attachment.filename, attachment.read(), bug_id)
+                        cursor.execute(sql, data)
+                        connection.commit()
+                        flash(f"Attachment '{attachment.filename}' was successfully uploaded.")
+                        
+        # redirect to homepage
+        return redirect(url_for('homepage'))
+
+
+    # general landing
+    sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
+    programs, areas, employees = get_all_table_results(sql_list)
+    
+    # if the request method is GET, render the add_bug page with the necessary form data
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
+    # note: priority, status, resolution, resolution_version are UNUSED when making a new bug report
+
+    print('making a bug report?')
+    return render_template('bugReport.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, username=username, userlevel=userlevel)
+
+
+# searchBug ------------------------------
+@app.route('/search_bug', methods=['GET', 'POST'])
+def search_bug():
+    username = session['username']
+    userlevel =session['user_level']
+
+    verify_login()
+
+    sql_list = ['SELECT * FROM programs','SELECT * FROM areas','SELECT * FROM users']
+    
+    if request.method == 'POST':
+        field_values={
+        'program': request.form.get('program'),
+        'report_type': request.form.get('report_type'),
+        'severity': request.form.get('severity'),
+        'problem_summary': request.form.get('problem_summary'),
+        'reproducible': request.form.get('reproducible'),
+        'problem': request.form.get('problem'),
+        'reported_by': request.form.get('reported_by'),
+        'date_reported': request.form.get('date_reported'),
+        'functional_area': request.form.get('functional_area'),
+        'assigned_to': request.form.get('assigned_to'),
+        'comments': request.form.get('comments'),
+        'status': request.form.get('status'),
+        'priority': request.form.get('priority'),
+        'resolution': request.form.get('resolution'),
+        'resolution_version': request.form.get('resolution_version'),
+        'resolution_by': request.form.get('resolution_by'),
+        'date_resolved': request.form.get('date_resolved'),
+        'tested_by': request.form.get('tested_by')
+        }
+
+        print(field_values)
+        if field_values['date_reported']=='':
+            field_values['date_reported']=None
+
+        # build the SQL query based on user inputs
+        sql = "SELECT * FROM bugs"
+        conditions = []
+        for field, value in field_values.items():
+            if value!=None:
+                conditions.append(f"{field} = '{value}'")
+            
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+       
+        sql_list.append(sql)
+        programs, areas, employees, search_result = get_all_table_results(sql_list)
+
+        # if the request method is GET, render the add_bug page with the necessary form data
+        report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
+       
+        # process the form data and store it in the database using PL/SQL
+        
+        # redirect to a success page
+        return render_template('search_bug_result.html', result=search_result, username=username, userlevel=userlevel,programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
+    
+    programs, areas, employees = get_all_table_results(sql_list)
+    
+    # if the request method is GET, render the add_bug page with the necessary form data
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
+
+    return render_template('searchBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
+
+
+# TODO: revise the following routes, and related html templates
 # updateBug.html --------------------------------
 @app.route('/update_bug')
 def update_bug():
@@ -643,15 +866,15 @@ def delete_bug(id_data):
 
     verify_login()
     
-    connection = pymysql.connect(**db_config)
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM bug WHERE bug_id=%s", (id_data,))
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM bug WHERE bug_id=%s", (id_data,))
+            
+            connection.commit()
+            message=f"Bug with id {id_data} was successfully deleted"
         
-        connection.commit()
-        message=f"Bug with id {id_data} was successfully deleted"
-    
-        flash(message=message)
-        return redirect(url_for('update_bug'))
+            flash(message=message)
+            return redirect(url_for('update_bug'))
 
 # edit a bug
 @app.route('/edit_bug', methods=['POST','GET']) #type:ignore
@@ -719,158 +942,6 @@ def edit_bug():
         flash(message=message)
         return redirect(url_for('update_bug'))
 
-
-# addBug.html ------------------------------
-@app.route('/add_bug', methods=['GET', 'POST'])
-def add_bug():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_login()
-    
-    if request.method == 'POST':
-        program = request.form.get('program')
-        report_type = request.form.get('report_type')
-        severity = request.form.get('severity')
-        reproducible = request.form.get('reproducible')
-        problem = request.form.get('problem')
-        problem_summary = request.form.get('problem_summary')
-        suggested_fix = request.form.get("suggested_fix")
-        reported_by = request.form.get('reported_by')
-        date_reported = request.form.get('date_reported')
-        
-        # Get the file attachment from the form
-        attachment = request.files["attachment"]
-        # Get the filename of the attachment
-        file_name = attachment.filename
-
-        # Read the contents of the file
-        attachment = attachment.read()
-        
-        
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            
-
-            cursor.execute("SELECT prog_id FROM programs WHERE program=%s", (program,))
-            prog_id = cursor.fetchone()
-        
-            connection.commit()
-
-            cursor.execute("SELECT area_id FROM areas WHERE area=%s", (functional_area,))
-            area_id = cursor.fetchone()
-        
-            connection.commit()
-
-            
-            print("INSERT INTO bugs (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", 
-                (program, report_type, severity, 
-                 problem_summary, reproducible, problem, reported_by, 
-                 date_reported, functional_area, assigned_to, comments, 
-                 status, priority, resolution, resolution_version, resolved_by,
-                 date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
-            cursor.execute("INSERT INTO bugs (program, report_type, severity, problem_summary, reproducible, problem, reported_by, date_reported, functional_area, assigned_to, comments, status, priority, resolution, resolution_version, resolution_by,date_resolved, tested_by, prog_id, area_id, attachment, filename) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s)", 
-                (program, report_type, severity, 
-                 problem_summary, reproducible, problem, reported_by, 
-                 date_reported, functional_area, assigned_to, comments, 
-                 status, priority, resolution, resolution_version, resolved_by,
-                 date_resolved, tested_by, prog_id['prog_id'], area_id['area_id'],  attachment, file_name)) #type:ignore
-            connection.commit()
-            
-            bug_id= cursor.lastrowid
-            message = f"Bug with id {bug_id} was successfully added."
-        
-        
-        # process the form data and store it in the database using PL/SQL
-        
-        # redirect to a success page
-        flash(message=message)
-        return redirect(url_for('homepage'))
-
-
-    sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
-    programs, areas, employees = get_all_table_results(sql_list)
-    print(programs)
-    print(areas)
-    print(employees)
-    
-    # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
-
-    return render_template('bugReport.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
-
-
-# @app.route('/update',methods=['POST','GET'])
-# def update():
-#     verify_access()
-#     verify_login()
-#     return redirect(url_for('manage_employee'))
-
-
-# searchBug ------------------------------
-@app.route('/search_bug', methods=['GET', 'POST'])
-def search_bug():
-    username = session['username']
-    userlevel =session['user_level']
-
-    verify_login()
-
-    sql_list = ['SELECT * FROM programs','SELECT * FROM areas','SELECT * FROM users']
-    
-    if request.method == 'POST':
-        field_values={
-        'program': request.form.get('program'),
-        'report_type': request.form.get('report_type'),
-        'severity': request.form.get('severity'),
-        'problem_summary': request.form.get('problem_summary'),
-        'reproducible': request.form.get('reproducible'),
-        'problem': request.form.get('problem'),
-        'reported_by': request.form.get('reported_by'),
-        'date_reported': request.form.get('date_reported'),
-        'functional_area': request.form.get('functional_area'),
-        'assigned_to': request.form.get('assigned_to'),
-        'comments': request.form.get('comments'),
-        'status': request.form.get('status'),
-        'priority': request.form.get('priority'),
-        'resolution': request.form.get('resolution'),
-        'resolution_version': request.form.get('resolution_version'),
-        'resolution_by': request.form.get('resolution_by'),
-        'date_resolved': request.form.get('date_resolved'),
-        'tested_by': request.form.get('tested_by')
-        }
-
-        print(field_values)
-        if field_values['date_reported']=='':
-            field_values['date_reported']=None
-
-        # build the SQL query based on user inputs
-        sql = "SELECT * FROM bugs"
-        conditions = []
-        for field, value in field_values.items():
-            if value!=None:
-                conditions.append(f"{field} = '{value}'")
-            
-        if conditions:
-            sql += " WHERE " + " AND ".join(conditions)
-       
-        sql_list.append(sql)
-        programs, areas, employees, search_result = get_all_table_results(sql_list)
-
-        # if the request method is GET, render the add_bug page with the necessary form data
-        report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
-       
-        # process the form data and store it in the database using PL/SQL
-        
-        # redirect to a success page
-        return render_template('search_bug_result.html', result=search_result, username=username, userlevel=userlevel,programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
-    
-    programs, areas, employees = get_all_table_results(sql_list)
-    
-    # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
-
-    return render_template('searchBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
-
 # view attachments
 @app.route("/view_attachment/<string:filename>")
 def view_attachment(filename):
@@ -881,60 +952,7 @@ def view_attachment(filename):
         print(data)
         
     return send_file(BytesIO(data['attachment']), attachment_filename=filename, as_attachment=True) #type:ignore
-
-# export data
-@app.route('/export_data', methods=['GET', 'POST'])
-def export_data():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
-    
-    try:
-        table_name = request.form['table_name']
-        data_type = request.form['data_type']
-        connection = pymysql.connect(**db_config)
-        with connection.cursor() as cursor:
-            
-            cursor.execute(f'SELECT * FROM {table_name}')
-            rows = cursor.fetchall()
-            # create a root element for the XML file
-            root = Element(table_name)
-            
-            # iterate over the rows and create subelements for each record
-            for row in rows:
-                record = SubElement(root, "record")
-                for key, value in row.items(): #type:ignore
-                    field = SubElement(record, key)
-                    field.text = str(value)
-            
-            # generate the XML file and save it to disk
-            tree = ElementTree(root)
-            if data_type == "xml":
-                tree.write(f"{table_name}.xml", encoding="utf-8", xml_declaration=True)
-                
-            elif data_type == "ascii":
-                with open(f"{table_name}.txt", "w") as f:
-                    for row in rows:
-                        for key, value in row.items(): #type:ignore
-                            f.write(f"{key}: {value}\n")
-                        f.write("\n")
-            else:
-                print("Invalid data type")
-            
-            # close the database connection
-            cursor.close()
-            connection.close()
-        
-        message = f"Table '{table_name}' with type '{data_type}' was successfully exported."
-    except:
-        message = "File type has not been chosen."    
-        
-    flash(message=message)
-    return redirect(url_for('maintain_db'))
-        
-
+       
 
 # automatic
 if __name__ == "__main__":
