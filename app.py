@@ -24,16 +24,67 @@ db_config = {
 
 # helper functions (client-side/general)
 def verify_login():
-    if "loggedin" not in session or 'loggedIn' in session is False:
-         print('not logged in')
-         message = f"You need to Login first"
-         flash(message=message)
-         return render_template('Login.html')
 
-def verify_access():
-    if session['user_level'] != 3:
-        print('access not high enough')
-        return render_template('index.html', access=session['user_level'], username=session['username'])
+    flag = False
+    try:
+        logged_in = session['loggedin']
+        if logged_in is False:
+            print('not logged in')
+            flag = True
+    except:
+        print('loggedin NOT in session')
+        flag = True
+    
+    if flag:   
+        message = f"Not logged in"
+        flash(message=message)
+        return redirect("/logout")
+
+def verify_user():
+    flag = False
+    try:
+        user = session['username']
+        print(user)
+        
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT 'COUNT(*)' FROM users WHERE user_name={user}")
+                result = cursor.fetchone()
+                print(result) # type:ignore
+                connection.commit()
+
+        if result['COUNT(*)'] == 0: #type:ignore
+            print('no such username in database')
+            flag = True
+        
+    except:
+        print('username NOT in session')
+        flag = True
+    
+    if flag:   
+        message = f"No user found"
+        flash(message=message)
+        return redirect("/logout")
+        
+    return verify_login()
+
+def verify_admin():
+    flag = False
+    
+    try:
+        userlevel = session['user_level']
+        if userlevel != 3:
+            print('access not high enough')
+            flag = True
+    except:
+        print('userlevel NOT in session')
+        flag = True
+    
+    if flag:
+        flash('Restricted access')
+        return redirect("/homepage")
+        
+    return verify_user()
 
 def set_static_report_values():
     report_types = [
@@ -176,8 +227,41 @@ def get_all_table_results(sql_list: str | list[str]):
 
 
 # initial landing (Login)
-@app.route("/")
+# on POST, invoke login authentication
+@app.route("/", methods=['GET', 'POST'])
 def index():
+
+    if request.method == "POST":
+        # invoke login authentication
+        print("making login request...")
+        username = request.form['username']
+        password = request.form['password']
+
+        encoded_password = encode_password(password)
+
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
+                employee = cursor.fetchone()
+
+                # print(employee)
+                # print(encoded_password)
+
+                if employee and employee['user_pass'] == encoded_password: # type:ignore
+                    session['loggedin'] = True
+                    session['username'] = username
+                    session['user_level'] = int(employee["user_access"])   # type:ignore
+
+                    print('login successful')
+                    return redirect('/homepage')
+                
+                else:
+                    print("incorrect username/password")
+                    message = f"Incorrect username or password"
+                    flash(message=message)
+                    return redirect('/')
+    
+    # default landing     
     print("initial landing...")
     
     if 'username' in session and 'loggedIn' in session is True:
@@ -186,49 +270,17 @@ def index():
 
     return render_template("Login.html")
 
-#invoke login authentication
-@app.route("/", methods=['POST', 'GET'])
-def login_auth():
-
-    print("making login request...")
-    username = request.form['username']
-    password = request.form['password']
-
-    encoded_password = encode_password(password)
-
-    with pymysql.connect(**db_config) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM Users WHERE user_name = %s', username)
-            employee = cursor.fetchone()
-
-            # print(employee)
-            # print(encoded_password)
-
-            if employee and employee['user_pass'] == encoded_password: # type:ignore
-                session['loggedin'] = True
-                session['username'] = username
-                session['user_level'] = int(employee["user_access"])   # type:ignore
-
-                print('login successful')
-                return redirect('/homepage')
-            
-            else:
-                print("incorrect username/password")
-                message = f"Incorrect username or password"
-                flash(message=message)
-                return redirect('/')
-
 # invoke logout
 @app.route('/logout', methods=['POST','GET', 'PUT'])
 def logout():
     print('making logout request...')
 
     if "loggedin" in session:
-        message = f"You are Logged out Successfully"
+        message = f"You have been logged out successfully"
         flash(message=message)
         session.clear()
     else:
-        message = f"You need to Login first"
+        message = f"You need to log in first"
         flash(message=message)
     return redirect('/')
 
@@ -271,13 +323,14 @@ def change_password():
     return redirect(url_for("/"))
 
 # homepage (index)
-@app.route('/homepage')
-def homepage():
-    username = session['username']
-    userlevel =session['user_level']
-    #print("pp", username,userlevel)
+@app.route('/homepage') # type:ignore
+def homepage(): 
     
-    verify_login()
+    try:
+        userlevel =session['user_level']
+        username = session['username']
+    except: 
+        return verify_user()
     
     print('homepage...')
     print("session:", session.items())
@@ -286,23 +339,27 @@ def homepage():
 
 
 # maintenance page (main landing)
-@app.route('/maintain_db')
+@app.route('/maintain_db') # type:ignore
 def maintain_db():
     
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('db maintenance...')
-    return render_template('maintenancePage.html')
+    return render_template('maintenancePage.html', username=username, access=userlevel)
 
 # manage employee page
-@app.route('/manage_employees')
+@app.route('/manage_employees') # type:ignore
 def manage_employees():
-    username = session['username']
-    userlevel= session['user_level']
     
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('managing employees...')
     
@@ -311,13 +368,13 @@ def manage_employees():
     return render_template('maintenancePage/employees.html', employees=data, username=username, userlevel=userlevel)
 
 # manage program page
-@app.route('/manage_programs')
+@app.route('/manage_programs') #type:ignore
 def manage_programs():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('managing programs...')
     
@@ -327,13 +384,13 @@ def manage_programs():
     return render_template('maintenancePage/programs.html', programs=data, username=username, userlevel=userlevel)
 
 # manage area page
-@app.route('/manage_areas')
+@app.route('/manage_areas')  # type:ignore
 def manage_areas():
-    username = session['username']
-    userlevel =session['user_level']
-    
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('managing areas...')
         
@@ -349,12 +406,15 @@ def manage_areas():
     return render_template('maintenancePage/areas.html', program_areas=data, programs=programs, areas=areas, username=username, userlevel=userlevel)
 
 # export db table in a certain file type
-@app.route('/export_data', methods=['GET', 'POST'])
+@app.route('/export_data', methods=['GET', 'POST'])  # type:ignore
 def export_data():
         
-    verify_access()
-    verify_login()
-    
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
+        
     try:
         table_name = request.form['table_name']
         data_type = request.form['data_type']
@@ -396,10 +456,13 @@ def export_data():
 
 
 # insert new employee (maintenancePage/employee)
-@app.route('/insert', methods=['POST'])
+@app.route('/insert', methods=['POST'])  # type:ignore
 def insert():
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('adding employee...')
     
@@ -420,10 +483,13 @@ def insert():
     return redirect(url_for('manage_employees'))
 
 # update an employee
-@app.route('/edit/<string:id_data>', methods=['POST', 'PUT'])
+@app.route('/edit/<string:id_data>', methods=['POST', 'PUT']) # type:ignore
 def edit(id_data):
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('editing employee...')
             
@@ -456,11 +522,14 @@ def edit(id_data):
     return redirect(url_for('manage_employees'))
 
 # delete an employee
-@app.route('/delete/<string:id_data>', methods = ['GET', 'DELETE'])
+@app.route('/delete/<string:id_data>', methods = ['GET', 'DELETE'])  # type:ignore
 def delete(id_data):
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('deleting employee...')
     
@@ -475,8 +544,11 @@ def delete(id_data):
 @app.route('/add_program', methods=['POST']) #type:ignore
 def add_program():
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('adding program...')
     
@@ -493,10 +565,13 @@ def add_program():
     return redirect(url_for('manage_programs'))
 
 # edit a program
-@app.route('/edit_program/<string:id_data>', methods=['POST', 'PUT']) #type:ignore
+@app.route('/edit_program/<string:id_data>', methods=['POST', 'PUT']) # type:ignore
 def edit_program(id_data):
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('editing program...')
         
@@ -530,11 +605,14 @@ def edit_program(id_data):
     return redirect(url_for('manage_programs'))
 
 # delete a program
-@app.route('/delete_program/<string:id_data>', methods = ['GET', 'DELETE'])
+@app.route('/delete_program/<string:id_data>', methods = ['GET', 'DELETE']) # type:ignore
 def delete_program(id_data):
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('deleting program...')
     
@@ -551,11 +629,14 @@ def delete_program(id_data):
 
 
 # add an area (maintenancePage/area)
-@app.route('/add_area', methods=['POST'])
+@app.route('/add_area', methods=['POST']) # type:ignore
 def add_area():
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('adding area...')
     
@@ -600,11 +681,14 @@ def add_area():
     return redirect(url_for('manage_areas'))
 
 # edit a program-area connection
-@app.route('/edit_program_area/<string:pa_id>', methods=['POST', 'PUT'])
+@app.route('/edit_program_area/<string:pa_id>', methods=['POST', 'PUT']) # type:ignore
 def edit_program_area(pa_id):
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('editing program-area relation...')
     
@@ -638,11 +722,14 @@ def edit_program_area(pa_id):
     return redirect(url_for('manage_areas'))
 
 # edit an area
-@app.route('/edit_area', methods=["POST", 'PUT'])
+@app.route('/edit_area', methods=["POST", 'PUT']) # type:ignore
 def edit_area():
     
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('editing area')
     
@@ -660,11 +747,14 @@ def edit_area():
     return redirect(url_for("manage_areas"))
 
 # delete an area connection to a program
-@app.route('/delete_program_area/<string:pa_id>', methods = ['GET', 'DELETE'])
+@app.route('/delete_program_area/<string:pa_id>', methods = ['GET', 'DELETE']) # type:ignore
 def delete_program_area(pa_id):
 
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('deleting program-area relation...')
     
@@ -676,11 +766,14 @@ def delete_program_area(pa_id):
     return redirect(url_for('manage_areas'))
 
 # delete area (and all connections to all programs)
-@app.route('/delete_area/<string:area_id>', methods= ['GET', 'DELETE'])
+@app.route('/delete_area/<string:area_id>', methods= ['GET', 'DELETE']) # type:ignore
 def delete_area(area_id):
     
-    verify_access()
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     print('deleting area...')
     
@@ -698,12 +791,14 @@ def delete_area(area_id):
 # bug report stuff -----------------------------------------------
 
 # bugReport.html ------------------------------
-@app.route('/add_bug', methods=['GET', 'POST'])
+@app.route('/add_bug', methods=['GET', 'POST']) # type:ignore
 def add_bug():
-    username = session['username']
-    userlevel =session['user_level']
     
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
     
     # posting a new report
     if request.method == 'POST':
@@ -778,35 +873,40 @@ def add_bug():
 
 
 # searchBug ------------------------------
-@app.route('/search_bug', methods=['GET', 'POST'])
+@app.route('/search_bug', methods=['GET', 'POST']) # type:ignore
 def search_bug():
-    username = session['username']
-    userlevel =session['user_level']
-
-    verify_login()
-
-    sql_list = ['SELECT * FROM programs','SELECT * FROM areas','SELECT * FROM users']
     
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
+
     if request.method == 'POST':
+    
+        sql_list = ['SELECT * FROM programs',
+                    'SELECT * FROM areas',
+                    'SELECT * FROM users']
+        
         field_values={
-        'program': request.form.get('program'),
-        'report_type': request.form.get('report_type'),
-        'severity': request.form.get('severity'),
-        'problem_summary': request.form.get('problem_summary'),
-        'reproducible': request.form.get('reproducible'),
-        'problem': request.form.get('problem'),
-        'reported_by': request.form.get('reported_by'),
-        'date_reported': request.form.get('date_reported'),
-        'functional_area': request.form.get('functional_area'),
-        'assigned_to': request.form.get('assigned_to'),
-        'comments': request.form.get('comments'),
-        'status': request.form.get('status'),
-        'priority': request.form.get('priority'),
-        'resolution': request.form.get('resolution'),
-        'resolution_version': request.form.get('resolution_version'),
-        'resolution_by': request.form.get('resolution_by'),
-        'date_resolved': request.form.get('date_resolved'),
-        'tested_by': request.form.get('tested_by')
+            'program': request.form.get('program'),
+            'report_type': request.form.get('report_type'),
+            'severity': request.form.get('severity'),
+            'problem_summary': request.form.get('problem_summary'),
+            'reproducible': request.form.get('reproducible'),
+            'problem': request.form.get('problem'),
+            'reported_by': request.form.get('reported_by'),
+            'date_reported': request.form.get('date_reported'),
+            'functional_area': request.form.get('functional_area'),
+            'assigned_to': request.form.get('assigned_to'),
+            'comments': request.form.get('comments'),
+            'status': request.form.get('status'),
+            'priority': request.form.get('priority'),
+            'resolution': request.form.get('resolution'),
+            'resolution_version': request.form.get('resolution_version'),
+            'resolution_by': request.form.get('resolution_by'),
+            'date_resolved': request.form.get('date_resolved'),
+            'tested_by': request.form.get('tested_by')
         }
 
         print(field_values)
@@ -832,24 +932,21 @@ def search_bug():
         # process the form data and store it in the database using PL/SQL
         
         # redirect to a success page
-        return render_template('search_bug_result.html', result=search_result, username=username, userlevel=userlevel,programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status)
-    
-    programs, areas, employees = get_all_table_results(sql_list)
-    
-    # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
+        return render_template('searchReport.html', is_initial=False)
 
-    return render_template('searchBug.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, resolution=resolution, resolution_version=resolution_version, priority=priority, status=status, username=username, userlevel=userlevel)
+    return render_template('searchReport.html', is_initial=True)
 
 
 # TODO: revise the following routes, and related html templates
 # updateBug.html --------------------------------
-@app.route('/update_bug')
+@app.route('/update_bug') # type:ignore
 def update_bug():
-    username = session['username']
-    userlevel =session['user_level']
 
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
     
     sql_list = ['SELECT * FROM bugs', 'SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
 
@@ -864,7 +961,7 @@ def update_bug():
 @app.route('/delete_bug/<string:id_data>', methods = ['GET'])
 def delete_bug(id_data):
 
-    verify_login()
+    verify_admin()
     
     with pymysql.connect(**db_config) as connection:
         with connection.cursor() as cursor:
@@ -877,10 +974,14 @@ def delete_bug(id_data):
             return redirect(url_for('update_bug'))
 
 # edit a bug
-@app.route('/edit_bug', methods=['POST','GET']) #type:ignore
+@app.route('/edit_bug', methods=['POST','GET']) # type:ignore
 def edit_bug():
     
-    verify_login()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
     
     if request.method == "POST":
         print(request.form)
@@ -942,9 +1043,17 @@ def edit_bug():
         flash(message=message)
         return redirect(url_for('update_bug'))
 
+
 # view attachments
-@app.route("/view_attachment/<string:filename>")
+@app.route("/view_attachment/<string:filename>") # type:ignore
 def view_attachment(filename):
+    
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
+    
     connection = pymysql.connect(**db_config)
     with connection.cursor() as cursor:
         cursor.execute("SELECT attachment FROM bug WHERE filename = %s", (filename,))

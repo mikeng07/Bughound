@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+    <title>Bug Lookup/Edit</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        var homepage = "{{url_for('homepage')}}";
+
+        function move(endpoint) { window.location.href = endpoint; }
+    </script>
+</head>
+<body>
+    <h1>Bug Lookup</h1>
+    <hr class="long-line">
+
+    <button onclick="move(homepage)">Back to Home</button>
+    <br><br>
+    
+    <form id="searchForm" action="/search_bug" method="POST">
+        <label for="search_options">Search by:</label>
+        <select id="search_options">
+            <option value="bug_id" selected>ID</option>
+            <option value="program_name">Program Name</option>
+            <option value="report_type">Report Type</option>
+            <option value="severity">Severity</option>
+            <option value="reporter_name">Reporter ID</option>
+            <option value="date">Date (mm-dd-yyyy)</option>
+        </select>
+        <button type="submit">Search</button>
+        <br>
+        <input type="search" id="searchInput" placeholder="enter search term by (search type)..." size="36"><br>
+    </form>
+
+    <hr>
+
+    
+    <table id="searchResults" class="fixedSize">
+        <thead class="fixedHeader">
+            <th scope="col" style="width: 17%">Report ID</th>
+            <th scope="col" style="width: 17%">Date</th>
+            <th scope="col" style="width: 60%">Report Summary</th>
+        </thead>
+
+        {% for result in results %}
+        <tr>
+            <td>{{ result['bug_id'] }}</td>
+            <td>{{ result['bug_find_date'] }}</td>
+            
+            <!-- modal to view report, and related options -->
+            <td>
+                <a href="/view_report/{{result['bug_id']}}" data-toggle="modal">
+                    {{ result['bug_id'] }}
+                </a>
+            </td>
+            <!-- <td>{{ result['program_name'] }} R{{ result['program_version'] }} v{{ result['release_version'] }}</td> -->
+            <!-- <td>
+                <a href="/delete/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')">Delete</a>
+            </td> -->
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    {% if not results and not is_initial %}
+        {% include 'no_results.html' %}
+    {% endif %}
+    
+    <br>
+
+</body>
+</html>
