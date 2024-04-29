@@ -7,3 +7,4 @@
 # venv folder (flask)
 .venv
 __pycache__
+exports

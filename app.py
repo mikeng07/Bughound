@@ -441,10 +441,10 @@ def export_data():
                 # generate the XML file and save it to disk
                 tree = ElementTree(root)
                 if data_type == "xml":
-                    tree.write(f"{table_name}.xml", encoding="utf-8", xml_declaration=True)
+                    tree.write(f"exports/{table_name}.xml", encoding="utf-8", xml_declaration=True)
                     
                 elif data_type == "ascii":
-                    with open(f"{table_name}.txt", "w") as f:
+                    with open(f"exports/{table_name}.txt", "w") as f:
                         for row in rows:
                             for key, value in row.items(): #type:ignore
                                 f.write(f"{key}: {value}\n")
