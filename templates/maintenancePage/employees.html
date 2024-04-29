@@ -57,22 +57,22 @@
 
     <table class="fixedSize">
         <thead class="fixedHeader">
-            <th scope="col" style="text-align:center;">ID</th>
-            <th scope="col" style="text-align:center;">Lvl</th>
-            <th scope="col">Name</th>
-            <th scope="col">Username</th>
-            <th scope="col">Pwd Hash</th>
-            <th scope="col">Operations</th>
+            <th scope="col" style="width: 5%">ID</th>
+            <th scope="col" style="width: 5%">Lvl</th>
+            <th scope="col" style="width: 15%" class="overflow pwd">Name</th>
+            <th scope="col" style="width: 20%" class="overflow pwd">Username</th>
+            <th scope="col" class="overflow pwd">Pwd Hash</th>
+            <th scope="col" style="width: 17%">Operations</th>
         </thead>
 
         {% for row in employees %}
 
         <tr>
-            <td style="text-align:center;">{{ row['user_id'] }}</td>
-            <td style="text-align:center;">{{ row['user_access'] }}</td>
-            <td>{{ row['user_realname'] }}</td>
-            <td>{{ row['user_name'] }}</td>
-            {% set partial_pass = row['user_pass'][:18] + "..." %}
+            <td>{{ row['user_id'] }}</td>
+            <td>{{ row['user_access'] }}</td>
+            <td class="overflow pwd">{{ row['user_realname'] }}</td>
+            <td class="overflow pwd">{{ row['user_name'] }}</td>
+            {% set partial_pass = row['user_pass'][:55] + "..." %}
             <td class="overflow pwd">{{ partial_pass }}</td>
             
             {% if row['user_realname'] != "ADMIN" and row['user_realname'] != "USER" %}

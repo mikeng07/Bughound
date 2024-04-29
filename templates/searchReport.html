@@ -23,7 +23,7 @@
     <form id="searchForm" action="/search_bug" method="POST">
         <label for="search_options">Search by:</label>
         <select id="search_options">
-            <option value="ALL" selected>Get all reports</option>
+            <option value="ALL" selected>All reports</option>
             <option value="bug_id">Bug ID</option>
             <option value="program_name">Program Name</option>
             <option value="report_type">Report Type</option>
@@ -41,32 +41,51 @@
     
     <table id="searchResults" class="fixedSize">
         <thead class="fixedHeader">
-            <th scope="col" style="width: 17%">Report ID</th>
-            <th scope="col" style="width: 17%">Date</th>
-            <th scope="col" style="width: 60%">Report Summary</th>
+            <th scope="col" style="width: 17%" class="overflow pwd rev">Report ID</th>
+            <th scope="col" style="width: 17%" class="overflow pwd">Date</th>
+            <th scope="col" style="width: 50%" class="overflow pwd rev">Report Summary</th>
+            <th scope="col" style="width: 17%">Operations</th>
         </thead>
 
         {% for result in results %}
         <tr>
             <td>{{ result['bug_id'] }}</td>
-            <td>{{ result['bug_find_date'] }}</td>
+            <td class="overflow pwd">{{ result['bug_find_date'] }}</td>
             
             <!-- modal to view report, and related options -->
-            <td>
-                <a href="/view_report/{{result['bug_id']}}" data-toggle="modal">
-                    {{ result['bug_id'] }}
-                </a>
+            <td class="overflow pwd">
+                <a href="/view_report/{{result['bug_id']}}" data-toggle="modal" data-target="#modaledit{{result['bug_id']}}">{{ result['bug_title'] }}</a>
             </td>
-            <!-- <td>{{ result['program_name'] }} R{{ result['program_version'] }} v{{ result['release_version'] }}</td> -->
-            <!-- <td>
-                <a href="/delete/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')">Delete</a>
-            </td> -->
+            <td class="overflow pwd">
+                <a href="plus_res/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Res</a> |
+                <a href="/delete/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
+            </td>
         </tr>
+
+        <div id="#modaledit{{result['bug_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Bug Report # {{ result['bug_id'] }}</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <form id="editBugForm{{result['bug_id']}}" action="/edit_bug/{{result['bug_id']}}" method="POST">
+                        
+                    </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" form="editBugForm{{result['bug_id']}}">Make report changes</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         {% endfor %}
 
     </table>
 
-    {% if not results and not is_initial %}
+    {% if not results %}
         {% include 'no_results.html' %}
     {% endif %}
     

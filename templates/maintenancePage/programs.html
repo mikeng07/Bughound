@@ -55,8 +55,8 @@
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Program</th>
-                <th scope="col">Release</th>
-                <th scope="col">Version</th>
+                <th scope="col" class="overflow pwd">Release</th>
+                <th scope="col" class="overflow pwd">Version</th>
                 <th scope="col">Operations</th>
             </tr>
         </thead>
@@ -65,7 +65,7 @@
 
         <tr>
             <td>{{ row['program_id'] }}</td>
-            <td>{{ row['program_name'] }}</td>
+            <td class="overflow pwd">{{ row['program_name'] }}</td>
             <td>{{ row['program_version'] }}</td>
             <td>{{ row['release_version'] }}</td>
             <td>

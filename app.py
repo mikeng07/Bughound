@@ -251,6 +251,7 @@ def index():
                     session['loggedin'] = True
                     session['username'] = username
                     session['user_level'] = int(employee["user_access"])   # type:ignore
+                    session['user_name'] = employee['user_realname']       # type:ignore
 
                     print('login successful')
                     return redirect('/homepage')
@@ -335,7 +336,7 @@ def homepage():
     print('homepage...')
     print("session:", session.items())
     
-    return render_template('index.html', username=username, access=userlevel)
+    return render_template('index.html', username=username, user_name=session['user_name'], access=userlevel)
 
 
 # maintenance page (main landing)
@@ -944,9 +945,12 @@ def search_bug():
         # process the form data and store it in the database using PL/SQL
         
         # redirect to a success page
-        return render_template('searchReport.html', is_initial=False)
+        return render_template('searchReport.html')
+    
+    # general landing: 
+    results = select_from_table(table="bugs", should_flash=True)
 
-    return render_template('searchReport.html', is_initial=True)
+    return render_template('searchReport.html', results=results)
 
 
 # TODO: revise the following routes, and related html templates

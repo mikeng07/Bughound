@@ -94,29 +94,29 @@
     <table class="fixedSize">
         <thead class="fixedHeader">
             <tr>
-                <th scope="col" style="text-align:right;">P.ID</th>
-                <th scope="col">A.ID</th>
-                <th scope="col">Program</th>
-                <th scope="col">Release</th>
-                <th scope="col">Version</th>
-                <th scope="col">Area</th>
-                <th scope="col">Operations</th>
+                <th scope="col" style="width: 5%" class="overflow pwd">P.ID</th>
+                <th scope="col" style="width: 5%" class="overflow pwd">A.ID</th>
+                <th scope="col" style="width: 23%" >Program</th>
+                <th scope="col" class="overflow pwd">Release</th>
+                <th scope="col" class="overflow pwd">Version</th>
+                <th scope="col" style="width: 23%" >Area</th>
+                <th scope="col" style="width: 17%">Operations</th>
             </tr>
         </thead>
         
         {% for row in program_areas %}
 
         <tr>
-            <td style="text-align:right;">{{ row['program_id'] }}</td>
+            <td>{{ row['program_id'] }}</td>
             <td>{{ row['area_id'] }}</td>
 
             <!-- program name, release, version -->
-            <td>{{ row['program_name'] }}</td>
+            <td class="overflow pwd">{{ row['program_name'] }}</td>
             <td>{{ row['program_version'] }}</td>
             <td>{{ row['release_version'] }}</td>
 
             <!-- area name -->
-            <td>{{ row['area_title'] }}</td>
+            <td class="overflow pwd">{{ row['area_title'] }}</td>
 
             <td>
                 <a href="/update_program_area{{row['pa_id']}}" data-toggle="modal" data-target="#modaledit{{row['pa_id']}}">Edit</a> |

@@ -120,6 +120,9 @@ table.fixedSize .fixedHeader {
 .overflow.pwd {
   max-width: 40px;
 }
+.overflow.pwd.rev {
+  direction: rtl;
+}
 
 .no_list_results {
   width: 100%;
