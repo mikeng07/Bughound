@@ -34,9 +34,9 @@
     <h3>Add Programs</h3>
     <form id="newProgramForm" action="/add_program" method="POST">
         <div id="program_entity" class="add-entity">
-            <input id="program_name" name="program_name" size="10" placeholder="program name">
-            <input id="program_release" name="program_release" size="6" placeholder="release">
-            <input id="release_version" name="release_version" size="3" placeholder="version">
+            <input id="program_name" name="program_name" size="10" placeholder="program name" required>
+            <input id="program_release" name="program_release" size="6" placeholder="release" required>
+            <input id="release_version" name="release_version" size="3" placeholder="version" required>
             <button type="button" id="newProgramButton">+</button> 
             <button type="button" id="removeProgramButton" hidden=true>--</button>
             
@@ -83,11 +83,11 @@
                     </div>
                     
                     <form id="editProgramForm{{row['program_id']}}" action="/edit_program/{{row['program_id']}}" method="POST">
-                        <label for="program_entity_after" class="inner-modal">Program after change (leave blank for no change):</label>
+                        <label for="program_entity_after" class="inner-modal">After change (leave blank for no change):</label>
                         <div id="program_entity_changes" class="inner-modal input">
-                            <input id="program_name" name="program_name" size="10" placeholder="program name">
-                            <input id="program_release" name="program_release" size="6" placeholder="release">
-                            <input id="release_version" name="release_version" size="3" placeholder="version">
+                            <input id="program_name" name="program_name" size="20" placeholder="p: {{row['program_name']}}">
+                            <input id="program_release" name="program_release" size="6" placeholder="r: {{ row['program_version'] }}">
+                            <input id="release_version" name="release_version" size="6" placeholder="v: {{row['release_version'] }}">
                         </div>
                     </form>
                     <div class="modal-footer">

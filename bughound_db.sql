@@ -71,19 +71,23 @@ CREATE TABLE Attachments (
     FOREIGN KEY (bug_id) REFERENCES Bugs(bug_id)                    -- connected to Bugs:bug_id
 );
 
--- TEST POPULATION OF TABLES -----------------------------------------
+-- POPULATE TABLE 'Users' -----------------------------------------
 
--- NOTE: bugs, reports, and resolutions are set off by submissions only
--- TODO: procedure to connect reports of 1 bug to another bug (correlation)
--- TODO: procedure to add to / remove from 'Users', 'Areas'
-
--- 'Users' table
 INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("admin", SHA2("admin", 256), "ADMIN", 3);
 INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("user", SHA2("user", 256), "USER", 1);
 
--- DELETE FROM Users;
+-- REMOVING DATA FROM TABLES --------------------------------------
 
--- REMOVING TABLES ---------------------------------------------------
+DELETE FROM Attachments;
+DELETE FROM Resolutions;
+DELETE FROM Bugs;
+DELETE FROM program_areas;
+DELETE FROM Programs;
+DELETE FROM Areas;
+DELETE FROM Users;
+
+-- REMOVING TABLES ------------------------------------------------
+
 DROP TABLE Attachments;
 DROP TABLE Resolutions;
 DROP TABLE Bugs;

@@ -211,7 +211,7 @@ def get_all_table_results(sql_list: str | list[str]):
         with connection.cursor() as cursor:
 
             if type(sql_list) is str:
-                print(sql_list, "is a string")
+                # print(sql_list, "is a string")
                 cursor.execute(sql_list)
                 data = cursor.fetchall()
                 connection.commit()
@@ -418,6 +418,8 @@ def export_data():
     try:
         table_name = request.form['table_name']
         data_type = request.form['data_type']
+        
+        print(table_name, data_type)
         with pymysql.connect(**db_config) as connection:
             with connection.cursor() as cursor:
                 
@@ -426,6 +428,8 @@ def export_data():
                 # create a root element for the XML file
                 root = Element(table_name)
                 
+                print('executed sql')
+                
                 # iterate over the rows and create subelements for each record
                 for row in rows:
                     record = SubElement(root, "record")
@@ -433,6 +437,7 @@ def export_data():
                         field = SubElement(record, key)
                         field.text = str(value)
                 
+                print('iterated')
                 # generate the XML file and save it to disk
                 tree = ElementTree(root)
                 if data_type == "xml":
@@ -446,6 +451,8 @@ def export_data():
                             f.write("\n")
                 else:
                     print("Invalid data type")
+                
+                print('made into file')
         
         message = f"Table '{table_name}' with type '{data_type}' was successfully exported."
     except:
@@ -580,7 +587,7 @@ def edit_program(id_data):
     
     program = request.form['program_name']
     if program != "":
-        conditions.append("program=%s")
+        conditions.append("program_name=%s")
         data.append(program)
     
     program_release = request.form['program_release']
@@ -804,6 +811,7 @@ def add_bug():
     if request.method == 'POST':
         
         print('posting bug report...')
+        print(request.form)
         
         program_id = request.form.get('program_id')
         report_type = request.form.get('report_type')
@@ -839,13 +847,13 @@ def add_bug():
             with connection.cursor() as cursor:
             
                 # 1. make bug
-                sql  = "INSERT INTO bugs (program_id, bug_type, bug_severity, bug_title, bug_description, bug_suggestion, bug_reproducible, user_reporter_id, bug_find_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                sql  = "INSERT INTO bugs (program_id, bug_type, bug_severity, bug_title, bug_description, bug_suggestion, bug_reproducible, user_reporter_id, bug_find_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                 data = (program_id, report_type, severity, problem_summary, problem, suggested_fix, reproducible, reporter_id, date_reported)
                 cursor.execute(sql, data)
                 connection.commit()
                 bug_id= cursor.lastrowid
                 
-                flash(f"Bug with id '{bug_id}' was successfully added.")
+                flash(f"Bug report with id '{bug_id}' was successfully added.")
                 
                 # 2. add attachments (if any)
                 if has_attachments:            

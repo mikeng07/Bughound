@@ -23,7 +23,8 @@
     <form id="searchForm" action="/search_bug" method="POST">
         <label for="search_options">Search by:</label>
         <select id="search_options">
-            <option value="bug_id" selected>ID</option>
+            <option value="ALL" selected>Get all reports</option>
+            <option value="bug_id">Bug ID</option>
             <option value="program_name">Program Name</option>
             <option value="report_type">Report Type</option>
             <option value="severity">Severity</option>
