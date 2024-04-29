@@ -108,6 +108,7 @@ div.inline-child {
   table-layout: auto;
 }
 
+
 table.fixedSize .fixedHeader {
   color: white;
   background-color: grey;
@@ -180,3 +181,10 @@ table.fixedSize .fixedHeader {
     }
   }
 
+.hide {
+  display: none
+}
+
+.img_span:hover + .hide {
+  display: block;
+}

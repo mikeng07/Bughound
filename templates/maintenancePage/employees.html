@@ -84,7 +84,7 @@
             <td>N/A | N/A</td>
             {% endif %}
         </tr>
-
+        {% if row['user_realname'] != "ADMIN" and row['user_realname'] != "USER" %}
         <div id="modaledit{{row['user_id']}}" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -134,7 +134,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
         {% endfor %}
         
     </table>

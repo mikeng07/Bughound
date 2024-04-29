@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Lookup</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
-    <title>Bug Lookup/Edit</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         var homepage = "{{url_for('homepage')}}";
 
@@ -15,34 +15,45 @@
 </head>
 <body>
     <h1>Bug Lookup</h1>
+
     <hr class="long-line">
 
     <button onclick="move(homepage)">Back to Home</button>
-    <br><br>
+    
+    <hr>
+    <div id="search_bug_results">
+        {% include 'flash_results.html' %}
+    </div>
     
     <form id="searchForm" action="/search_bug" method="POST">
-        <label for="search_options">Search by:</label>
-        <select id="search_options">
-            <option value="ALL" selected>All reports</option>
-            <option value="bug_id">Bug ID</option>
-            <option value="program_name">Program Name</option>
-            <option value="report_type">Report Type</option>
-            <option value="severity">Severity</option>
-            <option value="reporter_name">Reporter ID</option>
-            <option value="date">Date (mm-dd-yyyy)</option>
-        </select>
-        <button type="submit">Search</button>
-        <br>
-        <input type="search" id="searchInput" placeholder="enter search term by (search type)..." size="36"><br>
+        <div>
+            <button type="submit" style="margin-bottom: 5px;">Make search</button>
+            <button id="clearSearchTermButton">Clear</button>
+            <button type="button" id="newSearchTermButton">+</button> 
+            <button type="button" id="removeSearchTermButton" hidden=true>--</button>
+        </div>
+        <div id="search_entity" class="add-entity" style="margin-top: 5px;">
+            <label for="search_options">Search by:</label>
+            <select id="search_options" name="search_options">
+                <option value="ALL" selected>All reports</option>
+                <option value="bug_id">Bug ID</option>
+                <option value="program_name">Program Name</option>
+                <option value="report_type">Report Type</option>
+                <option value="severity">Severity</option>
+                <option value="reporter_name">Reporter ID</option>
+                <option value="date">Date (mm-dd-yyyy)</option>
+            </select>
+            <input type="search" id="searchInput" name="searchInput" placeholder="enter search term by (search type)..." size="36"><br>
+        </div>
     </form>
 
     <hr>
-
     
     <table id="searchResults" class="fixedSize">
+        <h4>Report List</h4>
         <thead class="fixedHeader">
-            <th scope="col" style="width: 17%" class="overflow pwd rev">Report ID</th>
-            <th scope="col" style="width: 17%" class="overflow pwd">Date</th>
+            <th scope="col" style="width: 13%" class="overflow pwd rev">Report ID</th>
+            <th scope="col" style="width: 15%" class="overflow pwd">Date</th>
             <th scope="col" style="width: 50%" class="overflow pwd rev">Report Summary</th>
             <th scope="col" style="width: 17%">Operations</th>
         </thead>
@@ -57,21 +68,130 @@
                 <a href="/view_report/{{result['bug_id']}}" data-toggle="modal" data-target="#modaledit{{result['bug_id']}}">{{ result['bug_title'] }}</a>
             </td>
             <td class="overflow pwd">
-                <a href="plus_res/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Res</a> |
+                <a href="/plus_res/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Res</a> |
                 <a href="/delete/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
             </td>
         </tr>
 
-        <div id="#modaledit{{result['bug_id']}}" class="modal fade" role="dialog">
+        <div id="modaledit{{result['bug_id']}}" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Bug Report # {{ result['bug_id'] }}</h3>
+                        <h4 class="modal-title">Bug report #{{ result['bug_id'] }}</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
-                    <form id="editBugForm{{result['bug_id']}}" action="/edit_bug/{{result['bug_id']}}" method="POST">
-                        
-                    </form>
+                    <div class="modal-body">
+                        <form id="editBugForm{{result['bug_id']}}" action="/edit_bug/{{result['bug_id']}}" enctype="multipart/form-data" method="POST">
+                            <div>
+                                <label for="program_id" style="margin-left: 23px;">Program:</label>
+                                <select id="program_id" name="program_id" class="fixed" required>
+                                    {% for program in programs %}
+                                        {% if program['program_id'] == result['program_id'] %}
+                                            <option value="{{ program['program_id'] }}" selected>
+                                                {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
+                                            </option>
+                                        {% else %}
+                                            <option value="{{ program['program_id'] }}">
+                                                {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                    
+                            <div>
+                                <label for="report_type">Report Type:</label>
+                                <select id="report_type" name="report_type"required>
+                                    {% for report_type in report_types %}
+                                        {% if report_type == result['bug_type'] %}
+                                            <option value="{{report_type}}" selected>{{report_type}}</option>
+                                        {% else %}
+                                            <option value="{{report_type}}">{{report_type}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                    
+                            <div>
+                                <label for="severity" style="margin-left: 30px;">Severity:</label>
+                                <select id="severity" name="severity" style="width: auto;" required>
+                                    {% for severity in severities %}
+                                    {% if severity == result['bug_severity'] %}
+                                        <option value="{{severity}}" selected>{{severity}}</option>
+                                    {% else %}
+                                        <option value="{{severity}}">{{severity}}</option>
+                                    {% endif %}
+                                    {% endfor %} 
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="reproducible">Reproducible?</label>
+                                {% if result['bug_reproducible'] == 1 %}
+                                    <input type="checkbox" name="reproducible" id="reproducible" checked>
+                                {% else %}
+                                    <input type="checkbox" name="reproducible" id="reproducible">
+                                {% endif %}
+                            </div>
+                    
+                            <div class="input-container">
+                                <label for="problem_summary">Problem Summary</label><br>
+                                <textarea type="text" id="problem_summary" name="problem_summary" rows="2" class="summary" required>{{result['bug_title']}}</textarea>
+                            </div>
+                            
+                            <br>
+                    
+                            <div class="input-container">
+                                <label for="problem">Problem</label><br>
+                                <textarea type="text" id="problem" name="problem" rows="3" class="problem" required>{{result['bug_description']}}</textarea>
+                            </div>
+                            
+                            <br>
+                            
+                            <div class="input-container">
+                                <label for="suggested_fix">Suggested Fix</label><br>
+                                <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="suggestedFix" placeholder="(None given)">{% if result['bug_suggestion'] != "None given" %}{{result['bug_suggestion']}}{% endif %}</textarea>
+                            </div>
+                            
+                            <br>
+                            
+                            <label for="reported_by">Reported by</label>
+                            <select id="reported_by" name="reported_by" class="user" required>
+                                <option value="default" selected>user</option>
+                                {% for employee in employees %}
+                                    {% if employee['user_id'] == result['user_reporter_id'] %}
+                                        <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                    {% else %}
+                                        <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                    {% endif %}
+                                {% endfor %} 
+                            </select>
+                    
+                            <label for="date_reported">on</label>
+                            <input type="date" id ="date_reported" name ="date_reported" required value="{{result['bug_find_date']}}">
+                            <br>
+
+                            <!-- for attachment in attachments, add a div showing the filename and a view on hover, with a checkbox option to delete -->
+                            {% if attachments %}
+                                <div>
+                                    <label>(Checking means deleting the attachment)</label>
+                                    {% for attachment in attachments %}
+                                        {% if result['bug_id'] == attachment['bug_id'] %}    
+                                            <div>
+                                                <input hidden name="file_id" value="{{ attachment['attach_id'] }}">
+                                                <input type="checkbox" id="deleteAttachment" name="deleteAttachment">
+                                                <span name="filename" class="img_span">{{ attachment['attach_name']}}</span>
+                                                <img class="hide" src="{{ url_for('view_attachment', attach_id=attachment['attach_id']) }}">
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <label for="file">Add new attachments (optional)</label><br>
+                            <input type="file" id="file" name="file" multiple>
+                        </form>
+                    </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" form="editBugForm{{result['bug_id']}}">Make report changes</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -90,6 +210,48 @@
     {% endif %}
     
     <br>
+    <hr class="long-line">
 
+    <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        $('#newSearchTermButton').on("click", () => {
+            
+            let temp = '<div id="search_entity" class="add-entity">'+
+                '<label for="search_options">Search by:</label> '+
+                '<select id="search_options" name="search_options">'+
+                    '<option value="ALL" selected>All reports</option>'+
+                    '<option value="bug_id">Bug ID</option>'+
+                    '<option value="program_name">Program Name</option>'+
+                    '<option value="report_type">Report Type</option>'+
+                    '<option value="severity">Severity</option>'+
+                    '<option value="reporter_name">Reporter ID</option>'+
+                    '<option value="date">Date (mm-dd-yyyy)</option>'+
+                '</select> '+
+                '<input type="search" id="searchInput" name="searchInput" placeholder="enter search term by (search type)..." size="36"><br>'+
+            '</div>';
+            $("#searchForm").append(temp);
+            console.log('add')
+            
+            let search_term_length = $("#searchForm").children('div[id=search_entity]').length;
+            if (search_term_length > 1)  removeSearchTermButton.hidden = false;
+        });
+        $('#removeSearchTermButton').on("click", () => {
+            $("#searchForm").children('div[id=search_entity]:last').remove();
+            console.log('remove')
+
+            let search_term_length = $("#searchForm").children('div[id=search_entity]').length;
+            if (search_term_length == 1) removeSearchTermButton.hidden = true;
+        });
+
+        $('#clearSearchTermButton').on("click", () => {
+            let search_term_length = $("#searchForm").children('div[id=search_entity]').length;
+            for (var i=0; i<search_term_length-1; i++) { $('#removeSearchTermButton').click(); }
+            $('#searchForm #search_options').val("ALL");
+            $('#newProgramForm #searchInput').val("");
+        });
+    </script>
 </body>
 </html>
