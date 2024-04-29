@@ -810,7 +810,7 @@ def add_bug():
     # posting a new report
     if request.method == 'POST':
         
-        print('posting bug report...')
+        print('submitting a new bug report...')
         print(request.form)
         
         program_id = request.form.get('program_id')
@@ -819,7 +819,7 @@ def add_bug():
         reproducible = request.form.get('reproducible')       
         problem_summary = request.form.get('problem_summary')
         problem = request.form.get('problem')
-        suggested_fix = request.form.get("suggested_fix")
+        suggested_fix = request.form.get("suggested_fix") 
         reporter_id = request.form.get('reported_by')
         date_reported = request.form.get('date_reported')   
         
@@ -828,6 +828,10 @@ def add_bug():
             reproducible = True
         else:
             reproducible = False
+        
+        # no suggestions could be given
+        if suggested_fix == "":
+            suggested_fix = "None given"
         
         # Get the file attachment from the form
         attachments = request.files.getlist('file')
@@ -873,7 +877,7 @@ def add_bug():
     programs, areas, employees = get_all_table_results(sql_list)
     
     # if the request method is GET, render the add_bug page with the necessary form data
-    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
+    report_types, severities, _, _, _, _ = set_static_report_values()
     # note: priority, status, resolution, resolution_version are UNUSED when making a new bug report
 
     print('making a bug report?')
