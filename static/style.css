@@ -180,11 +180,3 @@ table.fixedSize .fixedHeader {
       stroke-dashoffset: -124;
     }
   }
-
-.hide {
-  display: none
-}
-
-.img_span:hover + .hide {
-  display: block;
-}

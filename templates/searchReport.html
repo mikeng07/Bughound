@@ -173,19 +173,19 @@
 
                             <!-- for attachment in attachments, add a div showing the filename and a view on hover, with a checkbox option to delete -->
                             {% if attachments %}
+                            <hr>
                                 <div>
                                     <label>(Checking means deleting the attachment)</label>
                                     {% for attachment in attachments %}
                                         {% if result['bug_id'] == attachment['bug_id'] %}    
                                             <div>
-                                                <input hidden name="file_id" value="{{ attachment['attach_id'] }}">
-                                                <input type="checkbox" id="deleteAttachment" name="deleteAttachment">
-                                                <span name="filename" class="img_span">{{ attachment['attach_name']}}</span>
-                                                <img class="hide" src="{{ url_for('view_attachment', attach_id=attachment['attach_id']) }}">
+                                                <input type="checkbox" id="delete_id" name="delete_id" value="{{ attachment['attach_id'] }} {{ attachment['attach_name'] }}">
+                                                <a href="{{ url_for('view_attachment', attach_id=attachment['attach_id']) }}">{{ attachment['attach_name']}}</a>
                                             </div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
+                            <hr>
                             {% endif %}
 
                             <label for="file">Add new attachments (optional)</label><br>

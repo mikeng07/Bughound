@@ -1,6 +1,6 @@
 from datetime import datetime
 from io import BytesIO
-from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file, make_response
+from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 import pymysql.cursors
 import hashlib
@@ -840,11 +840,11 @@ def add_bug():
         # check filename of the first file and empty file content
         is_length_one     = len(attachments) == 1
         has_empty_filename = attachments[0].filename == ''
-        has_empty_content  = attachments[0].read() == b'' 
+        # has_empty_content  = attachments[0].read() == b'' # this is the problem (read() is streamed)
         
         # above conditions answer if there are any attachments
         has_attachments = True
-        if is_length_one and has_empty_filename and has_empty_content:
+        if is_length_one and has_empty_filename:
             # the filename is empty (and file.read() will also be empty())
             has_attachments = False
         
@@ -961,9 +961,6 @@ def delete_bug(id_data):
             flash(message=message)
             return redirect(url_for('update_bug'))
 
-
-# TODO: revise the following routes, and related html templates
-
 # edit a bug
 @app.route('/edit_bug/<int:bug_id>', methods=['POST','GET']) # type:ignore
 def edit_bug(bug_id):
@@ -977,26 +974,28 @@ def edit_bug(bug_id):
     if request.method == "POST":
         print(request.form)
         
-        program_id = request.form.get('program_id')
-        report_type = request.form.get('report_type')
-        severity = request.form.get('severity')
-        reproducible = request.form.get('reproducible')       
-        problem_summary = request.form.get('problem_summary')
-        problem = request.form.get('problem')
-        suggested_fix = request.form.get("suggested_fix") 
-        reporter_id = request.form.get('reported_by')
-        date_reported = request.form.get('date_reported')
+        field_values = {
+            'program_id': request.form.get('program_id'),
+            'bug_type' :request.form.get('report_type'),
+            'bug_severity' : request.form.get('severity'),
+            'bug_reproducible' : request.form.get('reproducible'),
+            'bug_title' : request.form.get('problem_summary'),
+            'bug_description' : request.form.get('problem'),
+            'bug_suggestion' : request.form.get("suggested_fix") ,
+            'user_reporter_id' : request.form.get('reported_by'),
+            'bug_find_date' : request.form.get('date_reported'),
+        }
         
         
         # reproducible has two states: "on" and "None"
-        if reproducible == "on":
-            reproducible = True
+        if field_values['bug_reproducible'] == "on":
+            field_values['bug_reproducible'] = True # type:ignore
         else:
-            reproducible = False
+            field_values['bug_reproducible'] = False # type:ignore
         
         # no suggestions could be given
-        if suggested_fix == "":
-            suggested_fix = "None given"
+        if field_values['bug_suggestion'] == "":
+            field_values['bug_suggestion'] = "None given"
         
         # Get the file attachment from the form
         attachments = request.files.getlist('file')
@@ -1004,11 +1003,11 @@ def edit_bug(bug_id):
         # check filename of the first file and empty file content
         is_length_one     = len(attachments) == 1
         has_empty_filename = attachments[0].filename == ''
-        has_empty_content  = attachments[0].read() == b'' 
+        # has_empty_content  = attachments[0].read() == b'' # this is the problem (read() is streamed)
         
         # above conditions answer if there are any attachments
         has_attachments = True
-        if is_length_one and has_empty_filename and has_empty_content:
+        if is_length_one and has_empty_filename: # and has_empty_content
             # the filename is empty (and file.read() will also be empty())
             has_attachments = False
         
@@ -1025,86 +1024,69 @@ def edit_bug(bug_id):
                 # original_report is the comparator against this 'new' info
                 original_report = cursor.fetchall()[0]
                 connection.commit()
-                print('original report:', original_report)
+                del original_report['bug_id'] # type: ignore
+                # print('original report:', original_report)
                 
-                # compare the following, add to stmt and date if they don't match: 
+                # compare the following, add to stmt and date if they don't match:
+                for key in field_values.keys():
+                    if key=='program_id' or key =='user_reporter_id':
+                        condition = int(field_values[key]) != original_report[key] # type:ignore
+                    elif key == 'bug_find_date':
+                        condition = field_values[key] != datetime.strftime(original_report[key], "%Y-%m-%d") # type:ignore
+                    else:
+                        condition = field_values[key] != original_report[key] # type:ignore
+                        
+                    if condition:
+                        stmt.append(f"{key}=%s")
+                        data.append(field_values[key])
                 
-                print(program_id, original_report['program_id']) # type:ignore            
-                if int(program_id) != original_report['program_id']: # type:ignore
-                    stmt.append("program_id=%s")
-                    data.append(program_id)
-                
-                if report_type != original_report['bug_type']: # type:ignore
-                    stmt.append("bug_type=%s")
-                    data.append(report_type)
-                
-                if severity != original_report['bug_severity']: # type:ignore
-                    stmt.append("bug_severity=%s")
-                    data.append(severity)
-
-                if reproducible != original_report['bug_reproducible']: # type:ignore
-                    stmt.append("bug_reproducible=%s")
-                    data.append(reproducible)
-
-                if problem_summary != original_report['bug_title']: # type:ignore
-                    stmt.append("bug_title=%s")
-                    data.append(problem_summary)
-
-                if problem != original_report['bug_description']: # type:ignore
-                    stmt.append("bug_description=%s")
-                    data.append(problem)
-
-                if suggested_fix != original_report['bug_suggestion']: # type:ignore
-                    stmt.append("bug_suggestion=%s")
-                    data.append(suggested_fix)
-
-                if int(reporter_id) != original_report['user_reporter_id']: # type:ignore
-                    stmt.append("user_reporter_id=%s")
-                    data.append(reporter_id)
-
-                if date_reported != datetime.strftime(original_report['bug_find_date'], "%Y-%m-%d"): # type:ignore
-                    stmt.append("bug_find_date=%s")
-                    data.append(date_reported)
-                
-                if len(stmt) == 0: # no changes were actually made, so no need to update
-                    flash(f"Bug report '{bug_id}' was ultimately left unchanged.")
-                    return redirect(url_for('search_bug'))
-                
-                # combine all conditions, add bug_id condition (known)
-                stmt = "UPDATE bugs SET " + ",".join(stmt) + " WHERE bug_id=%s"
-                data.append(bug_id)
-                
-                print(stmt)
-                print(data)
-                
-                cursor.execute(stmt, data)
-                connection.commit()
-                
-                flash(f"Bug report '{bug_id}' was successfully updated.")
+                if len(stmt) != 0:                
+                    # combine all needed conditions, add bug_id condition (known)
+                    stmt = "UPDATE bugs SET " + ",".join(stmt) + " WHERE bug_id=%s"
+                    data.append(bug_id)
+                    # print(stmt); print(data)
+                    
+                    cursor.execute(stmt, data) # actually update bug
+                    connection.commit()
+                    
+                    flash(f"Bug report '{bug_id}' was successfully updated.")
+                    
+                else: # no conditions were added, no changes to bug report were made
+                    flash(f"No changes made to Bug report '{bug_id}'.")
                 
                 # add attachments (if needed)
                 if has_attachments:            
                     sql = "INSERT INTO attachments (attach_name, attach_content, bug_id) VALUES (%s, %s, %s)"
                     for attachment in attachments:
+                        print('attachment being added: ', attachment)
+                        print(attachment.filename)
                         data = (attachment.filename, attachment.read(), bug_id)
                         cursor.execute(sql, data)
                         connection.commit()
                         flash(f"Attachment '{attachment.filename}' was successfully uploaded.")
                         
                 # delete attachments (if needed)
-                shown_file_ids = request.form.getlist("file_id")
-                shown_filenames = request.form.getlist("filename")
-                del_attachments = request.form.getlist("deleteAttachment")
+                del_attachments = request.form.getlist("delete_id")
                 stmt = "DELETE FROM attachments WHERE attach_id=%s AND bug_id=%s"
                 
-                for file_id, del_file, filename in zip(shown_file_ids, del_attachments, shown_filenames):
-                    if del_file == 'on':
-                        cursor.execute(stmt, (file_id, bug_id))
-                        connection.commit()
-                        flash(f"Attachment '{filename}' was removed.")
+                for file_info in del_attachments:
+                    # file_info = "<file_id> <filename>" 
+                    file_id, filename = file_info.split(" ") 
+                    cursor.execute(stmt, (file_id, bug_id))
+                    connection.commit()
+                    flash(f"Attachment '{filename}' was removed.")
                 
-                return redirect(url_for('search_bug'))
+        return redirect(url_for('search_bug'))
 
+
+# TODO: revise the following routes, and related html templates
+# add Resolution, edit resolution, delete resolution
+
+# convert filedata into binary data
+def convertToBinaryData(filename):
+    with open(filename, "rb") as f:
+        data = f.read()
+    return data
 
 # view attachments
 @app.route("/view_attachment/<string:attach_id>") # type:ignore
@@ -1118,12 +1100,11 @@ def view_attachment(attach_id):
     
     with pymysql.connect(**db_config) as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT attach_content FROM bugs WHERE attach_id = %s", (attach_id))
+            cursor.execute("SELECT * FROM attachments WHERE attach_id = %s", (attach_id))
             data = cursor.fetchone()
-            print('attachment:',data)
+            # print('attachment:', data)
         
-    return send_file(BytesIO(data['attach_content']), as_attachment=True, mimetype='image/png') #type:ignore
-       
+    return send_file(BytesIO(data['attach_content']), download_name=data['attach_name'], as_attachment=True) #type:ignore
 
 # automatic
 if __name__ == "__main__":

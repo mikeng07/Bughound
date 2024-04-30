@@ -66,7 +66,7 @@ CREATE TABLE Resolutions (
 CREATE TABLE Attachments (
     attach_id       INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     attach_name     VARCHAR(255) NOT NULL,
-    attach_content  BLOB,
+    attach_content  MEDIUMBLOB,
     bug_id          INT NOT NULL,
     FOREIGN KEY (bug_id) REFERENCES Bugs(bug_id)                    -- connected to Bugs:bug_id
 );
