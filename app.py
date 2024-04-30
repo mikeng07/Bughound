@@ -822,7 +822,7 @@ def add_bug():
         problem = request.form.get('problem')
         suggested_fix = request.form.get("suggested_fix") 
         reporter_id = request.form.get('reported_by')
-        date_reported = request.form.get('date_reported')   
+        date_reported = request.form.get('date_reported')
         
         # reproducible has two states: "on" and "None"
         if reproducible == "on":
@@ -884,67 +884,6 @@ def add_bug():
     print('making a bug report?')
     return render_template('bugReport.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, username=username, userlevel=userlevel)
 
-
-# searchBug ------------------------------
-@app.route('/search_bug', methods=['GET', 'POST']) # type:ignore
-def search_bug():
-    
-    try:
-        userlevel= session['user_level']
-        username = session['username']
-    except:
-        return verify_user()
-
-    sql_list = ['SELECT * FROM programs',
-                'SELECT * FROM areas',
-                'SELECT * FROM users',
-                "SELECT * from attachments"]
-    
-    sql = "SELECT * FROM bugs"
-    
-    if request.method == 'POST':
-        print('request.form:', request.form)
-        
-        search_options = request.form.getlist('search_options')
-        search_inputs = request.form.getlist('searchInput')
-        
-        for search_option, search_input in zip(search_options, search_inputs):
-            print(f"{search_option}: {search_input}")
-
-        # print(field_values)
-        # if field_values['date_reported']=='':
-        #     field_values['date_reported']=None
-
-        # # build the SQL query based on user inputs
-        
-        # conditions = []
-        # for field, value in field_values.items():
-        #     if value!=None:
-        #         conditions.append(f"{field} = '{value}'")
-            
-        # if conditions:
-        #     sql += " WHERE " + " AND ".join(conditions)
-       
-        # sql_list.append(sql)
-        # programs, areas, employees, attachments, search_result = get_all_table_results(sql_list)
-
-        # # if the request method is GET, render the add_bug page with the necessary form data
-        # report_types, severities, _,_,_,_ = set_static_report_values()
-       
-        # # process the form data and store it in the database using PL/SQL
-        
-        # # redirect to a success page
-        # return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, search_result=search_result, report_types=report_types, severities=severities)
-    
-    # general landing: 
-    sql_list.append(sql)
-    programs, areas, employees, attachments, bugs = get_all_table_results(sql_list)
-    
-    report_types, severities,  _,_,_,_ = set_static_report_values()
-    
-    print(bugs)
-    return render_template('searchReport.html', userlevel=userlevel, username=username, results=bugs, programs=programs, areas=areas, employees=employees, report_types=report_types, severities=severities, attachments=attachments)
-
 # delete a bug
 @app.route('/delete_bug/<string:id_data>', methods = ['GET'])
 def delete_bug(id_data):
@@ -985,7 +924,6 @@ def edit_bug(bug_id):
             'user_reporter_id' : request.form.get('reported_by'),
             'bug_find_date' : request.form.get('date_reported'),
         }
-        
         
         # reproducible has two states: "on" and "None"
         if field_values['bug_reproducible'] == "on":
@@ -1029,6 +967,7 @@ def edit_bug(bug_id):
                 
                 # compare the following, add to stmt and date if they don't match:
                 for key in field_values.keys():
+                    # print(type(field_values[key]),":",type(original_report[key])) #type:ignore
                     if key=='program_id' or key =='user_reporter_id':
                         condition = int(field_values[key]) != original_report[key] # type:ignore
                     elif key == 'bug_find_date':
@@ -1077,6 +1016,54 @@ def edit_bug(bug_id):
                     flash(f"Attachment '{filename}' was removed.")
                 
         return redirect(url_for('search_bug'))
+
+
+# searchBug ------------------------------
+@app.route('/search_bug', methods=['GET', 'POST']) # type:ignore
+def search_bug():
+    
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
+
+    sql_list = ['SELECT * FROM programs',
+                'SELECT * FROM areas',
+                'SELECT * FROM users',
+                "SELECT * from attachments"]
+    
+    sql = "SELECT * FROM bugs"
+    report_types, severities, _,_,_,_ = set_static_report_values()
+    
+    if request.method == 'POST':
+        print('request.form:', request.form)
+        
+        search_options = request.form.getlist('search_options')
+        search_inputs = request.form.getlist('searchInput')
+        
+        # build the SQL query based on user inputs
+        conditions = []
+        for option, input in zip(search_options, search_inputs):
+            print(f"{option}: '{input}'")
+            if option != 'ALL':
+                conditions.append(f"{option}='{input}'")
+            
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+       
+        sql_list.append(sql)
+        programs, areas, employees, attachments, search_results = get_all_table_results(sql_list)
+        
+        # redirect to a success page
+        return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, results=search_results, report_types=report_types, severities=severities)
+    
+    # general landing: 
+    sql_list.append(sql)
+    programs, areas, employees, attachments, bugs = get_all_table_results(sql_list)
+    
+    print(bugs)
+    return render_template('searchReport.html', userlevel=userlevel, username=username, results=bugs, programs=programs, areas=areas, employees=employees, report_types=report_types, severities=severities, attachments=attachments)
 
 
 # TODO: revise the following routes, and related html templates

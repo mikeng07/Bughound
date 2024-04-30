@@ -31,17 +31,18 @@
             <button id="clearSearchTermButton">Clear</button>
             <button type="button" id="newSearchTermButton">+</button> 
             <button type="button" id="removeSearchTermButton" hidden=true>--</button>
+            <span> (Note: Use underscores ('_') to wildcard)</span>
         </div>
         <div id="search_entity" class="add-entity" style="margin-top: 5px;">
             <label for="search_options">Search by:</label>
             <select id="search_options" name="search_options">
                 <option value="ALL" selected>All reports</option>
                 <option value="bug_id">Bug ID</option>
-                <option value="program_name">Program Name</option>
+                <option value="program_name">Program ('Name' R'#' V'#')</option>
                 <option value="report_type">Report Type</option>
                 <option value="severity">Severity</option>
-                <option value="reporter_name">Reporter ID</option>
-                <option value="date">Date (mm-dd-yyyy)</option>
+                <option value="user_reported_id">Reporter ID</option>
+                <option value="bug_find_date">Date reported (yyyy-mm-dd)</option>
             </select>
             <input type="search" id="searchInput" name="searchInput" placeholder="enter search term by (search type)..." size="36"><br>
         </div>
@@ -52,8 +53,8 @@
     <table id="searchResults" class="fixedSize">
         <h4>Report List</h4>
         <thead class="fixedHeader">
-            <th scope="col" style="width: 13%" class="overflow pwd rev">Report ID</th>
-            <th scope="col" style="width: 15%" class="overflow pwd">Date</th>
+            <th scope="col" style="width: 10%" class="overflow pwd rev">Report ID</th>
+            <th scope="col" style="width: 15%" class="overflow pwd">Date Reported</th>
             <th scope="col" style="width: 50%" class="overflow pwd rev">Report Summary</th>
             <th scope="col" style="width: 17%">Operations</th>
         </thead>
@@ -68,8 +69,14 @@
                 <a href="/view_report/{{result['bug_id']}}" data-toggle="modal" data-target="#modaledit{{result['bug_id']}}">{{ result['bug_title'] }}</a>
             </td>
             <td class="overflow pwd">
-                <a href="/plus_res/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Res</a> |
-                <a href="/delete/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
+                <span>
+                    <a href="/add_resolution/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Resolution</a>
+                    {% if userlevel == 3 %}
+                    |
+                    <a href="/delete_bug/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
+                    {% endif %}
+
+                </span>
             </td>
         </tr>
 
@@ -224,11 +231,11 @@
                 '<select id="search_options" name="search_options">'+
                     '<option value="ALL" selected>All reports</option>'+
                     '<option value="bug_id">Bug ID</option>'+
-                    '<option value="program_name">Program Name</option>'+
+                    '<option value="program_name">Program (' + "'Name' R'#' V'#'" +')</option>'+
                     '<option value="report_type">Report Type</option>'+
                     '<option value="severity">Severity</option>'+
                     '<option value="reporter_name">Reporter ID</option>'+
-                    '<option value="date">Date (mm-dd-yyyy)</option>'+
+                    '<option value="date">Date reported (yyyy-mm-dd)</option>'+
                 '</select> '+
                 '<input type="search" id="searchInput" name="searchInput" placeholder="enter search term by (search type)..." size="36"><br>'+
             '</div>';
