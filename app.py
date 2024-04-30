@@ -1069,6 +1069,69 @@ def search_bug():
 # TODO: revise the following routes, and related html templates
 # add Resolution, edit resolution, delete resolution
 
+@app.route("/add_resolution/<string:bug_id>", methods=['GET', 'POST']) # type:ignore
+def add_resolution(bug_id):
+    
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
+
+    # posting new resolution
+    if request.method == "POST":
+        print('submitting a new resolution...')
+        area_id = request.form.get("functional_area")
+        assigned_id = request.form.get("assigned_to")
+        comments = request.form.get("comments")
+        res_status = request.form.get("status")
+        res_priority = request.form.get("priority")
+        res_state = request.form.get("resolution")
+        res_version = request.form.get("resolution_version")
+        resolver_id = request.form.get("resolved_by")
+        resolve_date = request.form.get("date_resolved")
+        tester_id = request.form.get("tested_by")
+        test_date = request.form.get("date_tested")
+        
+        is_deferred = False
+        if res_status == "Deferred":
+            is_deferred = True
+        
+        if comments == '':
+            comments = "None given"
+        
+        conditions = "(bug_id, area_id, res_status, res_priority, res_state, res_version, res_comments, res_defer, assigned_id, resolver_id, resolver_date, restester_id, restester_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        data = (bug_id, area_id, res_status, res_priority, res_state, res_version, comments, is_deferred, assigned_id, resolver_id, resolve_date, tester_id, test_date)
+        
+        stmt = " ".join(["INSERT INTO", "resolutions", conditions])
+        with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(stmt, data)
+                connection.commit()
+                id = cursor.lastrowid
+                
+        flash(f"Resolution with id '{id}' has been submitted for bug report with id '{bug_id}'.")
+        return redirect(url_for('homepage'))
+    
+    
+    print('setting up a new resolution?')
+    # from areas, get the ones prevalent to the chosen program as stated in program_areas
+    sql_list = [
+        'SELECT * FROM programs', 
+        'SELECT * FROM areas',
+        f'SELECT area_id FROM program_areas WHERE program_id=(SELECT program_id FROM bugs WHERE bug_id={bug_id})',
+        'SELECT * FROM users', 
+        f'SELECT * FROM bugs WHERE bug_id={bug_id}'
+    ]
+    
+    programs, areas, program_areas, employees, bug = get_all_table_results(sql_list)
+    
+    _,_, priority, status, resolution, resolution_version = set_static_report_values()
+        
+    return render_template('bugResolution.html', username=username, userlevel=userlevel, programs=programs, areas=areas, program_areas=program_areas, employees=employees, bug=bug[0], priority=priority, status=status, resolution=resolution, resolution_version=resolution_version)
+    
+
+
 # convert filedata into binary data
 def convertToBinaryData(filename):
     with open(filename, "rb") as f:

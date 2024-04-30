@@ -42,7 +42,7 @@ CREATE TABLE Bugs (
 );
 
 CREATE TABLE Resolutions (
-    resolution_id       INT NOT NULL PRIMARY KEY,
+    resolution_id       INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bug_id              INT NOT NULL,
     area_id             INT NOT NULL,
     res_status          ENUM('Open','Closed', 'Resolved') NOT NULL DEFAULT 'Open',

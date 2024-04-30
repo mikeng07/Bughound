@@ -70,7 +70,7 @@
             </td>
             <td class="overflow pwd">
                 <span>
-                    <a href="/add_resolution/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalres{{result['bug_id']}}" class="overflow pwd">+Resolution</a>
+                    <a href="/add_resolution/{{result['bug_id'] }}">+Resolution</a>
                     {% if userlevel == 3 %}
                     |
                     <a href="/delete_bug/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>

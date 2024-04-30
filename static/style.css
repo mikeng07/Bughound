@@ -99,6 +99,7 @@ div.inline-child {
   right: 5px;
   bottom: 0;
   position: absolute;
+  margin-right: 10px;
 }
 
 .fixedSize {
