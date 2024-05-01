@@ -872,7 +872,6 @@ def add_bug():
         # redirect to homepage
         return redirect(url_for('homepage'))
 
-
     # general landing
     sql_list = ['SELECT * FROM programs', 'SELECT * FROM areas', 'SELECT * FROM users']
     programs, areas, employees = get_all_table_results(sql_list)
@@ -885,17 +884,21 @@ def add_bug():
     return render_template('bugReport.html', programs=programs, report_types=report_types, severities=severities, employees=employees, areas=areas, username=username, userlevel=userlevel)
 
 # delete a bug
-@app.route('/delete_bug/<string:id_data>', methods = ['GET'])
-def delete_bug(id_data):
+@app.route('/delete_bug/<string:bug_id>', methods = ['GET']) # type:ignore
+def delete_bug(bug_id):
 
-    verify_admin()
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
     
     with pymysql.connect(**db_config) as connection:
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM bug WHERE bug_id=%s", (id_data,))
+            cursor.execute("DELETE FROM bugs WHERE bug_id=%s", (bug_id,))
             
             connection.commit()
-            message=f"Bug with id {id_data} was successfully deleted"
+            message=f"Bug with id {bug_id} was successfully deleted"
         
             flash(message=message)
             return redirect(url_for('update_bug'))
@@ -1059,16 +1062,10 @@ def search_bug():
         return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, results=search_results, report_types=report_types, severities=severities)
     
     # general landing: 
-    sql_list.append(sql)
-    programs, areas, employees, attachments, bugs = get_all_table_results(sql_list)
-    
-    print(bugs)
-    return render_template('searchReport.html', userlevel=userlevel, username=username, results=bugs, programs=programs, areas=areas, employees=employees, report_types=report_types, severities=severities, attachments=attachments)
+    return render_template('searchReport.html', userlevel=userlevel, username=username)
 
 
-# TODO: revise the following routes, and related html templates
-# add Resolution, edit resolution, delete resolution
-
+# within each report search result, one can do one of three things
 @app.route("/add_resolution/<string:bug_id>", methods=['GET', 'POST']) # type:ignore
 def add_resolution(bug_id):
     
@@ -1121,16 +1118,98 @@ def add_resolution(bug_id):
         'SELECT * FROM areas',
         f'SELECT area_id FROM program_areas WHERE program_id=(SELECT program_id FROM bugs WHERE bug_id={bug_id})',
         'SELECT * FROM users', 
-        f'SELECT * FROM bugs WHERE bug_id={bug_id}'
+        f'SELECT * FROM bugs WHERE bug_id={bug_id}',
+        f'SELECT * FROM resolutions WHERE bug_id={bug_id}'
     ]
     
-    programs, areas, program_areas, employees, bug = get_all_table_results(sql_list)
+    programs, areas, program_areas, employees, bug, bug_res = get_all_table_results(sql_list)
     
     _,_, priority, status, resolution, resolution_version = set_static_report_values()
         
-    return render_template('bugResolution.html', username=username, userlevel=userlevel, programs=programs, areas=areas, program_areas=program_areas, employees=employees, bug=bug[0], priority=priority, status=status, resolution=resolution, resolution_version=resolution_version)
-    
+    return render_template('bugResolution.html', username=username, userlevel=userlevel, programs=programs, areas=areas, program_areas=program_areas, employees=employees, bug=bug[0], resolutions=bug_res, priority=priority, status=status, resolution=resolution, resolution_version=resolution_version)
 
+@app.route("/edit_resolution/<string:res_id>", methods=['POST']) # type:ignore
+def edit_resolution(res_id):
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
+    
+    print(f'editing resolution with id:{res_id}...')
+    
+    field_values = {
+        'area_id': request.form.get("functional_area"),
+        'assigned_id' : request.form.get("assigned_to"),
+        'res_comments': request.form.get("comments"),
+        'res_status' : request.form.get("status"),
+        'res_priority' : request.form.get("priority"),
+        'res_state' : request.form.get("resolution"),
+        'res_version' : request.form.get("resolution_version"),
+        'resolver_id' : request.form.get("resolved_by"),
+        'resolver_date' : request.form.get("date_resolved"),
+        'restester_id' : request.form.get("tested_by"),
+        'restester_date': request.form.get("date_tested"),
+    }
+    
+    with pymysql.connect(**db_config) as connection:
+            with connection.cursor() as cursor:
+                
+                cursor.execute(f"SELECT * FROM resolutions WHERE resolution_id={res_id}")
+                original_res = cursor.fetchall()[0]
+                connection.commit()
+                
+                bug_id = original_res['bug_id'] # type:ignore
+                del original_res['resolution_id']; del original_res['bug_id'] # type:ignore
+                
+                # update resolution
+                stmt = []; data = []
+                
+                for key in field_values.keys():
+                    if key == 'resolver_date' or key == 'restester_date':
+                        condition = field_values[key] != datetime.strftime(original_res[key], "%Y-%m-%d") # type:ignore
+                    elif key=='area_id' or key=='assigned_id' or key=='resolver_id' or key=='restester_id':
+                        condition = int(field_values[key]) != original_res[key] # type:ignore
+                    else:
+                        condition = field_values[key] != original_res[key] # type:ignore
+                    if condition:
+                        stmt.append(f"{key}=%s")
+                        data.append(field_values[key])
+                        
+                if len(stmt) != 0:                
+                    # combine all needed conditions, add res_id condition (known)
+                    stmt = "UPDATE resolutions SET " + ",".join(stmt) + " WHERE resolution_id=%s"
+                    data.append(res_id)
+                    # print(stmt); print(data)
+                    
+                    cursor.execute(stmt, data) # actually update resolution
+                    connection.commit()
+                    
+                    flash(f"From Bug report (id:'{bug_id}'), resolution (id:'{res_id}') was successfully updated.")
+                    
+                else: # no conditions were added, no changes to resolution were made
+                    flash(f"No changes made to Resolution (id:'{res_id}') from Bug report (id:'{bug_id}').")
+                                
+    return redirect(url_for('homepage', username=session['user_name'], userlevel=userlevel))  
+
+@app.route("/delete_resolution/<string:res_id>", methods=['GET']) # type:ignore
+def delete_resolution(res_id):
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_admin()
+    
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM resolutions WHERE resolution_id=%s", (res_id,))
+            
+            connection.commit()
+            message=f"Resolution with id {res_id} was successfully deleted"
+        
+            flash(message=message)
+            return redirect(url_for('update_bug'))
+    
 
 # convert filedata into binary data
 def convertToBinaryData(filename):

@@ -18,21 +18,25 @@
 
     <hr class="long-line">
 
-    <button onclick="move(homepage)">Back to Home</button>
-    
+    <div>
+        <span> * Use underscores ('_') to wildcard</span><br>
+        <span> * Click Report Summary to edit the report</span><br>
+        <span> * View bug resolutions in '+Resolution'</span>
+    </div>
     <hr>
+    <div>
+        <button onclick="move(homepage)">Back to Home</button>
+        <button type="submit" style="margin-bottom: 5px;" form="searchForm">Make search</button>
+        <button id="clearSearchTermButton">Clear</button>
+        <button type="button" id="newSearchTermButton">+</button> 
+        <button type="button" id="removeSearchTermButton" hidden=true>--</button><br>
+    </div>
+    
     <div id="search_bug_results">
         {% include 'flash_results.html' %}
     </div>
     
     <form id="searchForm" action="/search_bug" method="POST">
-        <div>
-            <button type="submit" style="margin-bottom: 5px;">Make search</button>
-            <button id="clearSearchTermButton">Clear</button>
-            <button type="button" id="newSearchTermButton">+</button> 
-            <button type="button" id="removeSearchTermButton" hidden=true>--</button>
-            <span> (Note: Use underscores ('_') to wildcard)</span>
-        </div>
         <div id="search_entity" class="add-entity" style="margin-top: 5px;">
             <label for="search_options">Search by:</label>
             <select id="search_options" name="search_options">

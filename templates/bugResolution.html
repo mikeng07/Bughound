@@ -15,11 +15,17 @@
 <body>
     <h1>New Resolution</h1>
     <hr class="long-line">
-    <div class="inline-parent">
-        <button onclick="go_back()">Go back</button>
-        <div class="inline-child">
-            <a href="/view_report/{{bug['bug_id']}}" data-toggle="modal" data-target="#modal_report">Show report</a>
-        </div>
+    <button onclick="go_back()">Go back</button>
+    <span>Note: You can edit the resolutions here!</span>
+    <hr>
+    <a href="/view_report/{{bug['bug_id']}}" data-toggle="modal" data-target="#modal_report">Show Bug report</a>
+    <div>
+        View/Edit:
+        {% for res in resolutions %}
+        <span>
+            <a href="/view_res/{{res['resolution_id']}}" data-toggle="modal" data-target="#modal_res{{res['resolution_id']}}">Res #{{ loop.index }}</a>
+        </span>|
+        {% endfor %}
     </div>
     <hr>
 
@@ -88,7 +94,7 @@
         </select>
 
         <br>
-        <label for="resolved_by">Resolved by</label>
+        <label for="resolved_by" style="margin-left: 2px;">Resolved by</label>
         <select id="resolved_by" name="resolved_by" class="user" required>
             <option value="default" disabled selected>user</option>
             {% for employee in employees %}
@@ -97,10 +103,10 @@
         </select>
 
         <label for="date_resolved">on</label>
-        <input type="date" id ="date_resolved" name ="dateResolved" required>
+        <input type="date" id ="date_resolved" name ="date_resolved" required>
 
         <br>
-        <label for="tested_by" style="margin-left: 18px;">Tested by</label>
+        <label for="tested_by" style="margin-left: 20px;">Tested by</label>
         <select id="tested_by" name="tested_by" class="user" required>
             <option value="default" disabled selected>user</option>
             {% for employee in employees %}
@@ -181,6 +187,134 @@
             </div>
         </div>
     </div>
+
+    {% for res in resolutions %}
+        <div id="modal_res{{res['resolution_id']}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Resolution #{{ loop.index }}</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form name="editResForm" action="/edit_resolution/{{res['resolution_id']}}" enctype="multipart/form-data" method="POST">
+                            <!-- Resolution info -->
+                    
+                            <label for="functional_area">Functional Area:</label>
+                            <select name="functional_area" id="functional_area" class="" required>
+                                {% for area in areas %}
+                                    {% if area['area_id'] == res['area_id'] %}
+                                        <option value="{{ area['area_id'] }}">{{ area['area_title'] }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                    
+                            <br>
+                            <label for="assigned_to" style="margin-left: 30px;">Assigned to</label>
+                            <select name="assigned_to" id="assigned_to" class="user" required>
+                                {% for employee in employees %}
+                                    {% if employee['user_id'] == res['assigned_id'] %}
+                                        <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                    {% else %}
+                                        <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                    {% endif %}
+                                {% endfor %} 
+                            </select>
+                    
+                            <br>
+                            <div class="input-container">
+                                <label for="comments">Comments</label>
+                                <textarea type="text" id="comments" name="comments" class="comments" rows="3">{{res['res_comments']}}</textarea>
+                            </div>
+                    
+                            <br>
+                            <label for="status" style="margin-left: 40px;">Status:</label>      
+                            <select id="status" name="status" required>
+                                    {% for s in status %}
+                                        {% if s == res['res_status'] %}
+                                            <option value="{{ s }}" selected>{{ s }}</option>
+                                        {% else %}
+                                            <option value="{{ s }}">{{ s }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                    
+                            <label for="priority">| Priority</label>      
+                            <select id="priority" name="priority" class="numeral" required>
+                                    {% for p in priority %}
+                                        {% if p|int == res['res_priority']|int %}
+                                            <option value="{{ p }}" selected>{{ p }}</option>
+                                        {% else %}
+                                            <option value="{{ p }}">{{ p }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            <br>
+                    
+                            <label for="resolution" style="margin-left: 9px;">Resolution:</label>
+                            <select id="resolution" name="resolution" required>
+                                {% for r in resolution %}
+                                    {% if r == res['res_state'] %}
+                                        <option value="{{ r }}" selected>{{ r }}</option>
+                                    {% else %}
+                                        <option value="{{ r }}">{{ r }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                    
+                            <label for="resolution_version">, version</label>
+                            <select id="resolution_version" name="resolution_version" class="numeral" required>
+                                {% for r in resolution_version %}
+                                    {% if r|int == res['res_version']|int %}
+                                        <option value="{{ r }}" selected>{{ r }}</option>
+                                    {% else %}
+                                        <option value="{{ r }}">{{ r }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                    
+                            <br>
+                            <label for="resolved_by" style="margin-left: 2px;">Resolved by</label>
+                            <select id="resolved_by" name="resolved_by" class="user" required>
+                                {% for employee in employees %}
+                                    {% if employee['user_id'] == res['resolver_id'] %}
+                                        <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                    {% else %}
+                                        <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                    {% endif %}
+                                {% endfor %}  
+                            </select>
+                    
+                            <label for="date_resolved">on</label>
+                            <input type="date" id ="date_resolved" name ="date_resolved" value="{{res['resolver_date']}}" required>
+                    
+                            <br>
+                            <label for="tested_by" style="margin-left: 20px;">Tested by</label>
+                            <select id="tested_by" name="tested_by" class="user" required>
+                                {% for employee in employees %}
+                                    {% if employee['user_id'] == res['restester_id'] %}
+                                        <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                    {% else %}
+                                        <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                    {% endif %}
+                                {% endfor %} 
+                            </select>
+                    
+                            <label for="date_tested">on</label>
+                            <input type="date" id ="date_tested" name ="date_tested" value="{{res['restester_date']}}" required>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" form="editResForm">Make resolution edits</button>
+                        {% if userlevel == 3 %}
+                            <a href="/delete_resolution/{{ res['resolution_id'] }}" onclick="return confirm('Confirm deletion of resolution?')" style="margin-left: 12px;">Delete</a>
+                        {% endif %}
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 
     <!-- jQuery, Popper.js, Bootstrap, in-page listeners -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

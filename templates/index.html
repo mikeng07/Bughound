@@ -7,16 +7,12 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
     <title>BugHound Home</title>
     <script>
-        let username = '{{username}}';
-        let access = '{{access}}';
-
-        localStorage.setItem('username', username);
-        localStorage.setItem('access', access);
+        localStorage.setItem('username', '{{username}}');
+        localStorage.setItem('access', '{{access}}');
 
         // endpoints
         var add_bug = "{{url_for('add_bug')}}";
         var search_bug = "{{url_for('search_bug')}}";
-        
         var maintain_db = "{{url_for('maintain_db')}}";
         var logout = "{{url_for('logout')}}";
 
@@ -29,8 +25,7 @@
     <hr class="long-line">
 
     <button onclick="move(add_bug)">Add a Bug</button> 
-    <button onclick="move(search_bug)">Search</button> 
-    <!-- <button onclick="move(search_resolution)">Search a Resolution</button> -->
+    <button onclick="move(search_bug)">Search Bugs & Resolutions</button> 
     
     <hr>
     <div class="inline-parent">
