@@ -1,4 +1,3 @@
--- insert database entities here
 
 CREATE TABLE Users (
     user_id         INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -37,30 +36,25 @@ CREATE TABLE Bugs (
     bug_reproducible    BOOLEAN NOT NULL DEFAULT FALSE,
     user_reporter_id    INT NOT NULL,
     bug_find_date       DATE NOT NULL,
-    FOREIGN KEY (program_id)       REFERENCES Programs(program_id), -- connects to Programs:program_id
-    FOREIGN KEY (user_reporter_id) REFERENCES Users(user_id)        -- connects to Users:user_id
-);
 
-CREATE TABLE Resolutions (
-    resolution_id       INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    bug_id              INT NOT NULL,
-    area_id             INT NOT NULL,
+    area_id             INT,
     res_status          ENUM('Open','Closed', 'Resolved') NOT NULL DEFAULT 'Open',
     res_priority        ENUM('0','1','2','3','4','5','6') NOT NULL DEFAULT '0',
-    res_state           ENUM('Pending','FIxed', 'Cannot be reproduced', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Needs more information', 'Disagree with suggestion', 'Duplicate') NOT NULL DEFAULT 'Pending',
-    res_version         INT NOT NULL,
+    res_state           ENUM('Pending','Fixed', 'Cannot be reproduced', 'Deferred', 'As designed', 'Withdrawn by reporter', 'Needs more information', 'Disagree with suggestion', 'Duplicate') NOT NULL DEFAULT 'Pending',
+    res_version         INT NOT NULL DEFAULT 0,
     res_comments        VARCHAR(255),
     res_defer           BOOLEAN NOT NULL DEFAULT FALSE,
-    assigned_id         INT NOT NULL,
-    resolver_id         INT NOT NULL,
-    resolver_date       DATE NOT NULL,
-    restester_id        INT NOT NULL,
-    restester_date      DATE NOT NULL,
-    FOREIGN KEY (bug_id)        REFERENCES Bugs(bug_id),            -- connected to Bugs:bug_id
+    assigned_id         INT,
+    resolver_id         INT,
+    resolver_date       DATE,
+    restester_id        INT,
+    restester_date      DATE,
     FOREIGN KEY (area_id)       REFERENCES Areas(area_id),          -- connected to Areas:area_id
     FOREIGN KEY (assigned_id)   REFERENCES Users(user_id),          -- a user is assigned
     FOREIGN KEY (resolver_id)   REFERENCES Users(user_id),          -- a user resolves
-    FOREIGN KEY (restester_id)  REFERENCES Users(user_id)           -- a user tests the resolution
+    FOREIGN KEY (restester_id)  REFERENCES Users(user_id),          -- a user tests the resolution
+    FOREIGN KEY (program_id)       REFERENCES Programs(program_id), -- connects to Programs:program_id
+    FOREIGN KEY (user_reporter_id) REFERENCES Users(user_id)        -- connects to Users:user_id
 );
 
 CREATE TABLE Attachments (
@@ -79,7 +73,6 @@ INSERT INTO Users (user_name, user_pass, user_realname, user_access) VALUES ("us
 -- REMOVING DATA FROM TABLES --------------------------------------
 
 DELETE FROM Attachments;
-DELETE FROM Resolutions;
 DELETE FROM Bugs;
 DELETE FROM program_areas;
 DELETE FROM Programs;
@@ -89,7 +82,6 @@ DELETE FROM Users;
 -- REMOVING TABLES ------------------------------------------------
 
 DROP TABLE Attachments;
-DROP TABLE Resolutions;
 DROP TABLE Bugs;
 DROP TABLE program_areas;
 DROP TABLE Programs;

@@ -92,7 +92,7 @@ def set_static_report_values():
         'Suggestion', 'Documentation', 'Query']
 
     severities = ['Mild','Infectious','Serious','Fatal']
-    priority=[1,2,3,4,5,6]
+    priority=[0,1,2,3,4,5,6]
     status=['Open', 'Closed', 'Resolved']
     resolution=['Pending', 'Fixed', 'Irreproducible', 
                 'Deferred', 'As designed','Withdrawn by reporter', 
@@ -455,7 +455,7 @@ def export_data():
                 
                 print('made into file')
         
-        message = f"Table '{table_name}' with type '{data_type}' was successfully exported."
+        message = f"Table '{table_name}' with type '{data_type}' was successfully exported (look in 'exports' folder)."
     except:
         message = "File type has not been chosen."    
         
@@ -926,6 +926,17 @@ def edit_bug(bug_id):
             'bug_suggestion' : request.form.get("suggested_fix") ,
             'user_reporter_id' : request.form.get('reported_by'),
             'bug_find_date' : request.form.get('date_reported'),
+            'area_id': request.form.get("functional_area"),
+            'assigned_id' : request.form.get("assigned_to"),
+            'res_comments': request.form.get("comments"),
+            'res_status' : request.form.get("status"),
+            'res_priority' : request.form.get("priority"),
+            'res_state' : request.form.get("resolution"),
+            'res_version' : request.form.get("resolution_version"),
+            'resolver_id' : request.form.get("resolved_by"),
+            'resolver_date' : request.form.get("date_resolved"),
+            'restester_id' : request.form.get("tested_by"),
+            'restester_date': request.form.get("date_tested"),
         }
         
         # reproducible has two states: "on" and "None"
@@ -1007,16 +1018,6 @@ def edit_bug(bug_id):
                         connection.commit()
                         flash(f"Attachment '{attachment.filename}' was successfully uploaded.")
                         
-                # delete attachments (if needed)
-                del_attachments = request.form.getlist("delete_id")
-                stmt = "DELETE FROM attachments WHERE attach_id=%s AND bug_id=%s"
-                
-                for file_info in del_attachments:
-                    # file_info = "<file_id> <filename>" 
-                    file_id, filename = file_info.split(" ") 
-                    cursor.execute(stmt, (file_id, bug_id))
-                    connection.commit()
-                    flash(f"Attachment '{filename}' was removed.")
                 
         return redirect(url_for('search_bug'))
 
@@ -1033,11 +1034,12 @@ def search_bug():
 
     sql_list = ['SELECT * FROM programs',
                 'SELECT * FROM areas',
+                'SELECT * FROM program_areas',
                 'SELECT * FROM users',
-                "SELECT * from attachments"]
+                'SELECT * FROM attachments']
     
     sql = "SELECT * FROM bugs"
-    report_types, severities, _,_,_,_ = set_static_report_values()
+    report_types, severities, priority, status, resolution, resolution_version = set_static_report_values()
     
     if request.method == 'POST':
         print('request.form:', request.form)
@@ -1050,166 +1052,71 @@ def search_bug():
         for option, input in zip(search_options, search_inputs):
             print(f"{option}: '{input}'")
             if option != 'ALL':
-                conditions.append(f"{option}='{input}'")
+                if option == 'program_id':
+                    items = input.split(" ")
+                    
+                    release = ''; version = ''; name = input
+                    
+                    if len(items) > 1:
+                        try:
+                            release = items[-2][1:]
+                        except:
+                            pass
+                        
+                        try:
+                            version = items[-1][1:]
+                        except:
+                            pass
+                    
+                    try:
+                        if items[1] == 'Coder':    
+                            name = items[0] + " "+ items[1]
+                        else:
+                            name = input[0]
+                    except:
+                        pass
+                            
+                    conds = []
+                    print(items, '=>', name, release, version)
+                    
+                    if name != '':
+                        conds.append(f"programs.program_name='{name}'")
+                    
+                    if release != '':
+                        conds.append(f"programs.program_version={int(release)}")
+                    
+                    if version != '':
+                        conds.append(f"programs.release_version={int(version)}")
+                    
+                    conds = "program_id=(SELECT program_id FROM programs WHERE "+ " AND ".join(conds) + ")"
+                    # print(conds)
+                    conditions.append(conds)
+                
+                elif option == 'status':
+                    conditions.append(f"res_status='{input}'")
+                    
+                elif option == 'assigned_id':
+                    conditions.append(f"assigned_id=(SELECT user_id FROM users WHERE user_realname='{input}')")
+                    
+                else:
+                    conditions.append(f"{option}='{input}'")
             
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
-       
+            
+        print(sql)
         sql_list.append(sql)
-        programs, areas, employees, attachments, search_results = get_all_table_results(sql_list)
+        programs, areas, program_areas, employees, files, search_results = get_all_table_results(sql_list)
         
         # redirect to a success page
-        return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, results=search_results, report_types=report_types, severities=severities)
+        return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, results=search_results, report_types=report_types, severities=severities, priority=priority,status=status, resolution=resolution, resolution_version=resolution_version, program_areas=program_areas, attachments=files)
     
-    # general landing: 
-    return render_template('searchReport.html', userlevel=userlevel, username=username)
-
-
-# within each report search result, one can do one of three things
-@app.route("/add_resolution/<string:bug_id>", methods=['GET', 'POST']) # type:ignore
-def add_resolution(bug_id):
+    # general landing:
+    sql += " WHERE res_status='Open'"
+    sql_list.append(sql)
+    programs, areas, program_areas, employees, files, search_results = get_all_table_results(sql_list)
     
-    try:
-        userlevel= session['user_level']
-        username = session['username']
-    except:
-        return verify_user()
-
-    # posting new resolution
-    if request.method == "POST":
-        print('submitting a new resolution...')
-        area_id = request.form.get("functional_area")
-        assigned_id = request.form.get("assigned_to")
-        comments = request.form.get("comments")
-        res_status = request.form.get("status")
-        res_priority = request.form.get("priority")
-        res_state = request.form.get("resolution")
-        res_version = request.form.get("resolution_version")
-        resolver_id = request.form.get("resolved_by")
-        resolve_date = request.form.get("date_resolved")
-        tester_id = request.form.get("tested_by")
-        test_date = request.form.get("date_tested")
-        
-        is_deferred = False
-        if res_status == "Deferred":
-            is_deferred = True
-        
-        if comments == '':
-            comments = "None given"
-        
-        conditions = "(bug_id, area_id, res_status, res_priority, res_state, res_version, res_comments, res_defer, assigned_id, resolver_id, resolver_date, restester_id, restester_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        data = (bug_id, area_id, res_status, res_priority, res_state, res_version, comments, is_deferred, assigned_id, resolver_id, resolve_date, tester_id, test_date)
-        
-        stmt = " ".join(["INSERT INTO", "resolutions", conditions])
-        with pymysql.connect(**db_config) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(stmt, data)
-                connection.commit()
-                id = cursor.lastrowid
-                
-        flash(f"Resolution with id '{id}' has been submitted for bug report with id '{bug_id}'.")
-        return redirect(url_for('homepage'))
-    
-    
-    print('setting up a new resolution?')
-    # from areas, get the ones prevalent to the chosen program as stated in program_areas
-    sql_list = [
-        'SELECT * FROM programs', 
-        'SELECT * FROM areas',
-        f'SELECT area_id FROM program_areas WHERE program_id=(SELECT program_id FROM bugs WHERE bug_id={bug_id})',
-        'SELECT * FROM users', 
-        f'SELECT * FROM bugs WHERE bug_id={bug_id}',
-        f'SELECT * FROM resolutions WHERE bug_id={bug_id}'
-    ]
-    
-    programs, areas, program_areas, employees, bug, bug_res = get_all_table_results(sql_list)
-    
-    _,_, priority, status, resolution, resolution_version = set_static_report_values()
-        
-    return render_template('bugResolution.html', username=username, userlevel=userlevel, programs=programs, areas=areas, program_areas=program_areas, employees=employees, bug=bug[0], resolutions=bug_res, priority=priority, status=status, resolution=resolution, resolution_version=resolution_version)
-
-@app.route("/edit_resolution/<string:res_id>", methods=['POST']) # type:ignore
-def edit_resolution(res_id):
-    try:
-        userlevel= session['user_level']
-        username = session['username']
-    except:
-        return verify_user()
-    
-    print(f'editing resolution with id:{res_id}...')
-    
-    field_values = {
-        'area_id': request.form.get("functional_area"),
-        'assigned_id' : request.form.get("assigned_to"),
-        'res_comments': request.form.get("comments"),
-        'res_status' : request.form.get("status"),
-        'res_priority' : request.form.get("priority"),
-        'res_state' : request.form.get("resolution"),
-        'res_version' : request.form.get("resolution_version"),
-        'resolver_id' : request.form.get("resolved_by"),
-        'resolver_date' : request.form.get("date_resolved"),
-        'restester_id' : request.form.get("tested_by"),
-        'restester_date': request.form.get("date_tested"),
-    }
-    
-    with pymysql.connect(**db_config) as connection:
-            with connection.cursor() as cursor:
-                
-                cursor.execute(f"SELECT * FROM resolutions WHERE resolution_id={res_id}")
-                original_res = cursor.fetchall()[0]
-                connection.commit()
-                
-                bug_id = original_res['bug_id'] # type:ignore
-                del original_res['resolution_id']; del original_res['bug_id'] # type:ignore
-                
-                # update resolution
-                stmt = []; data = []
-                
-                for key in field_values.keys():
-                    if key == 'resolver_date' or key == 'restester_date':
-                        condition = field_values[key] != datetime.strftime(original_res[key], "%Y-%m-%d") # type:ignore
-                    elif key=='area_id' or key=='assigned_id' or key=='resolver_id' or key=='restester_id':
-                        condition = int(field_values[key]) != original_res[key] # type:ignore
-                    else:
-                        condition = field_values[key] != original_res[key] # type:ignore
-                    if condition:
-                        stmt.append(f"{key}=%s")
-                        data.append(field_values[key])
-                        
-                if len(stmt) != 0:                
-                    # combine all needed conditions, add res_id condition (known)
-                    stmt = "UPDATE resolutions SET " + ",".join(stmt) + " WHERE resolution_id=%s"
-                    data.append(res_id)
-                    # print(stmt); print(data)
-                    
-                    cursor.execute(stmt, data) # actually update resolution
-                    connection.commit()
-                    
-                    flash(f"From Bug report (id:'{bug_id}'), resolution (id:'{res_id}') was successfully updated.")
-                    
-                else: # no conditions were added, no changes to resolution were made
-                    flash(f"No changes made to Resolution (id:'{res_id}') from Bug report (id:'{bug_id}').")
-                                
-    return redirect(url_for('homepage', username=session['user_name'], userlevel=userlevel))  
-
-@app.route("/delete_resolution/<string:res_id>", methods=['GET']) # type:ignore
-def delete_resolution(res_id):
-    try:
-        userlevel= session['user_level']
-        username = session['username']
-    except:
-        return verify_admin()
-    
-    with pymysql.connect(**db_config) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM resolutions WHERE resolution_id=%s", (res_id,))
-            
-            connection.commit()
-            message=f"Resolution with id {res_id} was successfully deleted"
-        
-            flash(message=message)
-            return redirect(url_for('update_bug'))
-    
+    return render_template('searchReport.html', userlevel=userlevel, username=username, programs=programs, areas=areas, employees=employees, results=search_results, report_types=report_types, severities=severities, priority=priority,status=status, resolution=resolution, resolution_version=resolution_version, program_areas=program_areas, attachments=files)
 
 # convert filedata into binary data
 def convertToBinaryData(filename):
@@ -1234,6 +1141,25 @@ def view_attachment(attach_id):
             # print('attachment:', data)
         
     return send_file(BytesIO(data['attach_content']), download_name=data['attach_name'], as_attachment=True) #type:ignore
+
+@app.route("/delete_attachment/<string:bug_id>", methods=["POST"])
+def delete_attachment(bug_id):
+    
+    with pymysql.connect(**db_config) as connection:
+        with connection.cursor() as cursor:
+            # delete attachments (if needed)
+            del_attachments = request.form.getlist("delete_id")
+            stmt = "DELETE FROM attachments WHERE attach_id=%s AND bug_id=%s"
+            
+            for file_info in del_attachments:
+                # file_info = "<file_id> <filename>" 
+                file_id, filename = file_info.split(" ") 
+                cursor.execute(stmt, (file_id, bug_id))
+                connection.commit()
+                flash(f"Attachment '{filename}' was removed.")
+            
+    return redirect(url_for('search_bug'))
+
 
 # automatic
 if __name__ == "__main__":

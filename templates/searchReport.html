@@ -20,8 +20,7 @@
 
     <div>
         <span> * Use underscores ('_') to wildcard</span><br>
-        <span> * Click Report Summary to edit the report</span><br>
-        <span> * View bug resolutions in '+Resolution'</span>
+        <span> * Click Report Summary to edit the report</span>
     </div>
     <hr>
     <div>
@@ -42,151 +41,311 @@
             <select id="search_options" name="search_options">
                 <option value="ALL" selected>All reports</option>
                 <option value="bug_id">Bug ID</option>
-                <option value="program_name">Program ('Name' R'#' V'#')</option>
+                <option value="program_id">Program ('Name' R'#' V'#')</option>
                 <option value="report_type">Report Type</option>
                 <option value="severity">Severity</option>
-                <option value="user_reported_id">Reporter ID</option>
+                <option value="status">Status</option>
+                <option value="user_reported_id">Reporter Name</option>
                 <option value="bug_find_date">Date reported (yyyy-mm-dd)</option>
+                <option value="assigned_id">Assigned User</option>
             </select>
             <input type="search" id="searchInput" name="searchInput" placeholder="enter search term by (search type)..." size="36"><br>
         </div>
     </form>
 
     <hr>
+    <div style="overflow: auto; height: 70%;">
+        <table id="searchResults" class="fixedSize">
+            <h4>Report List</h4>
+            <thead class="fixedHeader">
+                <th scope="col" style="width: 5%">Bug ID</th>
+                <th scope="col" style="width: 5%">Status</th>
+                <th scope="col" style="width: 5%">Severity</th>
+                <th scope="col" style="width: 7%">Reporter</th>
+                <th scope="col" style="width: 10%" class="overflow pwd">Date Reported</th>
+                <th scope="col" style="width: 15%">Program</th>
+                <th scope="col">Report Summary</th>
+                <th scope="col" style="width: 12%">Operations</th>
+            </thead>
     
-    <table id="searchResults" class="fixedSize">
-        <h4>Report List</h4>
-        <thead class="fixedHeader">
-            <th scope="col" style="width: 10%" class="overflow pwd rev">Report ID</th>
-            <th scope="col" style="width: 15%" class="overflow pwd">Date Reported</th>
-            <th scope="col" style="width: 50%" class="overflow pwd rev">Report Summary</th>
-            <th scope="col" style="width: 17%">Operations</th>
-        </thead>
-
-        {% for result in results %}
-        <tr>
-            <td>{{ result['bug_id'] }}</td>
-            <td class="overflow pwd">{{ result['bug_find_date'] }}</td>
-            
-            <!-- modal to view report, and related options -->
-            <td class="overflow pwd">
-                <a href="/view_report/{{result['bug_id']}}" data-toggle="modal" data-target="#modaledit{{result['bug_id']}}">{{ result['bug_title'] }}</a>
-            </td>
-            <td class="overflow pwd">
-                <span>
-                    <a href="/add_resolution/{{result['bug_id'] }}">+Resolution</a>
-                    {% if userlevel == 3 %}
-                    |
-                    <a href="/delete_bug/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
-                    {% endif %}
-
-                </span>
-            </td>
-        </tr>
-
-        <div id="modaledit{{result['bug_id']}}" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Bug report #{{ result['bug_id'] }}</h3>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editBugForm{{result['bug_id']}}" action="/edit_bug/{{result['bug_id']}}" enctype="multipart/form-data" method="POST">
-                            <div>
-                                <label for="program_id" style="margin-left: 23px;">Program:</label>
-                                <select id="program_id" name="program_id" class="fixed" required>
-                                    {% for program in programs %}
-                                        {% if program['program_id'] == result['program_id'] %}
-                                            <option value="{{ program['program_id'] }}" selected>
-                                                {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
-                                            </option>
+            {% for result in results %}
+            <tr>
+                <td>{{ result['bug_id'] }}</td>
+                <td>{{result['res_status']}}</td>
+                <td>{{result['bug_severity']}}</td>
+                <td>
+                    {% for employee in employees %}    
+                        {% if result['user_reporter_id'] == employee['user_id'] %}
+                        {{employee['user_realname']}}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="overflow pwd">{{ result['bug_find_date'] }}</td>
+                <td class="overflow pwd">
+                    {% for program in programs %}    
+                        {% if result['program_id'] == program['program_id'] %}
+                        {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                
+                <!-- modal to view report, and related options -->
+                <td class="overflow pwd">
+                    <a href="/view_report/{{result['bug_id']}}" data-toggle="modal" data-target="#modaledit{{result['bug_id']}}">{{ result['bug_title'] }}</a>
+                </td>
+                <td class="overflow pwd">
+                    <span>
+                        {% if result['bug_id']|has_attachments(attachments) %}
+                            <a href="/see_attachments/{{result['bug_id'] }}" data-toggle="modal" data-target="#modalfiles{{result['bug_id']}}">View attachments</a>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                        {% if userlevel == 3 %}
+                        |
+                        <a href="/delete_bug/{{ result['bug_id'] }}" onclick="return confirm('Confirm deletion of bug report?')" class="overflow pwd rev">Delete</a>
+                        {% endif %}
+    
+                    </span>
+                </td>
+            </tr>
+    
+            <div id="modaledit{{result['bug_id']}}" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Bug report #{{ result['bug_id'] }}</h3>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editBugForm{{result['bug_id']}}" action="/edit_bug/{{result['bug_id']}}" enctype="multipart/form-data" method="POST">
+                                <div>
+                                    <label for="program_id" style="margin-left: 23px;">Program:</label>
+                                    <select id="program_id" name="program_id" class="fixed" required>
+                                        {% for program in programs %}
+                                            {% if program['program_id'] == result['program_id'] %}
+                                                <option value="{{ program['program_id'] }}" selected>
+                                                    {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
+                                                </option>
+                                            {% else %}
+                                                <option value="{{ program['program_id'] }}">
+                                                    {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                        
+                                <div>
+                                    <label for="report_type">Report Type:</label>
+                                    <select id="report_type" name="report_type"required>
+                                        {% for report_type in report_types %}
+                                            {% if report_type == result['bug_type'] %}
+                                                <option value="{{report_type}}" selected>{{report_type}}</option>
+                                            {% else %}
+                                                <option value="{{report_type}}">{{report_type}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                        
+                                <div>
+                                    <label for="severity" style="margin-left: 30px;">Severity:</label>
+                                    <select id="severity" name="severity" style="width: auto;" required>
+                                        {% for severity in severities %}
+                                        {% if severity == result['bug_severity'] %}
+                                            <option value="{{severity}}" selected>{{severity}}</option>
                                         {% else %}
-                                            <option value="{{ program['program_id'] }}">
-                                                {{ program['program_name'] }} R{{ program["program_version"]|string }} v{{ program["release_version"]|string }}
-                                            </option>
+                                            <option value="{{severity}}">{{severity}}</option>
                                         {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                    
-                            <div>
-                                <label for="report_type">Report Type:</label>
-                                <select id="report_type" name="report_type"required>
-                                    {% for report_type in report_types %}
-                                        {% if report_type == result['bug_type'] %}
-                                            <option value="{{report_type}}" selected>{{report_type}}</option>
-                                        {% else %}
-                                            <option value="{{report_type}}">{{report_type}}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                    
-                            <div>
-                                <label for="severity" style="margin-left: 30px;">Severity:</label>
-                                <select id="severity" name="severity" style="width: auto;" required>
-                                    {% for severity in severities %}
-                                    {% if severity == result['bug_severity'] %}
-                                        <option value="{{severity}}" selected>{{severity}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="reproducible">Reproducible?</label>
+                                    {% if result['bug_reproducible'] == 1 %}
+                                        <input type="checkbox" name="reproducible" id="reproducible" checked>
                                     {% else %}
-                                        <option value="{{severity}}">{{severity}}</option>
+                                        <input type="checkbox" name="reproducible" id="reproducible">
                                     {% endif %}
+                                </div>
+                        
+                                <div class="input-container">
+                                    <label for="problem_summary">Problem Summary</label><br>
+                                    <textarea type="text" id="problem_summary" name="problem_summary" rows="2" class="summary" required>{{result['bug_title']}}</textarea>
+                                </div>
+                                
+                                <br>
+                        
+                                <div class="input-container">
+                                    <label for="problem">Problem</label><br>
+                                    <textarea type="text" id="problem" name="problem" rows="3" class="problem" required>{{result['bug_description']}}</textarea>
+                                </div>
+                                
+                                <br>
+                                
+                                <div class="input-container">
+                                    <label for="suggested_fix">Suggested Fix</label><br>
+                                    <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="suggestedFix" placeholder="(None given)">{% if result['bug_suggestion'] != "None given" %}{{result['bug_suggestion']}}{% endif %}</textarea>
+                                </div>
+                                
+                                <br>
+                                
+                                <label for="reported_by">Reported by</label>
+                                <select id="reported_by" name="reported_by" class="user" required>
+                                    <option value="default" selected>user</option>
+                                    {% for employee in employees %}
+                                        {% if employee['user_id'] == result['user_reporter_id'] %}
+                                            <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                        {% else %}
+                                            <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                        {% endif %}
                                     {% endfor %} 
                                 </select>
-                            </div>
-                            
-                            <div>
-                                <label for="reproducible">Reproducible?</label>
-                                {% if result['bug_reproducible'] == 1 %}
-                                    <input type="checkbox" name="reproducible" id="reproducible" checked>
-                                {% else %}
-                                    <input type="checkbox" name="reproducible" id="reproducible">
-                                {% endif %}
-                            </div>
-                    
-                            <div class="input-container">
-                                <label for="problem_summary">Problem Summary</label><br>
-                                <textarea type="text" id="problem_summary" name="problem_summary" rows="2" class="summary" required>{{result['bug_title']}}</textarea>
-                            </div>
-                            
-                            <br>
-                    
-                            <div class="input-container">
-                                <label for="problem">Problem</label><br>
-                                <textarea type="text" id="problem" name="problem" rows="3" class="problem" required>{{result['bug_description']}}</textarea>
-                            </div>
-                            
-                            <br>
-                            
-                            <div class="input-container">
-                                <label for="suggested_fix">Suggested Fix</label><br>
-                                <textarea type="text" id="suggested_fix" name="suggested_fix" rows="3" class="suggestedFix" placeholder="(None given)">{% if result['bug_suggestion'] != "None given" %}{{result['bug_suggestion']}}{% endif %}</textarea>
-                            </div>
-                            
-                            <br>
-                            
-                            <label for="reported_by">Reported by</label>
-                            <select id="reported_by" name="reported_by" class="user" required>
-                                <option value="default" selected>user</option>
-                                {% for employee in employees %}
-                                    {% if employee['user_id'] == result['user_reporter_id'] %}
-                                        <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
-                                    {% else %}
-                                        <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
-                                    {% endif %}
-                                {% endfor %} 
-                            </select>
-                    
-                            <label for="date_reported">on</label>
-                            <input type="date" id ="date_reported" name ="date_reported" required value="{{result['bug_find_date']}}">
-                            <br>
+                        
+                                <label for="date_reported">on</label>
+                                <input type="date" id ="date_reported" name ="date_reported" required value="{{result['bug_find_date']}}">
+                                <br>
+    
+                                <label for="file">Add new attachments (optional)</label><br>
+                                <input type="file" id="file" name="file" multiple>
 
-                            <!-- for attachment in attachments, add a div showing the filename and a view on hover, with a checkbox option to delete -->
+                                <!-- Resolution parts -->
+                                <hr>
+                                <label for="functional_area">Functional Area:</label>
+                                <select name="functional_area" id="functional_area" class="" required>
+                                    <option disabled selected>area</option>
+                                    {% for area in areas %}
+                                        {% for pa in program_areas %}
+                                            {% if area['area_id']==pa['area_id'] and pa['program_id']==result['program_id'] %}
+                                                {% if area['area_id'] == result['area_id'] %}
+                                                    <option value="{{ area['area_id'] }}" selected>{{ area['area_title'] }}</option>
+                                                {% else %}
+                                                    <option value="{{ area['area_id'] }}">{{ area['area_title'] }}</option>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+
+                                <br>
+                                <label for="assigned_to" style="margin-left: 30px;">Assigned to</label>
+                                <select name="assigned_to" id="assigned_to" class="user" required>
+                                    <option value="default" disabled selected>user</option>
+                                    {% for employee in employees %}
+                                        {% if employee['user_id']==result['assigned_id'] %}
+                                            <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                        {% else %}
+                                            <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </select>
+
+                                <br>
+                                <div class="input-container">
+                                    <label for="comments">Comments</label>
+                                    <textarea type="text" id="comments" name="comments" class="comments" rows="3">{{result['res_comments']}}</textarea>
+                                </div>
+
+                                <br>
+                                <label for="status" style="margin-left: 40px;">Status:</label>
+                                <select id="status" name="status" required>
+                                        {% for s in status %}
+                                            {% if s == result['res_status'] %}
+                                                <option value="{{ s }}" selected>{{ s }}</option>
+                                            {% else %}
+                                                <option value="{{ s }}">{{ s }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+
+                                <label for="priority">| Priority (1 is highest)</label>      
+                                <select id="priority" name="priority" class="numeral" required>
+                                        {% for p in priority %}
+                                            {% if p|int == result['res_priority']|int %}
+                                                <option value="{{ p }}" selected>{{ p }}</option>
+                                            {% else %}
+                                                <option value="{{ p }}">{{ p }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                <br>
+
+                                <label for="resolution" style="margin-left: 9px;">Resolution:</label>
+                                <select id="resolution" name="resolution" required>
+                                    {% for r in resolution %}
+                                        {% if r == result['res_state'] %}
+                                            <option value="{{ r }}" selected>{{ r }}</option>
+                                        {% else %}
+                                            <option value="{{ r }}">{{ r }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+
+                                <label for="resolution_version">, version</label>
+                                <select id="resolution_version" name="resolution_version" class="numeral" required>
+                                    {% for r in resolution_version %}
+                                        {% if r|int == result['res_version']|int %}
+                                            <option value="{{ r }}" selected>{{ r }}</option>
+                                        {% else %}
+                                            <option value="{{ r }}">{{ r }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+
+                                <br>
+                                <label for="resolved_by" style="margin-left: 2px;">Resolved by</label>
+                                <select id="resolved_by" name="resolved_by" class="user">
+                                    <option value="default" disabled selected>user</option>
+                                    {% for employee in employees %}
+                                        {% if employee['user_id'] == result['resolver_id'] %}
+                                            <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                        {% else %}
+                                            <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </select>
+
+                                <label for="date_resolved">on</label>
+                                <input type="date" id ="date_resolved" name ="date_resolved" value="{{result['resolver_date']}}">
+
+                                <br>
+                                <label for="tested_by" style="margin-left: 20px;">Tested by</label>
+                                <select id="tested_by" name="tested_by" class="user">
+                                    <option value="default" disabled selected>user</option>
+                                    {% for employee in employees %}
+                                        {% if employee['user_id'] == result['restester_id'] %}
+                                            <option value="{{employee['user_id']}}" selected>{{employee['user_realname']}}</option>
+                                        {% else %}
+                                            <option value="{{employee['user_id']}}">{{employee['user_realname']}}</option>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </select>
+
+                                <label for="date_tested">on</label>
+                                <input type="date" id ="date_tested" name ="date_tested" value="{{result['restester_date']}}">
+
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" form="editBugForm{{result['bug_id']}}">Make report changes</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modalfiles{{result['bug_id']}}" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Bug report #{{ result['bug_id'] }} -- attachments</h3>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
                             {% if attachments %}
-                            <hr>
-                                <div>
-                                    <label>(Checking means deleting the attachment)</label>
+                                <form id="delFilesForm{{result['bug_id']}}" form="/delete_attachment/{{result['bug_id']}}" method="POST">
+                                    <label>(Checking means selecting the attachment for deletion)</label>
                                     {% for attachment in attachments %}
                                         {% if result['bug_id'] == attachment['bug_id'] %}    
                                             <div>
@@ -195,30 +354,25 @@
                                             </div>
                                         {% endif %}
                                     {% endfor %}
-                                </div>
-                            <hr>
+                                </form>
                             {% endif %}
-
-                            <label for="file">Add new attachments (optional)</label><br>
-                            <input type="file" id="file" name="file" multiple>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" form="editBugForm{{result['bug_id']}}">Make report changes</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" form="delFilesForm{{result['bug_id']}}" onclick="return confirm('Confirm deletion of attachments?')">Delete</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            {% endfor %}
+        </table>
 
+        {% if not results %}
+            {% include 'no_results.html' %}
+        {% endif %}
 
-        {% endfor %}
+    </div>
 
-    </table>
-
-    {% if not results %}
-        {% include 'no_results.html' %}
-    {% endif %}
     
     <br>
     <hr class="long-line">
@@ -235,7 +389,7 @@
                 '<select id="search_options" name="search_options">'+
                     '<option value="ALL" selected>All reports</option>'+
                     '<option value="bug_id">Bug ID</option>'+
-                    '<option value="program_name">Program (' + "'Name' R'#' V'#'" +')</option>'+
+                    '<option value="program_id">Program (' + "'Name' R'#' V'#'" +')</option>'+
                     '<option value="report_type">Report Type</option>'+
                     '<option value="severity">Severity</option>'+
                     '<option value="reporter_name">Reporter ID</option>'+

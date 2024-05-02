@@ -34,7 +34,7 @@
 
         <div>
             <label for="report_type">Report Type:</label>
-            <select id="report_type" name="report_type"required>
+            <select id="report_type" name="report_type" required>
                 <option value="default" disabled selected>Report type</option>
                 {% for report_type in report_types %}
                     <option value="{{report_type}}">{{report_type}}</option>
@@ -54,7 +54,7 @@
         
         <div>
             <label for="reproducible">Reproducible?</label>
-            <input type="checkbox" name="reproducible" id="reproducible">
+            <input type="checkbox" name="reproducible" id="reproducible" checked>
         </div>
 
         <div class="input-container">
