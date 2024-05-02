@@ -1160,6 +1160,11 @@ def delete_attachment(bug_id):
             
     return redirect(url_for('search_bug'))
 
+@app.template_filter()
+def has_attachments(bug_id, attachments):
+    if any(attachment['bug_id']==bug_id for attachment in attachments):
+        return True
+    return False
 
 # automatic
 if __name__ == "__main__":
