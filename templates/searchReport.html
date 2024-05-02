@@ -335,6 +335,7 @@
                 </div>
             </div>
 
+            {% if result['bug_id']|has_attachments(attachments) %}
             <div id="modalfiles{{result['bug_id']}}" class="modal fade" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -343,8 +344,8 @@
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
-                            {% if attachments %}
-                                <form id="delFilesForm{{result['bug_id']}}" form="/delete_attachment/{{result['bug_id']}}" method="POST">
+                            
+                                <form id="delFilesForm{{result['bug_id']}}" action="/delete_attachment/{{result['bug_id']}}" method="POST">
                                     <label>(Checking means selecting the attachment for deletion)</label>
                                     {% for attachment in attachments %}
                                         {% if result['bug_id'] == attachment['bug_id'] %}    
@@ -355,15 +356,18 @@
                                         {% endif %}
                                     {% endfor %}
                                 </form>
-                            {% endif %}
+                            
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" form="delFilesForm{{result['bug_id']}}" onclick="return confirm('Confirm deletion of attachments?')">Delete</button>
+                            {% if attachments %}
+                            <button type="submit" class="btn btn-primary" form="delFilesForm{{result['bug_id']}}" onclick="return confirm('Confirm deletion of attachments?')">Delete Attachments</button>
+                            {% endif %}
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
             {% endfor %}
         </table>
 

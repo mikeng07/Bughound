@@ -1103,8 +1103,7 @@ def search_bug():
             
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
-            
-        print(sql)
+        
         sql_list.append(sql)
         programs, areas, program_areas, employees, files, search_results = get_all_table_results(sql_list)
         
@@ -1142,24 +1141,33 @@ def view_attachment(attach_id):
         
     return send_file(BytesIO(data['attach_content']), download_name=data['attach_name'], as_attachment=True) #type:ignore
 
-@app.route("/delete_attachment/<string:bug_id>", methods=["POST"])
+@app.route("/delete_attachment/<string:bug_id>", methods=["POST"]) # type: ignore
 def delete_attachment(bug_id):
+    
+    try:
+        userlevel= session['user_level']
+        username = session['username']
+    except:
+        return verify_user()
     
     with pymysql.connect(**db_config) as connection:
         with connection.cursor() as cursor:
+            print('deleting attachments...')
             # delete attachments (if needed)
             del_attachments = request.form.getlist("delete_id")
             stmt = "DELETE FROM attachments WHERE attach_id=%s AND bug_id=%s"
             
             for file_info in del_attachments:
-                # file_info = "<file_id> <filename>" 
-                file_id, filename = file_info.split(" ") 
+                # print(file_info)
+                # file_info = "<file_id> <filename>"
+                file_id, filename = file_info.split(" ")
+                # print(file_id, filename)
                 cursor.execute(stmt, (file_id, bug_id))
                 connection.commit()
                 flash(f"Attachment '{filename}' was removed.")
             
     return redirect(url_for('search_bug'))
-
+     
 @app.template_filter()
 def has_attachments(bug_id, attachments):
     if any(attachment['bug_id']==bug_id for attachment in attachments):
